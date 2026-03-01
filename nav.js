@@ -90,7 +90,17 @@
   var links  = document.getElementById('navLinks');
   if (toggle && links) {
     toggle.addEventListener('click', function () {
-      links.classList.toggle('open');
+      var open = links.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', open);
+      toggle.textContent = open ? '\u2715' : '\u2630'; /* ✕ / ☰ */
+    });
+    /* close nav when a page link is tapped on mobile */
+    links.addEventListener('click', function (e) {
+      if (e.target.tagName === 'A') {
+        links.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.textContent = '\u2630';
+      }
     });
   }
 }());

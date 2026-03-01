@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Get Started — NPLawn LLC</title>
+  <link rel="stylesheet" href="shared.css" />
+  <link rel="stylesheet" href="order.css" />
+</head>
+<body class="order-page">
+<div id="site-nav"></div>
+
+<!-- ═══ PROGRESS HEADER ═══ -->
+<header class="order-header">
+  <div class="order-header-inner">
+    <div class="order-header-top">
+      <a class="order-back" href="lawn-care.html">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Plans
+      </a>
+      <span class="order-title">NPLawn Order</span>
+    </div>
+    <div class="order-stepper">
+      <div class="stepper-item active" id="step-ind-1">
+        <div class="stepper-circle" id="step-circle-1">1</div>
+        <span class="stepper-label">Choose Plan</span>
+      </div>
+      <div class="stepper-line" id="step-line-1"></div>
+      <div class="stepper-item" id="step-ind-2">
+        <div class="stepper-circle" id="step-circle-2">2</div>
+        <span class="stepper-label">Your Address</span>
+      </div>
+      <div class="stepper-line" id="step-line-2"></div>
+      <div class="stepper-item" id="step-ind-3">
+        <div class="stepper-circle" id="step-circle-3">3</div>
+        <span class="stepper-label">Property Size</span>
+      </div>
+      <div class="stepper-line" id="step-line-3"></div>
+      <div class="stepper-item" id="step-ind-4">
+        <div class="stepper-circle" id="step-circle-4">4</div>
+        <span class="stepper-label">Review Order</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ BODY ═══ -->
+<main class="order-body">
+
+  <!-- ─── STEP 1: CHOOSE PLAN ─── -->
+  <section class="order-step active" id="step-1">
+    <div class="step-heading">
+      <div class="step-eyebrow">Step 1 of 4</div>
+      <h2 class="step-title">Choose Your Lawn Care Plan</h2>
+      <p class="step-sub">Pricing is calculated per square foot — you'll get your exact quote in Step 3.</p>
+    </div>
+
+    <div id="step1-error" class="step-error">Please select a plan to continue.</div>
+
+    <div class="plan-cards">
+
+      <div class="plan-card" data-plan="Basic" onclick="selectPlan(this)">
+        <div class="plan-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 22V12M12 12C12 7 7 3 2 4c0 5 4 9 10 8z"/></svg>
+        </div>
+        <div class="plan-card-name">Basic</div>
+        <div class="plan-card-desc">Essential seasonal care for a clean, weed-free lawn</div>
+        <div class="plan-tiers">
+          <div class="plan-tier-row">
+            <span class="plan-tier-label">0 – 1,000 sqft</span>
+            <span class="plan-tier-rate">$0.10/sqft</span>
+          </div>
+          <div class="plan-tier-row">
+            <span class="plan-tier-label">1,001 – 5,000 sqft</span>
+            <span class="plan-tier-rate">$0.09/sqft</span>
+          </div>
+          <div class="plan-tier-row">
+            <span class="plan-tier-label">5,000+ sqft</span>
+            <span class="plan-tier-rate">$0.08/sqft</span>
+          </div>
+        </div>
+        <div class="plan-select-indicator"></div>
+      </div>
+
+      <div class="plan-card" data-plan="Standard" onclick="selectPlan(this)">
+        <div class="plan-card-badge">Most Popular</div>
+        <div class="plan-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 22V12M12 12C12 7 7 3 2 4c0 5 4 9 10 8zM12 12c0-5 5-9 10-8-1 5-5 9-10 8z"/></svg>
+        </div>
+        <div class="plan-card-name">Standard</div>
+        <div class="plan-card-desc">Complete care for consistently great results all year</div>
+        <div class="plan-tiers">
+          <div class="plan-tier-row">
+            <span class="plan-tier-label">0 – 1,000 sqft</span>
+            <span class="plan-tier-rate">$0.20/sqft</span>
+          </div>
+          <div class="plan-tier-row">
+            <span class="plan-tier-label">1,001 – 5,000 sqft</span>
+            <span class="plan-tier-rate">$0.18/sqft</span>
+          </div>
+          <div class="plan-tier-row">
+            <span class="plan-tier-label">5,000+ sqft</span>
+            <span class="plan-tier-rate">$0.16/sqft</span>
+          </div>
+        </div>
+        <div class="plan-select-indicator"></div>
+      </div>
+
+      <div class="plan-card" data-plan="Premium" onclick="selectPlan(this)">
+        <div class="plan-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <div class="plan-card-name">Premium</div>
+        <div class="plan-card-desc">100% organic treatments — safe for people, pets &amp; planet</div>
+        <div class="plan-tiers">
+          <div class="plan-tier-row">
+            <span class="plan-tier-label">0 – 1,000 sqft</span>
+            <span class="plan-tier-rate">$0.30/sqft</span>
+          </div>
+          <div class="plan-tier-row">
+            <span class="plan-tier-label">1,001 – 5,000 sqft</span>
+            <span class="plan-tier-rate">$0.27/sqft</span>
+          </div>
+          <div class="plan-tier-row">
+            <span class="plan-tier-label">5,000+ sqft</span>
+            <span class="plan-tier-rate">$0.25/sqft</span>
+          </div>
+        </div>
+        <div class="plan-select-indicator"></div>
+      </div>
+
+    </div>
+
+    <div class="step-nav">
+      <button class="btn-next" onclick="goStep(2)">
+        Continue
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ─── STEP 2: ADDRESS ─── -->
+  <section class="order-step" id="step-2">
+    <div class="step-heading">
+      <div class="step-eyebrow">Step 2 of 4</div>
+      <h2 class="step-title">Your Service Address</h2>
+      <p class="step-sub">Where should we send our team? We'll confirm service availability after you submit.</p>
+    </div>
+
+    <div id="step2-error" class="step-error">Please fill in all required fields.</div>
+
+    <div class="form-card">
+      <div class="field-group">
+        <label for="addr-street">Street Address *</label>
+        <input type="text" id="addr-street" placeholder="e.g. 123 Maple Lane" autocomplete="street-address" />
+        <div class="field-error" id="err-street">Please enter your street address.</div>
+      </div>
+
+      <div class="field-row-3">
+        <div class="field-group">
+          <label for="addr-city">City *</label>
+          <input type="text" id="addr-city" placeholder="City" autocomplete="address-level2" />
+          <div class="field-error" id="err-city">Required.</div>
+        </div>
+        <div class="field-group">
+          <label for="addr-state">State *</label>
+          <select id="addr-state" autocomplete="address-level1">
+            <option value="">State</option>
+            <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option>
+            <option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option>
+            <option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option>
+            <option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option>
+            <option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option>
+            <option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option>
+            <option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option>
+            <option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option>
+            <option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option>
+            <option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option>
+          </select>
+          <div class="field-error" id="err-state">Required.</div>
+        </div>
+        <div class="field-group">
+          <label for="addr-zip">ZIP *</label>
+          <input type="text" id="addr-zip" placeholder="12345" maxlength="10" autocomplete="postal-code" />
+          <div class="field-error" id="err-zip">Required.</div>
+        </div>
+      </div>
+
+      <div class="field-group" style="margin-bottom:0">
+        <label for="addr-notes">Access Notes <em style="font-style:normal;font-weight:400;text-transform:none">(optional)</em></label>
+        <input type="text" id="addr-notes" placeholder="e.g. Gate code #1234, dog in backyard, etc." />
+      </div>
+    </div>
+
+    <div class="step-nav">
+      <button class="btn-back" onclick="goStep(1)">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </button>
+      <button class="btn-next" onclick="goStep(3)">
+        Continue
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ─── STEP 3: PROPERTY SIZE ─── -->
+  <section class="order-step" id="step-3">
+    <div class="step-heading">
+      <div class="step-eyebrow">Step 3 of 4</div>
+      <h2 class="step-title">How Big Is Your Property?</h2>
+      <p class="step-sub">Enter your lawn's square footage to get an instant monthly quote. Not sure? Use a rough estimate — we'll verify on site.</p>
+    </div>
+
+    <div id="step3-error" class="step-error">Please enter a valid square footage (minimum 100 sqft).</div>
+
+    <div class="sqft-card">
+      <label class="field-group" for="sqft-input" style="margin-bottom:0">
+        <span style="display:block;font-size:0.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#5a7a67;margin-bottom:7px">Lawn Area *</span>
+      </label>
+      <div class="sqft-input-wrap">
+        <input type="number" id="sqft-input" placeholder="2500" min="100" max="999999"
+               oninput="updateQuote()" onkeyup="updateQuote()" />
+        <span class="sqft-unit">sqft</span>
+      </div>
+      <p class="sqft-hint">Tip: Average US lawn is 10,000 sqft. A typical suburban yard is 2,000 – 5,000 sqft.</p>
+
+      <!-- Live quote preview -->
+      <div class="quote-preview" id="quote-preview">
+        <div class="quote-preview-inner">
+          <div class="quote-plan-label">Your Plan</div>
+          <div class="quote-plan-name" id="qp-plan-name">—</div>
+          <div class="quote-amount-row">
+            <div class="quote-amount" id="qp-amount">$—</div>
+            <div class="quote-period">/ month</div>
+          </div>
+          <div class="quote-breakdown" id="qp-breakdown">—</div>
+          <div class="quote-divider"></div>
+          <div class="quote-meta">
+            <div class="quote-meta-item">
+              <strong id="qp-sqft-display">—</strong>
+              <span>Square feet</span>
+            </div>
+            <div class="quote-meta-item">
+              <strong id="qp-rate-display">—</strong>
+              <span>Rate per sqft</span>
+            </div>
+            <div class="quote-meta-item">
+              <strong>Monthly</strong>
+              <span>Billing cycle</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-nav">
+      <button class="btn-back" onclick="goStep(2)">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </button>
+      <button class="btn-next" id="btn-step3-next" onclick="goStep(4)">
+        Review Order
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ─── STEP 4: REVIEW ─── -->
+  <section class="order-step" id="step-4">
+    <div class="step-heading">
+      <div class="step-eyebrow">Step 4 of 4</div>
+      <h2 class="step-title">Review Your Order</h2>
+      <p class="step-sub">Check the details below, then submit. We'll follow up within 24 hours.</p>
+    </div>
+
+    <div class="review-card">
+      <div class="review-card-header">
+        <h3>Order Details</h3>
+        <button class="review-edit" onclick="goStep(1)">Edit Plan</button>
+      </div>
+      <div class="review-rows">
+        <div class="review-row">
+          <span class="review-row-label">Plan</span>
+          <span class="review-row-val" id="rv-plan">—</span>
+        </div>
+        <div class="review-row">
+          <span class="review-row-label">Service Address</span>
+          <span class="review-row-val" id="rv-address">—</span>
+        </div>
+        <div class="review-row">
+          <span class="review-row-label">Property Size</span>
+          <span class="review-row-val" id="rv-sqft">—</span>
+        </div>
+        <div class="review-row">
+          <span class="review-row-label">Rate Applied</span>
+          <span class="review-row-val" id="rv-rate">—</span>
+        </div>
+        <div class="review-row">
+          <span class="review-row-label">Access Notes</span>
+          <span class="review-row-val" id="rv-notes">None</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="review-total">
+      <div class="review-total-label">
+        Monthly Total
+        <small>Billed each month &bull; Cancel anytime</small>
+      </div>
+      <div class="review-total-amount">
+        <span id="rv-total">$—</span>
+        <small>/mo</small>
+      </div>
+    </div>
+
+    <div class="review-invoice-note">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <p><strong>Payment by Invoice</strong> — No payment required today. After your free property assessment, we'll send your first invoice before service begins. Invoices are due within 15 days of receipt.</p>
+    </div>
+
+    <div class="step-nav">
+      <button class="btn-back" onclick="goStep(3)">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </button>
+      <button class="btn-next btn-submit" onclick="submitOrder()">
+        Submit Order
+        <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ─── STEP 5: CONFIRMED ─── -->
+  <section class="order-step" id="step-5">
+    <div class="confirm-wrap">
+      <div class="confirm-icon">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2 class="confirm-title">Order Submitted!</h2>
+      <p class="confirm-sub">Thank you — your lawn care order is confirmed.</p>
+      <div class="confirm-order-num" id="confirm-order-num">Order #NPL-0000</div>
+
+      <div class="confirm-summary-card">
+        <h4>Order Summary</h4>
+        <div class="confirm-row">
+          <span>Plan</span>
+          <span id="cf-plan">—</span>
+        </div>
+        <div class="confirm-row">
+          <span>Service Address</span>
+          <span id="cf-address">—</span>
+        </div>
+        <div class="confirm-row">
+          <span>Property Size</span>
+          <span id="cf-sqft">—</span>
+        </div>
+        <div class="confirm-row">
+          <span>Monthly Total</span>
+          <span id="cf-total" style="font-size:1rem;color:#2d6a4f">—</span>
+        </div>
+      </div>
+
+      <div class="confirm-next-steps">
+        <h4>What Happens Next</h4>
+        <ul class="confirm-next-list">
+          <li>
+            <span class="confirm-next-num">1</span>
+            <span>Our team will call you within <strong>24 hours</strong> to confirm your order and schedule a free property assessment.</span>
+          </li>
+          <li>
+            <span class="confirm-next-num">2</span>
+            <span>A lawn specialist will visit your property to verify the square footage and review any specific needs.</span>
+          </li>
+          <li>
+            <span class="confirm-next-num">3</span>
+            <span>We'll send your first invoice before service begins. No payment needed today.</span>
+          </li>
+          <li>
+            <span class="confirm-next-num">4</span>
+            <span>Your first treatment is scheduled — sit back and watch your lawn transform!</span>
+          </li>
+        </ul>
+      </div>
+
+      <a class="btn-home" href="landing.html">
+        Back to Home
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<script src="nav.js"></script>
+<script>
+/* ══════════════════════════════════════
+   PRICING DATA
+══════════════════════════════════════ */
+const PLANS = {
+  Basic: {
+    label: 'Basic',
+    desc: 'Essential seasonal care',
+    tiers: [
+      { max: 1000,      rate: 0.10 },
+      { max: 5000,      rate: 0.09 },
+      { max: Infinity,  rate: 0.08 }
+    ]
+  },
+  Standard: {
+    label: 'Standard',
+    desc: 'Complete year-round care',
+    tiers: [
+      { max: 1000,      rate: 0.20 },
+      { max: 5000,      rate: 0.18 },
+      { max: Infinity,  rate: 0.16 }
+    ]
+  },
+  Premium: {
+    label: 'Premium',
+    desc: '100% organic treatments',
+    tiers: [
+      { max: 1000,      rate: 0.30 },
+      { max: 5000,      rate: 0.27 },
+      { max: Infinity,  rate: 0.25 }
+    ]
+  }
+};
+
+/* ── State ── */
+let state = {
+  plan:   null,
+  street: '',
+  city:   '',
+  st:     '',
+  zip:    '',
+  notes:  '',
+  sqft:   null,
+  rate:   null,
+  total:  null
+};
+
+let currentStep = 1;
+
+/* ══════════════════════════════════════
+   PLAN SELECTION
+══════════════════════════════════════ */
+function selectPlan(el) {
+  document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.plan = el.dataset.plan;
+  document.getElementById('step1-error').classList.remove('show');
+}
+
+/* ══════════════════════════════════════
+   QUOTE CALCULATOR
+══════════════════════════════════════ */
+function getRate(plan, sqft) {
+  for (const tier of PLANS[plan].tiers) {
+    if (sqft <= tier.max) return tier.rate;
+  }
+}
+
+function tierLabel(sqft) {
+  if (sqft <= 1000) return '0 – 1,000 sqft tier';
+  if (sqft <= 5000) return '1,001 – 5,000 sqft tier';
+  return '5,000+ sqft tier';
+}
+
+function fmt(n) {
+  return n.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+}
+
+function updateQuote() {
+  const sqft = parseInt(document.getElementById('sqft-input').value, 10);
+  const preview = document.getElementById('quote-preview');
+
+  if (!state.plan || !sqft || sqft < 100) {
+    preview.classList.remove('visible');
+    state.sqft = null;
+    return;
+  }
+
+  const rate  = getRate(state.plan, sqft);
+  const total = sqft * rate;
+  state.sqft  = sqft;
+  state.rate  = rate;
+  state.total = total;
+
+  document.getElementById('qp-plan-name').textContent    = PLANS[state.plan].label + ' Plan';
+  document.getElementById('qp-amount').textContent       = fmt(total);
+  document.getElementById('qp-breakdown').innerHTML      =
+    '<strong>' + sqft.toLocaleString() + ' sqft</strong> &times; <strong>$' + rate.toFixed(2) + '/sqft</strong> — ' + tierLabel(sqft);
+  document.getElementById('qp-sqft-display').textContent = sqft.toLocaleString() + ' sqft';
+  document.getElementById('qp-rate-display').textContent = '$' + rate.toFixed(2) + '/sqft';
+
+  preview.classList.add('visible');
+}
+
+/* ══════════════════════════════════════
+   VALIDATION
+══════════════════════════════════════ */
+function validateStep(step) {
+  if (step === 1) {
+    if (!state.plan) {
+      document.getElementById('step1-error').classList.add('show');
+      return false;
+    }
+    return true;
+  }
+
+  if (step === 2) {
+    let ok = true;
+    const fields = [
+      ['addr-street', 'err-street'],
+      ['addr-city',   'err-city'],
+      ['addr-state',  'err-state'],
+      ['addr-zip',    'err-zip']
+    ];
+    fields.forEach(([id, errId]) => {
+      const el = document.getElementById(id);
+      const err = document.getElementById(errId);
+      if (!el.value.trim()) {
+        el.classList.add('error');
+        err.classList.add('show');
+        ok = false;
+      } else {
+        el.classList.remove('error');
+        err.classList.remove('show');
+      }
+    });
+    document.getElementById('step2-error').classList.toggle('show', !ok);
+    if (ok) {
+      state.street = document.getElementById('addr-street').value.trim();
+      state.city   = document.getElementById('addr-city').value.trim();
+      state.st     = document.getElementById('addr-state').value;
+      state.zip    = document.getElementById('addr-zip').value.trim();
+      state.notes  = document.getElementById('addr-notes').value.trim();
+    }
+    return ok;
+  }
+
+  if (step === 3) {
+    const sqft = parseInt(document.getElementById('sqft-input').value, 10);
+    if (!sqft || sqft < 100) {
+      document.getElementById('step3-error').classList.add('show');
+      return false;
+    }
+    document.getElementById('step3-error').classList.remove('show');
+    // refresh in case plan was changed earlier
+    updateQuote();
+    return true;
+  }
+
+  return true;
+}
+
+/* ══════════════════════════════════════
+   STEP NAVIGATION
+══════════════════════════════════════ */
+function goStep(next) {
+  // validate current before advancing
+  if (next > currentStep && !validateStep(currentStep)) return;
+
+  // populate review when arriving at step 4
+  if (next === 4) populateReview();
+
+  document.getElementById('step-' + currentStep).classList.remove('active');
+  document.getElementById('step-' + next).classList.add('active');
+
+  updateStepper(next);
+  currentStep = next;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateStepper(active) {
+  for (let i = 1; i <= 4; i++) {
+    const ind    = document.getElementById('step-ind-' + i);
+    const circle = document.getElementById('step-circle-' + i);
+    ind.classList.remove('active', 'done');
+    if (i < active) {
+      ind.classList.add('done');
+      circle.innerHTML = '&#10003;';  // checkmark
+    } else if (i === active) {
+      ind.classList.add('active');
+      circle.textContent = i;
+    } else {
+      circle.textContent = i;
+    }
+    if (i <= 3) {
+      document.getElementById('step-line-' + i)
+        .classList.toggle('done', i < active);
+    }
+  }
+}
+
+/* ══════════════════════════════════════
+   POPULATE REVIEW STEP
+══════════════════════════════════════ */
+function populateReview() {
+  document.getElementById('rv-plan').textContent    = PLANS[state.plan].label + ' — ' + PLANS[state.plan].desc;
+  document.getElementById('rv-address').textContent = state.street + ', ' + state.city + ', ' + state.st + ' ' + state.zip;
+  document.getElementById('rv-sqft').textContent    = state.sqft.toLocaleString() + ' sqft';
+  document.getElementById('rv-rate').textContent    = '$' + state.rate.toFixed(2) + '/sqft (' + tierLabel(state.sqft) + ')';
+  document.getElementById('rv-notes').textContent   = state.notes || 'None';
+  document.getElementById('rv-total').textContent   = fmt(state.total);
+}
+
+/* ══════════════════════════════════════
+   SUBMIT
+══════════════════════════════════════ */
+function submitOrder() {
+  // Fake order number
+  const orderNum = 'NPL-' + Math.floor(10000 + Math.random() * 90000);
+
+  // Populate confirmation
+  document.getElementById('confirm-order-num').textContent = 'Order #' + orderNum;
+  document.getElementById('cf-plan').textContent           = PLANS[state.plan].label;
+  document.getElementById('cf-address').textContent        = state.street + ', ' + state.city + ', ' + state.st + ' ' + state.zip;
+  document.getElementById('cf-sqft').textContent           = state.sqft.toLocaleString() + ' sqft';
+  document.getElementById('cf-total').textContent          = fmt(state.total) + '/month';
+
+  // Jump to confirmation — bypass normal nav
+  document.getElementById('step-4').classList.remove('active');
+  document.getElementById('step-5').classList.add('active');
+  document.querySelector('.order-stepper').style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ══════════════════════════════════════
+   URL PARAM: pre-select plan
+══════════════════════════════════════ */
+(function preSelect() {
+  const params = new URLSearchParams(window.location.search);
+  const plan   = params.get('plan');
+  if (plan && PLANS[plan]) {
+    const card = document.querySelector('.plan-card[data-plan="' + plan + '"]');
+    if (card) selectPlan(card);
+  }
+})();
+</script>
+</body>
+</html>

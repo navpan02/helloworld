@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NPLawn LLC – Premium Lawn Care</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:      #2d6a4f;
+      --green-mid:  #40916c;
+      --green-lite: #74c69d;
+      --accent:     #52b788;
+      --dark:       #1b2e24;
+      --text:       #1f2d27;
+      --muted:      #5a7a67;
+      --surface:    #f4faf6;
+      --white:      #ffffff;
+      --border:     #c8e6d4;
+      --radius:     14px;
+      --shadow:     0 4px 24px rgba(0,0,0,0.10);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--surface);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(27, 46, 36, 0.96);
+      backdrop-filter: blur(12px);
+      padding: 0 5%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .nav-logo {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--green-lite), var(--accent));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .nav-logo svg { width: 22px; height: 22px; fill: var(--dark); }
+
+    .nav-name {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.3px;
+    }
+    .nav-name span { color: var(--green-lite); }
+
+    .nav-cta {
+      background: var(--accent);
+      color: var(--dark);
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 9px 20px;
+      border-radius: 99px;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .nav-cta:hover { background: var(--green-lite); transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 88vh;
+      background:
+        linear-gradient(160deg, rgba(27,46,36,0.82) 0%, rgba(45,106,79,0.65) 60%, transparent 100%),
+        url("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&q=80") center/cover no-repeat;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 80px 8% 80px;
+    }
+
+    .hero-badge {
+      background: rgba(82,183,136,0.2);
+      border: 1px solid rgba(82,183,136,0.5);
+      color: var(--green-lite);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 99px;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 6vw, 4rem);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.1;
+      letter-spacing: -1px;
+      max-width: 680px;
+    }
+    .hero h1 span { color: var(--green-lite); }
+
+    .hero p {
+      margin-top: 18px;
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.72);
+      max-width: 520px;
+    }
+
+    .hero-btns {
+      margin-top: 36px;
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--dark);
+      font-weight: 800;
+      font-size: 0.95rem;
+      padding: 14px 30px;
+      border-radius: 99px;
+      text-decoration: none;
+      box-shadow: 0 6px 20px rgba(82,183,136,0.45);
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-primary:hover { background: var(--green-lite); transform: translateY(-2px); }
+
+    .btn-outline {
+      border: 2px solid rgba(255,255,255,0.5);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 13px 28px;
+      border-radius: 99px;
+      text-decoration: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .btn-outline:hover { border-color: #fff; background: rgba(255,255,255,0.08); }
+
+    /* ── SERVICES ── */
+    .section { padding: 80px 8%; }
+    .section-label {
+      color: var(--green-mid);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .section-title {
+      font-size: clamp(1.7rem, 4vw, 2.5rem);
+      font-weight: 800;
+      color: var(--dark);
+      letter-spacing: -0.5px;
+      margin-bottom: 14px;
+    }
+    .section-sub {
+      color: var(--muted);
+      max-width: 540px;
+      font-size: 1rem;
+      margin-bottom: 48px;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+    }
+
+    .service-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .service-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+
+    .service-icon {
+      width: 50px; height: 50px;
+      background: linear-gradient(135deg, #d8f3dc, #b7e4c7);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 16px;
+    }
+    .service-icon svg { width: 26px; height: 26px; stroke: var(--green); stroke-width: 2; fill: none; }
+
+    .service-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 6px;
+    }
+    .service-card p { font-size: 0.88rem; color: var(--muted); }
+
+    /* ── WHY US ── */
+    .why-section {
+      background: linear-gradient(135deg, var(--dark) 0%, var(--green) 100%);
+      padding: 80px 8%;
+      color: #fff;
+    }
+    .why-section .section-label { color: var(--green-lite); }
+    .why-section .section-title { color: #fff; }
+    .why-section .section-sub   { color: rgba(255,255,255,0.6); }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 32px;
+      margin-top: 48px;
+    }
+
+    .stat { text-align: center; }
+    .stat-num {
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: var(--green-lite);
+      line-height: 1;
+    }
+    .stat-desc {
+      font-size: 0.88rem;
+      color: rgba(255,255,255,0.65);
+      margin-top: 6px;
+    }
+
+    /* ── FORM SECTION ── */
+    .form-section {
+      padding: 80px 8%;
+      background: var(--surface);
+    }
+
+    .form-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: start;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .form-info { padding-top: 8px; }
+    .form-info .section-label { color: var(--green-mid); }
+    .form-info .section-title { color: var(--dark); }
+
+    .form-info p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 28px;
+    }
+
+    .form-perks { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+    .form-perks li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+    .perk-dot {
+      flex-shrink: 0;
+      width: 22px; height: 22px;
+      background: linear-gradient(135deg, var(--accent), var(--green-mid));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 1px;
+    }
+    .perk-dot svg { width: 12px; height: 12px; stroke: #fff; stroke-width: 3; fill: none; }
+
+    /* ── FORM CARD ── */
+    .form-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 36px;
+      box-shadow: 0 8px 40px rgba(45,106,79,0.10);
+    }
+
+    .form-card h3 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 4px;
+    }
+    .form-card .form-sub {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .input-wrap { position: relative; }
+    .input-wrap svg {
+      position: absolute;
+      left: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px; height: 16px;
+      stroke: #aac8b5;
+      stroke-width: 2;
+      fill: none;
+      pointer-events: none;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    select {
+      width: 100%;
+      padding: 11px 12px 11px 38px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+    input::placeholder { color: #b0c8ba; }
+
+    input:focus, select:focus {
+      border-color: var(--accent);
+      background: var(--white);
+      box-shadow: 0 0 0 3px rgba(82,183,136,0.18);
+    }
+
+    .field.valid   input,
+    .field.valid   select { border-color: var(--green-mid); }
+    .field.invalid input,
+    .field.invalid select { border-color: #ef4444; }
+    .field.invalid input:focus,
+    .field.invalid select:focus { box-shadow: 0 0 0 3px rgba(239,68,68,0.14); }
+
+    .err-msg {
+      font-size: 0.73rem;
+      color: #ef4444;
+      margin-top: 4px;
+      min-height: 16px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      margin-top: 8px;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--green), var(--green-mid));
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(45,106,79,0.3);
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .submit-btn:hover  { opacity: 0.92; transform: translateY(-1px); }
+    .submit-btn:active { transform: translateY(0); }
+    .submit-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+    .toast {
+      display: none;
+      margin-top: 16px;
+      padding: 13px 16px;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-align: center;
+      animation: slideIn 0.3s ease;
+    }
+    .toast.success { background: #d8f3dc; border: 1px solid #b7e4c7; color: var(--green); }
+    .toast.error   { background: #fee2e2; border: 1px solid #fca5a5; color: #b91c1c; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--dark);
+      color: rgba(255,255,255,0.55);
+      text-align: center;
+      padding: 28px 5%;
+      font-size: 0.82rem;
+    }
+    footer strong { color: var(--green-lite); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 860px) {
+      .form-layout { grid-template-columns: 1fr; gap: 40px; }
+      .form-info { padding-top: 0; }
+    }
+    @media (max-width: 560px) {
+      .hero { padding: 60px 5% 60px; }
+      .section, .form-section, .why-section { padding: 60px 5%; }
+      .form-row { grid-template-columns: 1fr; }
+      .form-card { padding: 28px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a class="nav-brand" href="#">
+    <div class="nav-logo">
+      <svg viewBox="0 0 24 24"><path d="M12 22V12M12 12C12 7 7 3 2 4c0 5 4 9 10 8zM12 12c0-5 5-9 10-8-1 5-5 9-10 8z"/></svg>
+    </div>
+    <span class="nav-name">NP<span>Lawn</span> LLC</span>
+  </a>
+  <a class="nav-cta" href="#quote">Get a Free Quote</a>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-badge">Serving Your Neighborhood</div>
+  <h1>Your Lawn, Our <span>Passion.</span></h1>
+  <p>Professional lawn care tailored to your property. Reliable, affordable, and always on time — from mowing to full yard transformations.</p>
+  <div class="hero-btns">
+    <a class="btn-primary" href="#quote">Request a Free Quote</a>
+    <a class="btn-outline" href="#services">Our Services</a>
+  </div>
+</section>
+
+<!-- ── SERVICES ── -->
+<section class="section" id="services">
+  <p class="section-label">What We Do</p>
+  <h2 class="section-title">Comprehensive Lawn Care</h2>
+  <p class="section-sub">From routine maintenance to complete yard transformations, we handle every inch of your outdoor space.</p>
+
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 17h18M3 12h18M3 7h18"/><circle cx="6" cy="17" r="1" fill="currentColor"/></svg>
+      </div>
+      <h3>Lawn Mowing</h3>
+      <p>Regular cuts that keep your grass healthy, even, and looking its best all season.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 22V2M2 12h20M4.93 4.93l14.14 14.14M19.07 4.93L4.93 19.07"/></svg>
+      </div>
+      <h3>Edging & Trimming</h3>
+      <p>Crisp borders along driveways, sidewalks, and flower beds for a polished finish.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      </div>
+      <h3>Fertilization</h3>
+      <p>Seasonal fertilizer programs that build a thick, lush lawn resistant to weeds and drought.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 22V12M12 12C12 7 7 3 2 4c0 5 4 9 10 8zM12 12c0-5 5-9 10-8-1 5-5 9-10 8z"/></svg>
+      </div>
+      <h3>Landscaping</h3>
+      <p>Design and planting services that turn bare yards into beautiful outdoor living spaces.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── WHY US ── -->
+<section class="why-section">
+  <p class="section-label">Why NPLawn?</p>
+  <h2 class="section-title">Built on Trust & Results</h2>
+  <p class="section-sub">We treat every lawn like it's our own — because our reputation grows right alongside yours.</p>
+  <div class="stats-grid">
+    <div class="stat"><div class="stat-num">500+</div><div class="stat-desc">Happy Customers</div></div>
+    <div class="stat"><div class="stat-num">8</div><div class="stat-desc">Years in Business</div></div>
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-desc">Satisfaction Guarantee</div></div>
+    <div class="stat"><div class="stat-num">5★</div><div class="stat-desc">Average Rating</div></div>
+  </div>
+</section>
+
+<!-- ── QUOTE FORM ── -->
+<section class="form-section" id="quote">
+  <div class="form-layout">
+
+    <!-- Left copy -->
+    <div class="form-info">
+      <p class="section-label">Free Estimate</p>
+      <h2 class="section-title">Get Your Lawn<br>Looking Great</h2>
+      <p>Fill out the form and we'll reach out within 24 hours with a no-obligation quote tailored to your property.</p>
+      <ul class="form-perks">
+        <li>
+          <div class="perk-dot"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          No hidden fees — transparent pricing every time
+        </li>
+        <li>
+          <div class="perk-dot"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          Licensed, insured, and background-checked crew
+        </li>
+        <li>
+          <div class="perk-dot"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          Flexible scheduling — we work around you
+        </li>
+        <li>
+          <div class="perk-dot"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          Satisfaction guarantee on every visit
+        </li>
+      </ul>
+    </div>
+
+    <!-- Right form card -->
+    <div class="form-card">
+      <h3>Request a Free Quote</h3>
+      <p class="form-sub">We'll contact you within 24 hours.</p>
+
+      <form id="quoteForm" novalidate>
+
+        <!-- Street address -->
+        <div class="field" id="f-street">
+          <label for="street">Street Address</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <input type="text" id="street" placeholder="123 Main St" autocomplete="street-address" />
+          </div>
+          <p class="err-msg" id="e-street"></p>
+        </div>
+
+        <!-- City / State -->
+        <div class="form-row">
+          <div class="field" id="f-city">
+            <label for="city">City</label>
+            <div class="input-wrap">
+              <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <input type="text" id="city" placeholder="Springfield" autocomplete="address-level2" />
+            </div>
+            <p class="err-msg" id="e-city"></p>
+          </div>
+
+          <div class="field" id="f-state">
+            <label for="state">State</label>
+            <div class="input-wrap">
+              <svg viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+              <select id="state" autocomplete="address-level1">
+                <option value="">Select…</option>
+                <option>AL</option><option>AK</option><option>AZ</option><option>AR</option>
+                <option>CA</option><option>CO</option><option>CT</option><option>DE</option>
+                <option>FL</option><option>GA</option><option>HI</option><option>ID</option>
+                <option>IL</option><option>IN</option><option>IA</option><option>KS</option>
+                <option>KY</option><option>LA</option><option>ME</option><option>MD</option>
+                <option>MA</option><option>MI</option><option>MN</option><option>MS</option>
+                <option>MO</option><option>MT</option><option>NE</option><option>NV</option>
+                <option>NH</option><option>NJ</option><option>NM</option><option>NY</option>
+                <option>NC</option><option>ND</option><option>OH</option><option>OK</option>
+                <option>OR</option><option>PA</option><option>RI</option><option>SC</option>
+                <option>SD</option><option>TN</option><option>TX</option><option>UT</option>
+                <option>VT</option><option>VA</option><option>WA</option><option>WV</option>
+                <option>WI</option><option>WY</option>
+              </select>
+            </div>
+            <p class="err-msg" id="e-state"></p>
+          </div>
+        </div>
+
+        <!-- Zip / Email -->
+        <div class="form-row">
+          <div class="field" id="f-zip">
+            <label for="zip">ZIP Code</label>
+            <div class="input-wrap">
+              <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              <input type="text" id="zip" placeholder="62701" maxlength="10" autocomplete="postal-code" />
+            </div>
+            <p class="err-msg" id="e-zip"></p>
+          </div>
+
+          <div class="field" id="f-email">
+            <label for="email">Email Address</label>
+            <div class="input-wrap">
+              <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>
+              <input type="email" id="email" placeholder="you@example.com" autocomplete="email" />
+            </div>
+            <p class="err-msg" id="e-email"></p>
+          </div>
+        </div>
+
+        <!-- Phone -->
+        <div class="field" id="f-phone">
+          <label for="phone">Phone Number</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.73a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.78 16z"/></svg>
+            <input type="tel" id="phone" placeholder="(555) 000-0000" autocomplete="tel" />
+          </div>
+          <p class="err-msg" id="e-phone"></p>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">Submit Request</button>
+        <div class="toast" id="toast"></div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── */-->
+<footer>
+  <p>&copy; 2026 <strong>NPLawn LLC</strong>. All rights reserved. | Proudly serving our community.</p>
+</footer>
+
+<script>
+  /* ── validators ── */
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const ZIP_RE   = /^\d{5}(-\d{4})?$/;
+  const PHONE_RE = /^\+?[\d\s\-().]{7,15}$/;
+
+  function required(val) { return val.trim().length > 0; }
+
+  const rules = {
+    street: v => required(v) || 'Street address is required.',
+    city:   v => required(v) || 'City is required.',
+    state:  v => (v !== '')   || 'Please select a state.',
+    zip:    v => ZIP_RE.test(v.trim()) || 'Enter a valid ZIP (e.g. 62701).',
+    email:  v => EMAIL_RE.test(v.trim()) || 'Enter a valid email address.',
+    phone:  v => PHONE_RE.test(v.trim()) || 'Enter a valid phone number.',
+  };
+
+  function validateField(id) {
+    const el     = document.getElementById(id);
+    const field  = document.getElementById('f-' + id);
+    const errEl  = document.getElementById('e-' + id);
+    const result = rules[id](el.value);
+    const valid  = result === true;
+    field.classList.toggle('valid',   valid);
+    field.classList.toggle('invalid', !valid);
+    errEl.textContent = valid ? '' : result;
+    return valid;
+  }
+
+  /* ── auto-format phone ── */
+  document.getElementById('phone').addEventListener('input', function () {
+    let v = this.value.replace(/\D/g, '').slice(0, 10);
+    if (v.length >= 7) v = '(' + v.slice(0,3) + ') ' + v.slice(3,6) + '-' + v.slice(6);
+    else if (v.length >= 4) v = '(' + v.slice(0,3) + ') ' + v.slice(3);
+    this.value = v;
+  });
+
+  /* ── live validation ── */
+  ['street','city','state','zip','email','phone'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('blur',  () => validateField(id));
+    el.addEventListener('input', () => {
+      if (document.getElementById('f-' + id).classList.contains('invalid')) validateField(id);
+    });
+  });
+
+  /* ── toast helper ── */
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + type;
+    t.style.display = 'block';
+    t.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  /* ── form submit ── */
+  document.getElementById('quoteForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const fields = ['street','city','state','zip','email','phone'];
+    const allValid = fields.map(validateField).every(Boolean);
+    if (!allValid) {
+      showToast('Please fix the errors above before submitting.', 'error');
+      return;
+    }
+
+    const record = {
+      id:        Date.now(),
+      timestamp: new Date().toISOString(),
+      street:    document.getElementById('street').value.trim(),
+      city:      document.getElementById('city').value.trim(),
+      state:     document.getElementById('state').value,
+      zip:       document.getElementById('zip').value.trim(),
+      email:     document.getElementById('email').value.trim(),
+      phone:     document.getElementById('phone').value.trim(),
+    };
+
+    /* ── persist to localStorage "database" ── */
+    const DB_KEY = 'nplawn_submissions';
+    const existing = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+    existing.push(record);
+    localStorage.setItem(DB_KEY, JSON.stringify(existing));
+
+    showToast('Thank you! We\'ll reach out within 24 hours with your free quote.', 'success');
+    this.reset();
+    fields.forEach(id => {
+      document.getElementById('f-' + id).classList.remove('valid','invalid');
+    });
+    document.getElementById('submitBtn').disabled = true;
+    setTimeout(() => { document.getElementById('submitBtn').disabled = false; }, 4000);
+  });
+</script>
+</body>
+</html>

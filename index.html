@@ -352,10 +352,36 @@
     #landing-view .nav-logo svg { width: 22px; height: 22px; fill: var(--dark); }
     #landing-view .nav-name { font-size: 1.15rem; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
     #landing-view .nav-name span { color: var(--green-lite); }
+
+    /* nav links + dropdown */
+    #landing-view .nav-links { display: flex; align-items: center; gap: 2px; }
+    #landing-view .lnav-link {
+      color: rgba(255,255,255,0.75); font-size: 0.88rem; font-weight: 500;
+      text-decoration: none; padding: 8px 12px; border-radius: 8px;
+      background: none; border: none; cursor: pointer; font-family: inherit;
+      transition: color 0.2s, background 0.2s;
+    }
+    #landing-view .lnav-link:hover { color: #fff; background: rgba(255,255,255,0.09); }
+    #landing-view .lnav-drop { position: relative; }
+    #landing-view .lnav-drop-menu {
+      display: none; position: absolute; top: calc(100% + 10px); left: -12px;
+      background: #1a2c22; border: 1px solid rgba(116,198,157,0.22);
+      border-radius: 14px; padding: 8px; min-width: 240px;
+      box-shadow: 0 20px 48px rgba(0,0,0,0.35); z-index: 200;
+    }
+    #landing-view .lnav-drop.open .lnav-drop-menu { display: block; }
+    #landing-view .lnav-drop-menu a {
+      display: flex; align-items: center; gap: 10px;
+      color: rgba(255,255,255,0.8); font-size: 0.86rem; text-decoration: none;
+      padding: 9px 10px; border-radius: 9px; transition: background 0.15s, color 0.15s;
+    }
+    #landing-view .lnav-drop-menu a:hover { background: rgba(255,255,255,0.07); color: var(--green-lite); }
+    #landing-view .lnav-drop-menu svg { width: 16px; height: 16px; stroke: var(--green-lite); stroke-width: 2; fill: none; flex-shrink: 0; }
+    #landing-view .lnav-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 4px 0; }
     #landing-view .nav-cta {
       background: var(--accent); color: var(--dark); font-weight: 700;
       font-size: 0.85rem; padding: 9px 20px; border-radius: 99px;
-      text-decoration: none; transition: background 0.2s, transform 0.15s;
+      text-decoration: none; transition: background 0.2s, transform 0.15s; margin-left: 6px;
     }
     #landing-view .nav-cta:hover { background: var(--green-lite); transform: translateY(-1px); }
 
@@ -737,7 +763,24 @@
       </div>
       <span class="nav-name">NP<span>Lawn</span> LLC</span>
     </a>
-    <a class="nav-cta" href="#quote">Get a Free Quote</a>
+    <div class="nav-links">
+      <div class="lnav-drop" id="landingServDrop">
+        <button class="lnav-link" id="landingServBtn">Services &#9662;</button>
+        <div class="lnav-drop-menu">
+          <a href="mowing.html"><svg viewBox="0 0 24 24"><path d="M3 17h18M3 12h18M3 7h18"/></svg>Lawn Mowing</a>
+          <a href="tree-trimming.html"><svg viewBox="0 0 24 24"><path d="M12 22V10M6 4l6 6 6-6"/></svg>Tree Trimming</a>
+          <div class="lnav-divider"></div>
+          <a href="lawn-care.html"><svg viewBox="0 0 24 24"><path d="M12 22V12M12 12C12 7 7 3 2 4c0 5 4 9 10 8zM12 12c0-5 5-9 10-8-1 5-5 9-10 8z"/></svg>Lawn Care Plans</a>
+          <a href="tree-shrubs.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M12 13v9M9 22h6"/></svg>Tree &amp; Shrubs</a>
+          <a href="aeration-seeding.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3"/></svg>Aeration &amp; Seeding</a>
+          <a href="landscape-design.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Landscape Design</a>
+        </div>
+      </div>
+      <a class="lnav-link" href="blog.html">Blog</a>
+      <a class="lnav-link" href="about.html">About</a>
+      <a class="lnav-link" href="contact.html">Contact</a>
+      <a class="nav-cta" href="#quote">Get a Free Quote</a>
+    </div>
   </nav>
 
   <section class="hero">
@@ -1350,6 +1393,15 @@
     osc.stop(ctx.currentTime + 0.2);
     setTimeout(() => ctx.close(), 600);
   }
+
+  /* ── Landing nav dropdown ── */
+  (function () {
+    var btn  = document.getElementById('landingServBtn');
+    var drop = document.getElementById('landingServDrop');
+    if (!btn || !drop) return;
+    btn.addEventListener('click', function (e) { e.stopPropagation(); drop.classList.toggle('open'); });
+    document.addEventListener('click', function () { drop.classList.remove('open'); });
+  }());
 
   document.getElementById('glitchBtn').addEventListener('click', function () {
     playGlitchSound();

@@ -384,6 +384,14 @@
       text-decoration: none; transition: background 0.2s, transform 0.15s; margin-left: 6px;
     }
     #landing-view .nav-cta:hover { background: var(--green-lite); transform: translateY(-1px); }
+    #landing-view .nav-logout {
+      background: transparent; border: 1px solid rgba(255,255,255,0.25);
+      color: rgba(255,255,255,0.7); font-size: 0.82rem; font-weight: 600;
+      padding: 7px 16px; border-radius: 8px; cursor: pointer;
+      font-family: inherit; margin-left: 8px;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    #landing-view .nav-logout:hover { border-color: rgba(255,255,255,0.6); color: #fff; background: rgba(255,255,255,0.06); }
 
     /* HERO */
     #landing-view .hero {
@@ -780,6 +788,7 @@
       <a class="lnav-link" href="about.html">About</a>
       <a class="lnav-link" href="contact.html">Contact</a>
       <a class="nav-cta" href="#quote">Get a Free Quote</a>
+      <button class="nav-logout" id="landingLogout">Sign Out</button>
     </div>
   </nav>
 
@@ -1402,6 +1411,20 @@
     btn.addEventListener('click', function (e) { e.stopPropagation(); drop.classList.toggle('open'); });
     document.addEventListener('click', function () { drop.classList.remove('open'); });
   }());
+
+  /* ── Landing logout ── */
+  document.getElementById('landingLogout').addEventListener('click', function () {
+    document.getElementById('landing-view').style.display = 'none';
+    document.getElementById('login-view').style.display  = 'flex';
+    loginForm.querySelectorAll('input, button').forEach(function (el) { el.disabled = false; });
+    loginForm.reset();
+    emailField.classList.remove('valid', 'invalid');
+    passwordField.classList.remove('valid', 'invalid');
+    emailHint.textContent = ''; passwordHint.textContent = '';
+    loginToast.style.display = 'none';
+    strengthBar.className = 'strength-bar'; strengthLabel.textContent = '';
+    window.scrollTo(0, 0);
+  });
 
   document.getElementById('glitchBtn').addEventListener('click', function () {
     playGlitchSound();

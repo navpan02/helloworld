@@ -4,130 +4,299 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NPLawn LLC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; min-height: 100vh; }
 
     /* ══════════════════════════════════════
-       LOGIN VIEW
+       LOGIN VIEW — CYBERPUNK 2077
     ══════════════════════════════════════ */
+    :root {
+      --cp-pink:    #ff2d78;
+      --cp-green:   #00ff9f;
+      --cp-yellow:  #f5e642;
+      --cp-bg:      #07000f;
+      --cp-card:    #0d0018;
+      --cp-border:  rgba(0,255,159,0.35);
+      --cp-glow-g:  0 0 8px #00ff9f, 0 0 20px rgba(0,255,159,0.4);
+      --cp-glow-p:  0 0 8px #ff2d78, 0 0 20px rgba(255,45,120,0.4);
+    }
+
     #login-view {
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 0%,   rgba(255,45,120,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 50% 100%,  rgba(0,255,159,0.10) 0%, transparent 60%),
+        var(--cp-bg);
+      font-family: 'Share Tech Mono', monospace;
+      /* CRT vignette */
+      box-shadow: inset 0 0 120px rgba(0,0,0,0.7);
+    }
+
+    /* static noise overlay */
+    #login-view::before {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      background-size: 180px 180px;
+      opacity: 0.5;
     }
 
     #login-view .card {
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 24px;
-      padding: 48px 40px 44px;
+      position: relative; z-index: 1;
+      background: var(--cp-card);
+      border: 1px solid var(--cp-border);
+      border-radius: 4px;
+      padding: 0 0 36px;
       width: 100%;
-      max-width: 420px;
-      box-shadow: 0 32px 64px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05) inset;
+      max-width: 440px;
+      box-shadow:
+        0 0 0 1px rgba(0,255,159,0.08) inset,
+        0 0 40px rgba(0,255,159,0.08),
+        0 32px 64px rgba(0,0,0,0.7);
+    }
+
+    /* ── card header with flickering scanlines ── */
+    #login-view .card-header {
+      position: relative;
+      padding: 40px 40px 28px;
+      border-bottom: 1px solid rgba(0,255,159,0.15);
+      overflow: hidden;
+    }
+
+    /* scanline stripes */
+    #login-view .card-header::before {
+      content: '';
+      position: absolute; inset: 0; pointer-events: none;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent 0px,
+        transparent 3px,
+        rgba(0,255,159,0.04) 3px,
+        rgba(0,255,159,0.04) 4px
+      );
+      z-index: 2;
+      animation: scanFlicker 0.08s steps(1) infinite;
+    }
+
+    /* moving scan beam */
+    #login-view .card-header::after {
+      content: '';
+      position: absolute; left: 0; right: 0; height: 40px;
+      background: linear-gradient(transparent, rgba(0,255,159,0.06), transparent);
+      animation: scanBeam 3s linear infinite;
+      z-index: 3; pointer-events: none;
+    }
+
+    @keyframes scanFlicker {
+      0%  { opacity: 1; }
+      25% { opacity: 0.85; }
+      50% { opacity: 1; }
+      75% { opacity: 0.9; }
+    }
+
+    @keyframes scanBeam {
+      0%   { top: -40px; }
+      100% { top: 100%; }
     }
 
     #login-view .logo {
-      width: 52px; height: 52px;
-      background: linear-gradient(135deg, #e94560, #0f3460);
-      border-radius: 14px;
+      width: 54px; height: 54px;
+      background: transparent;
+      border: 1.5px solid var(--cp-green);
+      border-radius: 2px;
       display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 28px;
-      box-shadow: 0 8px 24px rgba(233,69,96,0.35);
+      margin: 0 auto 20px;
+      box-shadow: var(--cp-glow-g);
+      position: relative; z-index: 4;
     }
-    #login-view .logo svg { width: 26px; height: 26px; fill: #fff; }
+    #login-view .logo svg { width: 28px; height: 28px; fill: none; stroke: var(--cp-green); stroke-width: 1.5; }
 
     #login-view h1 {
-      color: #fff; font-size: 1.75rem; font-weight: 700;
-      text-align: center; letter-spacing: -0.5px;
+      font-family: 'VT323', monospace;
+      color: var(--cp-green);
+      font-size: 2.4rem; font-weight: 400;
+      text-align: center; letter-spacing: 3px; text-transform: uppercase;
+      text-shadow: 0 0 8px var(--cp-green), 0 0 24px rgba(0,255,159,0.5);
+      position: relative; z-index: 4;
+      /* subtle horizontal jitter */
+      animation: crtJitter 5s steps(1) infinite;
     }
+
+    @keyframes crtJitter {
+      0%,97%,100% { transform: none; }
+      98%          { transform: translateX(-2px) skewX(-1deg); }
+      99%          { transform: translateX(2px)  skewX(1deg); }
+    }
+
     #login-view .subtitle {
-      color: rgba(255,255,255,0.45); font-size: 0.875rem;
-      text-align: center; margin-top: 6px; margin-bottom: 36px;
+      font-family: 'Share Tech Mono', monospace;
+      color: rgba(0,255,159,0.45); font-size: 0.78rem;
+      text-align: center; margin-top: 4px;
+      letter-spacing: 2px; text-transform: uppercase;
+      position: relative; z-index: 4;
     }
+
+    /* ── form body ── */
+    #login-view .card-body { padding: 28px 40px 0; }
 
     #login-view .field { margin-bottom: 20px; }
 
     #login-view label {
-      display: block; color: rgba(255,255,255,0.7); font-size: 0.8rem;
-      font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 8px;
+      display: block;
+      font-family: 'Share Tech Mono', monospace;
+      color: var(--cp-pink); font-size: 0.72rem;
+      letter-spacing: 2px; text-transform: uppercase; margin-bottom: 7px;
+      text-shadow: 0 0 6px rgba(255,45,120,0.6);
     }
 
     #login-view .input-wrap { position: relative; display: flex; align-items: center; }
     #login-view .input-wrap svg {
-      position: absolute; left: 14px; width: 18px; height: 18px;
-      stroke: rgba(255,255,255,0.35); stroke-width: 2; fill: none;
-      pointer-events: none; flex-shrink: 0; transition: stroke 0.2s;
+      position: absolute; left: 13px; width: 17px; height: 17px;
+      stroke: rgba(0,255,159,0.4); stroke-width: 2; fill: none;
+      pointer-events: none; transition: stroke 0.2s;
     }
-    #login-view .input-wrap:focus-within > svg { stroke: rgba(233,69,96,0.8); }
+    #login-view .input-wrap:focus-within > svg { stroke: var(--cp-green); }
 
     #login-view input[type="email"],
     #login-view input[type="password"] {
-      width: 100%; padding: 13px 44px 13px 42px;
-      background: rgba(255,255,255,0.07);
-      border: 1.5px solid rgba(255,255,255,0.1);
-      border-radius: 12px; color: #fff; font-size: 0.95rem; outline: none;
-      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      width: 100%; padding: 12px 44px 12px 40px;
+      background: rgba(0,255,159,0.04);
+      border: 1px solid rgba(0,255,159,0.25);
+      border-radius: 2px;
+      color: var(--cp-green); font-family: 'Share Tech Mono', monospace; font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      caret-color: var(--cp-green);
     }
-    #login-view input::placeholder { color: rgba(255,255,255,0.25); }
+    #login-view input::placeholder { color: rgba(0,255,159,0.2); }
     #login-view input:focus {
-      border-color: #e94560; background: rgba(255,255,255,0.1);
-      box-shadow: 0 0 0 3px rgba(233,69,96,0.18);
+      border-color: var(--cp-green);
+      background: rgba(0,255,159,0.07);
+      box-shadow: var(--cp-glow-g), inset 0 0 8px rgba(0,255,159,0.05);
     }
 
     #login-view .toggle-pw {
-      position: absolute; right: 12px; background: none; border: none;
+      position: absolute; right: 10px; background: none; border: none;
       cursor: pointer; padding: 4px; display: flex; align-items: center;
-      color: rgba(255,255,255,0.35); transition: color 0.2s;
+      color: rgba(0,255,159,0.35); transition: color 0.2s;
     }
-    #login-view .toggle-pw:hover { color: rgba(255,255,255,0.7); }
-    #login-view .toggle-pw svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; fill: none; }
+    #login-view .toggle-pw:hover { color: var(--cp-green); }
+    #login-view .toggle-pw svg { width: 17px; height: 17px; stroke: currentColor; stroke-width: 2; fill: none; }
 
-    #login-view .field.valid   input { border-color: #22c55e; }
-    #login-view .field.invalid input { border-color: #ef4444; }
+    #login-view .field.valid   input { border-color: var(--cp-green); box-shadow: var(--cp-glow-g); }
+    #login-view .field.invalid input { border-color: var(--cp-pink);  box-shadow: var(--cp-glow-p); }
 
     #login-view .hint {
-      font-size: 0.75rem; margin-top: 6px; min-height: 18px;
-      transition: color 0.2s; color: rgba(255,255,255,0.35);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem; margin-top: 5px; min-height: 17px;
+      letter-spacing: 0.5px; color: rgba(0,255,159,0.3);
     }
-    #login-view .field.invalid .hint { color: #f87171; }
-    #login-view .field.valid   .hint { color: #4ade80; }
+    #login-view .field.invalid .hint { color: var(--cp-pink); text-shadow: 0 0 6px rgba(255,45,120,0.5); }
+    #login-view .field.valid   .hint { color: var(--cp-green); text-shadow: 0 0 6px rgba(0,255,159,0.5); }
 
     #login-view .strength-bar { display: flex; gap: 4px; margin-top: 8px; }
     #login-view .strength-bar span {
-      flex: 1; height: 4px; border-radius: 99px;
-      background: rgba(255,255,255,0.1); transition: background 0.3s;
+      flex: 1; height: 3px;
+      background: rgba(0,255,159,0.1); transition: background 0.3s, box-shadow 0.3s;
     }
-    #login-view .strength-bar.s1 span:nth-child(1)    { background: #ef4444; }
-    #login-view .strength-bar.s2 span:nth-child(-n+2) { background: #f97316; }
-    #login-view .strength-bar.s3 span:nth-child(-n+3) { background: #eab308; }
-    #login-view .strength-bar.s4 span                 { background: #22c55e; }
-    #login-view .strength-label { font-size: 0.7rem; margin-top: 4px; color: rgba(255,255,255,0.4); }
+    #login-view .strength-bar.s1 span:nth-child(1)    { background: var(--cp-pink);   box-shadow: 0 0 6px var(--cp-pink); }
+    #login-view .strength-bar.s2 span:nth-child(-n+2) { background: #ff8c00;           box-shadow: 0 0 6px #ff8c00; }
+    #login-view .strength-bar.s3 span:nth-child(-n+3) { background: var(--cp-yellow);  box-shadow: 0 0 6px var(--cp-yellow); }
+    #login-view .strength-bar.s4 span                 { background: var(--cp-green);   box-shadow: 0 0 6px var(--cp-green); }
+    #login-view .strength-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.68rem; margin-top: 4px; color: rgba(0,255,159,0.35);
+      letter-spacing: 1px; text-transform: uppercase;
+    }
 
+    /* ── submit button ── */
     #login-view button[type="submit"] {
       width: 100%; padding: 14px; margin-top: 10px;
-      background: linear-gradient(135deg, #e94560, #c0392b);
-      border: none; border-radius: 12px; color: #fff; font-size: 1rem;
-      font-weight: 700; letter-spacing: 0.3px; cursor: pointer;
-      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
-      box-shadow: 0 8px 24px rgba(233,69,96,0.4);
+      background: transparent;
+      border: 1.5px solid var(--cp-pink);
+      border-radius: 2px;
+      color: var(--cp-pink);
+      font-family: 'VT323', monospace; font-size: 1.4rem; letter-spacing: 4px;
+      text-transform: uppercase; cursor: pointer;
+      text-shadow: 0 0 8px var(--cp-pink);
+      box-shadow: var(--cp-glow-p), inset 0 0 16px rgba(255,45,120,0.06);
+      transition: background 0.15s, color 0.15s, box-shadow 0.15s, transform 0.1s;
     }
-    #login-view button[type="submit"]:hover  { opacity: 0.9; transform: translateY(-1px); }
-    #login-view button[type="submit"]:active { transform: translateY(0); }
-    #login-view button[type="submit"]:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+    #login-view button[type="submit"]:hover {
+      background: rgba(255,45,120,0.12);
+      box-shadow: 0 0 16px var(--cp-pink), 0 0 40px rgba(255,45,120,0.35), inset 0 0 24px rgba(255,45,120,0.1);
+      transform: translateY(-1px);
+    }
+    #login-view button[type="submit"]:active  { transform: translateY(0); }
+    #login-view button[type="submit"]:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+    /* ── glitch button ── */
+    #login-view .glitch-btn {
+      width: 100%; padding: 11px; margin-top: 10px;
+      background: transparent;
+      border: 1px solid rgba(0,255,159,0.3);
+      border-radius: 2px;
+      color: rgba(0,255,159,0.5);
+      font-family: 'Share Tech Mono', monospace; font-size: 0.78rem; letter-spacing: 3px;
+      text-transform: uppercase; cursor: pointer;
+      transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+    #login-view .glitch-btn:hover {
+      color: var(--cp-green); border-color: var(--cp-green);
+      box-shadow: var(--cp-glow-g);
+    }
+    #login-view .glitch-btn.firing {
+      animation: glitchFire 0.45s steps(1);
+    }
+
+    @keyframes glitchFire {
+      0%   { transform: none; filter: none; }
+      10%  { transform: translate(-4px, 1px) skewX(-6deg); filter: hue-rotate(90deg) saturate(3); }
+      20%  { transform: translate(4px, -2px) skewX(4deg);  filter: hue-rotate(180deg); }
+      30%  { transform: translate(-3px, 2px);               clip-path: inset(30% 0 20% 0); }
+      40%  { transform: translate(5px, 0);  skewY(2deg);   clip-path: inset(60% 0 5% 0); filter: invert(1); }
+      50%  { transform: translate(-2px,1px);                clip-path: none; filter: none; }
+      60%  { transform: translate(3px,-1px) skewX(-3deg); }
+      70%  { transform: translate(-4px,2px);                filter: hue-rotate(270deg) saturate(2); }
+      80%  { transform: translate(2px, 0);                  filter: none; }
+      90%  { transform: translate(-1px,1px) skewX(2deg); }
+      100% { transform: none; filter: none; }
+    }
+
+    /* card glitch shake */
+    #login-view .card.glitching {
+      animation: cardGlitch 0.45s steps(1);
+    }
+    @keyframes cardGlitch {
+      0%   { box-shadow: 0 0 40px rgba(0,255,159,0.08), 0 32px 64px rgba(0,0,0,0.7); }
+      15%  { box-shadow: -4px 0 0 var(--cp-pink), 4px 0 0 var(--cp-green), 0 32px 64px rgba(0,0,0,0.7); transform: translateX(-3px); }
+      30%  { box-shadow: 4px 0 0 var(--cp-pink), -4px 0 0 var(--cp-green), 0 32px 64px rgba(0,0,0,0.7); transform: translateX(3px); }
+      50%  { box-shadow: -2px 0 0 var(--cp-yellow), 2px 0 0 var(--cp-pink); transform: translateX(-1px) skewX(-1deg); }
+      70%  { box-shadow: 3px 0 0 var(--cp-green); transform: translateX(2px); }
+      100% { box-shadow: 0 0 40px rgba(0,255,159,0.08), 0 32px 64px rgba(0,0,0,0.7); transform: none; }
+    }
 
     #login-view .toast {
-      display: none; margin-top: 20px; padding: 13px 16px;
-      border-radius: 12px; font-size: 0.875rem; font-weight: 500;
-      text-align: center; animation: slideInLogin 0.3s ease;
+      display: none; margin-top: 16px; padding: 12px 16px;
+      border-radius: 2px; font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem; letter-spacing: 1px; text-align: center;
+      animation: slideInLogin 0.3s ease;
     }
-    #login-view .toast.success { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.35); color: #4ade80; }
-    #login-view .toast.error   { background: rgba(239,68,68,0.15);  border: 1px solid rgba(239,68,68,0.35);  color: #f87171; }
+    #login-view .toast.success {
+      background: rgba(0,255,159,0.08); border: 1px solid rgba(0,255,159,0.35);
+      color: var(--cp-green); text-shadow: 0 0 6px rgba(0,255,159,0.5);
+    }
+    #login-view .toast.error {
+      background: rgba(255,45,120,0.08); border: 1px solid rgba(255,45,120,0.35);
+      color: var(--cp-pink); text-shadow: 0 0 6px rgba(255,45,120,0.5);
+    }
 
     @keyframes slideInLogin {
       from { opacity: 0; transform: translateY(-8px); }
@@ -135,7 +304,9 @@
     }
 
     @media (max-width: 480px) {
-      #login-view .card { padding: 36px 24px 32px; border-radius: 20px; }
+      #login-view .card { border-radius: 2px; }
+      #login-view .card-header { padding: 32px 24px 24px; }
+      #login-view .card-body   { padding: 24px 24px 0; }
     }
 
     /* ══════════════════════════════════════
@@ -383,40 +554,49 @@
      LOGIN VIEW
 ══════════════════════════════════════ -->
 <div id="login-view">
-  <div class="card">
-    <div class="logo">
-      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+  <div class="card" id="loginCard">
+
+    <!-- header with scanline overlay -->
+    <div class="card-header">
+      <div class="logo">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <h1>JACK IN</h1>
+      <p class="subtitle">// authenticate to proceed //</p>
     </div>
-    <h1>Welcome back</h1>
-    <p class="subtitle">Sign in to your account</p>
 
-    <form id="loginForm" novalidate>
-      <div class="field" id="emailField">
-        <label for="loginEmail">Email address</label>
-        <div class="input-wrap">
-          <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>
-          <input type="email" id="loginEmail" name="email" placeholder="you@example.com" autocomplete="username" required />
+    <!-- form body -->
+    <div class="card-body">
+      <form id="loginForm" novalidate>
+        <div class="field" id="emailField">
+          <label for="loginEmail">// user_id</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>
+            <input type="email" id="loginEmail" name="email" placeholder="user@net.corp" autocomplete="username" required />
+          </div>
+          <p class="hint" id="emailHint"></p>
         </div>
-        <p class="hint" id="emailHint"></p>
-      </div>
 
-      <div class="field" id="passwordField">
-        <label for="password">Password</label>
-        <div class="input-wrap">
-          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <input type="password" id="password" name="password" placeholder="Min 8 chars, A-Z, 0-9, symbol" autocomplete="current-password" required />
-          <button type="button" class="toggle-pw" id="togglePw" aria-label="Toggle password visibility">
-            <svg id="eyeIcon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
+        <div class="field" id="passwordField">
+          <label for="password">// passkey</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <input type="password" id="password" name="password" placeholder="Min 8 chars, A-Z, 0-9, symbol" autocomplete="current-password" required />
+            <button type="button" class="toggle-pw" id="togglePw" aria-label="Toggle password visibility">
+              <svg id="eyeIcon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div class="strength-bar" id="strengthBar"><span></span><span></span><span></span><span></span></div>
+          <p class="strength-label" id="strengthLabel"></p>
+          <p class="hint" id="passwordHint"></p>
         </div>
-        <div class="strength-bar" id="strengthBar"><span></span><span></span><span></span><span></span></div>
-        <p class="strength-label" id="strengthLabel"></p>
-        <p class="hint" id="passwordHint"></p>
-      </div>
 
-      <button type="submit" id="loginSubmitBtn">Sign in</button>
-      <div class="toast" id="loginToast"></div>
-    </form>
+        <button type="submit" id="loginSubmitBtn">[ ACCESS SYSTEM ]</button>
+        <button type="button" class="glitch-btn" id="glitchBtn">⚡ SIGNAL GLITCH ⚡</button>
+        <div class="toast" id="loginToast"></div>
+      </form>
+    </div>
+
   </div>
 </div>
 
@@ -783,6 +963,69 @@
     fields.forEach(id => document.getElementById('f-' + id).classList.remove('valid','invalid'));
     document.getElementById('submitBtn').disabled = true;
     setTimeout(() => { document.getElementById('submitBtn').disabled = false; }, 4000);
+  });
+
+  /* ══════════════════════════════════════
+     GLITCH BUTTON — Web Audio noise burst
+  ══════════════════════════════════════ */
+  function playGlitchSound() {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // White noise burst
+    const bufLen   = ctx.sampleRate * 0.35;
+    const buffer   = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+    const data     = buffer.getChannelData(0);
+    for (let i = 0; i < bufLen; i++) data[i] = (Math.random() * 2 - 1);
+
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    // Band-pass to make it sound "digital"
+    const bp = ctx.createBiquadFilter();
+    bp.type      = 'bandpass';
+    bp.frequency.setValueAtTime(1200, ctx.currentTime);
+    bp.frequency.linearRampToValueAtTime(400, ctx.currentTime + 0.35);
+    bp.Q.value   = 0.8;
+
+    // Amplitude envelope: sharp attack, fast decay
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0,    ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.55, ctx.currentTime + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+
+    // Pitch-drop blip on top
+    const osc = ctx.createOscillator();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.18);
+    const oscGain = ctx.createGain();
+    oscGain.gain.setValueAtTime(0.3,   ctx.currentTime);
+    oscGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+
+    noise.connect(bp);
+    bp.connect(gain);
+    gain.connect(ctx.destination);
+    osc.connect(oscGain);
+    oscGain.connect(ctx.destination);
+
+    noise.start();
+    osc.start();
+    noise.stop(ctx.currentTime + 0.35);
+    osc.stop(ctx.currentTime + 0.2);
+    setTimeout(() => ctx.close(), 600);
+  }
+
+  document.getElementById('glitchBtn').addEventListener('click', function () {
+    playGlitchSound();
+    // visual glitch on the card and button
+    const card = document.getElementById('loginCard');
+    card.classList.remove('glitching');
+    this.classList.remove('firing');
+    void card.offsetWidth; // force reflow
+    card.classList.add('glitching');
+    this.classList.add('firing');
+    card.addEventListener('animationend', () => card.classList.remove('glitching'), { once: true });
+    this.addEventListener('animationend',  () => this.classList.remove('firing'),   { once: true });
   });
 </script>
 </body>

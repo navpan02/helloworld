@@ -5,119 +5,400 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lawn Care Plans — NPLawn LLC</title>
   <link rel="stylesheet" href="shared.css" />
+  <link rel="stylesheet" href="lawn-care-design.css" />
 </head>
-<body>
+<body class="lc-page">
 <div id="site-nav"></div>
 
-<section class="page-hero">
-  <div class="page-hero-icon">
-    <svg viewBox="0 0 24 24"><path d="M12 22V12M12 12C12 7 7 3 2 4c0 5 4 9 10 8zM12 12c0-5 5-9 10-8-1 5-5 9-10 8z"/></svg>
-  </div>
-  <div class="page-hero-badge">Lawn Care Plans</div>
-  <h1>Healthy Grass All Season Long.</h1>
-  <p>Choose the plan that fits your lawn and lifestyle — from simple seasonal care to a fully organic treatment program.</p>
-  <div class="hero-btns">
-    <a class="btn-primary" href="#plans">See Plans</a>
-    <a class="btn-outline" href="contact.html">Talk to an Expert</a>
+<!-- ═══ HERO ═══ -->
+<section class="lc-hero">
+  <div class="lc-hero-inner">
+    <div class="lc-hero-content">
+      <div class="lc-hero-eyebrow">
+        <svg viewBox="0 0 24 24"><path d="M12 22V12M12 12C12 7 7 3 2 4c0 5 4 9 10 8zM12 12c0-5 5-9 10-8-1 5-5 9-10 8z"/></svg>
+        Lawn Care Plans
+      </div>
+      <h1>Healthy Grass,<br><span class="highlight">All Season Long.</span></h1>
+      <p class="lc-hero-desc">Choose the plan that fits your lawn and lifestyle — from simple seasonal care to a fully organic treatment program trusted by hundreds of homeowners.</p>
+      <div class="lc-hero-actions">
+        <a class="lc-btn-primary" href="#plans">
+          See Plans
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a class="lc-btn-secondary" href="contact.html">Talk to an Expert</a>
+      </div>
+      <div class="lc-hero-stats">
+        <div class="lc-hero-stat">
+          <div class="lc-hero-stat-num">500+</div>
+          <div class="lc-hero-stat-label">Lawns Serviced</div>
+        </div>
+        <div class="lc-hero-stat">
+          <div class="lc-hero-stat-num">4.9&starf;</div>
+          <div class="lc-hero-stat-label">Avg. Rating</div>
+        </div>
+        <div class="lc-hero-stat">
+          <div class="lc-hero-stat-num">12+</div>
+          <div class="lc-hero-stat-label">Years Experience</div>
+        </div>
+      </div>
+    </div>
+    <div class="lc-hero-visual">
+      <div class="lc-hero-card">
+        <div class="lc-hero-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 22V12M12 12C12 7 7 3 2 4c0 5 4 9 10 8zM12 12c0-5 5-9 10-8-1 5-5 9-10 8z"/></svg>
+        </div>
+        <h3>Your Plan Includes</h3>
+        <p>Every plan is designed to keep your lawn green and healthy year-round.</p>
+        <ul class="lc-hero-card-features">
+          <li><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Seasonal fertilization</li>
+          <li><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Weed prevention &amp; control</li>
+          <li><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Soil health testing</li>
+          <li><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Satisfaction guarantee</li>
+        </ul>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- WHAT IS IT -->
-<section class="pg-section white">
-  <p class="pg-label">Why a Plan?</p>
-  <h2 class="pg-title">Lawn Health Is a Year-Round Commitment</h2>
-  <p class="pg-sub">A one-time fertilizer application won't build a great lawn. Our plans deliver the right treatment at the right time — automatically.</p>
-  <div class="feature-grid">
-    <div class="feature-card">
-      <div class="feature-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+<!-- ═══ TRUST BAR ═══ -->
+<section class="lc-trust-bar">
+  <div class="lc-trust-inner">
+    <div class="lc-trust-item">
+      <div class="lc-trust-icon">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 0 0 1.946-.806 3.42 3.42 0 0 1 4.438 0 3.42 3.42 0 0 0 1.946.806 3.42 3.42 0 0 1 3.138 3.138 3.42 3.42 0 0 0 .806 1.946 3.42 3.42 0 0 1 0 4.438 3.42 3.42 0 0 0-.806 1.946 3.42 3.42 0 0 1-3.138 3.138 3.42 3.42 0 0 0-1.946.806 3.42 3.42 0 0 1-4.438 0 3.42 3.42 0 0 0-1.946-.806 3.42 3.42 0 0 1-3.138-3.138 3.42 3.42 0 0 0-.806-1.946 3.42 3.42 0 0 1 0-4.438 3.42 3.42 0 0 0 .806-1.946 3.42 3.42 0 0 1 3.138-3.138z"/></svg>
+      </div>
+      <div class="lc-trust-text">
+        <strong>Licensed &amp; Insured</strong>
+        <span>Fully bonded team</span>
+      </div>
+    </div>
+    <div class="lc-trust-divider"></div>
+    <div class="lc-trust-item">
+      <div class="lc-trust-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div class="lc-trust-text">
+        <strong>Flexible Scheduling</strong>
+        <span>Cancel anytime, 30 days</span>
+      </div>
+    </div>
+    <div class="lc-trust-divider"></div>
+    <div class="lc-trust-item">
+      <div class="lc-trust-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div class="lc-trust-text">
+        <strong>Results Guaranteed</strong>
+        <span>Free re-treatment if needed</span>
+      </div>
+    </div>
+    <div class="lc-trust-divider"></div>
+    <div class="lc-trust-item">
+      <div class="lc-trust-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 22V12M12 12C12 7 7 3 2 4c0 5 4 9 10 8zM12 12c0-5 5-9 10-8-1 5-5 9-10 8z"/></svg>
+      </div>
+      <div class="lc-trust-text">
+        <strong>Eco-Friendly Options</strong>
+        <span>100% organic available</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ WHY A PLAN ═══ -->
+<section class="lc-features">
+  <div class="lc-section-header">
+    <div class="lc-section-eyebrow">Why a Plan?</div>
+    <h2 class="lc-section-title">Lawn Health Is a Year-Round Commitment</h2>
+    <p class="lc-section-desc">A one-time fertilizer application won't build a great lawn. Our plans deliver the right treatment at the right time — automatically.</p>
+  </div>
+  <div class="lc-features-grid">
+    <div class="lc-feature-card">
+      <div class="lc-feature-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
       <h3>Seasonal Timing</h3>
       <p>Treatments applied in sync with growth cycles for maximum effectiveness and minimum waste.</p>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+    <div class="lc-feature-card">
+      <div class="lc-feature-icon">
+        <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
       <h3>Weed Prevention</h3>
       <p>Pre- and post-emergent weed control stops problems before they spread and take hold.</p>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 22V12M12 12C12 7 7 3 2 4c0 5 4 9 10 8zM12 12c0-5 5-9 10-8-1 5-5 9-10 8z"/></svg></div>
+    <div class="lc-feature-card">
+      <div class="lc-feature-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 22V12M12 12C12 7 7 3 2 4c0 5 4 9 10 8zM12 12c0-5 5-9 10-8-1 5-5 9-10 8z"/></svg>
+      </div>
       <h3>Soil Health</h3>
       <p>pH balancing and soil conditioning so nutrients are actually absorbed — not washed away.</p>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 0 0 1.946-.806 3.42 3.42 0 0 1 4.438 0 3.42 3.42 0 0 0 1.946.806 3.42 3.42 0 0 1 3.138 3.138 3.42 3.42 0 0 0 .806 1.946 3.42 3.42 0 0 1 0 4.438 3.42 3.42 0 0 0-.806 1.946 3.42 3.42 0 0 1-3.138 3.138 3.42 3.42 0 0 0-1.946.806 3.42 3.42 0 0 1-4.438 0 3.42 3.42 0 0 0-1.946-.806 3.42 3.42 0 0 1-3.138-3.138 3.42 3.42 0 0 0-.806-1.946 3.42 3.42 0 0 1 0-4.438 3.42 3.42 0 0 0 .806-1.946 3.42 3.42 0 0 1 3.138-3.138z"/></svg></div>
+    <div class="lc-feature-card">
+      <div class="lc-feature-icon">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 0 0 1.946-.806 3.42 3.42 0 0 1 4.438 0 3.42 3.42 0 0 0 1.946.806 3.42 3.42 0 0 1 3.138 3.138 3.42 3.42 0 0 0 .806 1.946 3.42 3.42 0 0 1 0 4.438 3.42 3.42 0 0 0-.806 1.946 3.42 3.42 0 0 1-3.138 3.138 3.42 3.42 0 0 0-1.946.806 3.42 3.42 0 0 1-4.438 0 3.42 3.42 0 0 0-1.946-.806 3.42 3.42 0 0 1-3.138-3.138 3.42 3.42 0 0 0-.806-1.946 3.42 3.42 0 0 1 0-4.438 3.42 3.42 0 0 0 .806-1.946 3.42 3.42 0 0 1 3.138-3.138z"/></svg>
+      </div>
       <h3>Guaranteed Results</h3>
       <p>If your lawn doesn't improve within the plan period, we re-treat at no additional cost.</p>
     </div>
   </div>
 </section>
 
-<!-- PLANS -->
-<section class="pg-section" id="plans">
-  <p class="pg-label">Choose Your Plan</p>
-  <h2 class="pg-title">Three Plans. One Healthy Lawn.</h2>
-  <p class="pg-sub">All plans are month-to-month. Cancel anytime with 30 days' notice.</p>
+<!-- ═══ HOW IT WORKS ═══ -->
+<section class="lc-process">
+  <div class="lc-section-header">
+    <div class="lc-section-eyebrow">How It Works</div>
+    <h2 class="lc-section-title">Four Simple Steps to a Better Lawn</h2>
+    <p class="lc-section-desc">We make it easy — pick your plan, and we handle the rest from start to finish.</p>
+  </div>
+  <div class="lc-process-grid">
+    <div class="lc-process-step">
+      <div class="lc-step-num">1</div>
+      <h3>Choose a Plan</h3>
+      <p>Select Basic, Pro, or Natural based on your goals and budget.</p>
+    </div>
+    <div class="lc-process-step">
+      <div class="lc-step-num">2</div>
+      <h3>Free Assessment</h3>
+      <p>We inspect your lawn, test the soil, and customize your treatment schedule.</p>
+    </div>
+    <div class="lc-process-step">
+      <div class="lc-step-num">3</div>
+      <h3>We Treat</h3>
+      <p>Our certified team applies seasonal treatments on a schedule — no action needed from you.</p>
+    </div>
+    <div class="lc-process-step">
+      <div class="lc-step-num">4</div>
+      <h3>Enjoy Results</h3>
+      <p>Watch your lawn thrive with greener, thicker grass and fewer weeds all year.</p>
+    </div>
+  </div>
+</section>
 
-  <div class="pricing-grid">
+<!-- ═══ PRICING ═══ -->
+<section class="lc-pricing" id="plans">
+  <div class="lc-section-header">
+    <div class="lc-section-eyebrow">Choose Your Plan</div>
+    <h2 class="lc-section-title">Three Plans. One Healthy Lawn.</h2>
+    <p class="lc-section-desc">All plans are month-to-month. Cancel anytime with 30 days' notice.</p>
+  </div>
 
-    <div class="pricing-card">
-      <div class="pricing-name">GrassBasic</div>
-      <div class="pricing-sub">Essential care for a clean, weed-free lawn</div>
-      <div class="pricing-price">$49<span>/month</span></div>
-      <div class="pricing-divider"></div>
-      <ul class="pricing-features">
-        <li><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Bi-monthly lawn inspection</li>
-        <li><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Weed control spray (2×/year)</li>
-        <li><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Fertilization (2×/year)</li>
-        <li><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>pH &amp; soil test (annual)</li>
-        <li class="off"><svg viewBox="0 0 16 16"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>Grub &amp; insect control</li>
-        <li class="off"><svg viewBox="0 0 16 16"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>Soil conditioning</li>
-        <li class="off"><svg viewBox="0 0 16 16"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>Organic treatments</li>
+  <div class="lc-pricing-grid">
+
+    <!-- GrassBasic -->
+    <div class="lc-price-card">
+      <div class="lc-price-header">
+        <div class="lc-price-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 22V12M12 12C12 7 7 3 2 4c0 5 4 9 10 8z"/></svg>
+        </div>
+        <div class="lc-price-name">GrassBasic</div>
+        <div class="lc-price-sub">Essential care for a clean, weed-free lawn</div>
+      </div>
+      <div class="lc-price-amount">
+        <span class="amount">$49</span><span class="period">/month</span>
+      </div>
+      <ul class="lc-price-features">
+        <li class="included"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Bi-monthly lawn inspection</li>
+        <li class="included"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Weed control spray (2&times;/year)</li>
+        <li class="included"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Fertilization (2&times;/year)</li>
+        <li class="included"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>pH &amp; soil test (annual)</li>
+        <li class="excluded"><svg viewBox="0 0 16 16"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>Grub &amp; insect control</li>
+        <li class="excluded"><svg viewBox="0 0 16 16"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>Soil conditioning</li>
+        <li class="excluded"><svg viewBox="0 0 16 16"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>Organic treatments</li>
       </ul>
-      <a class="pricing-btn" href="contact.html">Start GrassBasic</a>
+      <a class="lc-price-btn lc-price-btn-default" href="contact.html">Start GrassBasic</a>
+      <div class="lc-price-guarantee">No contracts. Cancel anytime.</div>
     </div>
 
-    <div class="pricing-card featured">
-      <div class="pricing-tag">Best Value</div>
-      <div class="pricing-name">GrassPro</div>
-      <div class="pricing-sub">Complete care for consistently great results</div>
-      <div class="pricing-price">$89<span>/month</span></div>
-      <div class="pricing-divider"></div>
-      <ul class="pricing-features">
-        <li><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Monthly lawn inspection</li>
-        <li><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Weed control (4×/year)</li>
-        <li><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Fertilization (4×/year)</li>
-        <li><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>pH &amp; soil test (annual)</li>
-        <li><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Grub &amp; insect prevention</li>
-        <li><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Soil conditioning</li>
-        <li class="off"><svg viewBox="0 0 16 16"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>Organic treatments</li>
+    <!-- GrassPro -->
+    <div class="lc-price-card popular">
+      <div class="lc-price-badge">Most Popular</div>
+      <div class="lc-price-header">
+        <div class="lc-price-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 22V12M12 12C12 7 7 3 2 4c0 5 4 9 10 8zM12 12c0-5 5-9 10-8-1 5-5 9-10 8z"/></svg>
+        </div>
+        <div class="lc-price-name">GrassPro</div>
+        <div class="lc-price-sub">Complete care for consistently great results</div>
+      </div>
+      <div class="lc-price-amount">
+        <span class="amount">$89</span><span class="period">/month</span>
+      </div>
+      <ul class="lc-price-features">
+        <li class="included"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Monthly lawn inspection</li>
+        <li class="included"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Weed control (4&times;/year)</li>
+        <li class="included"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Fertilization (4&times;/year)</li>
+        <li class="included"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>pH &amp; soil test (annual)</li>
+        <li class="included"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Grub &amp; insect prevention</li>
+        <li class="included"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Soil conditioning</li>
+        <li class="excluded"><svg viewBox="0 0 16 16"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>Organic treatments</li>
       </ul>
-      <a class="pricing-btn" href="contact.html">Start GrassPro</a>
+      <a class="lc-price-btn lc-price-btn-primary" href="contact.html">Start GrassPro</a>
+      <div class="lc-price-guarantee">Free re-treatment guarantee included.</div>
     </div>
 
-    <div class="pricing-card">
-      <div class="pricing-name">GrassNatural</div>
-      <div class="pricing-sub">100% organic for people, pets &amp; the planet</div>
-      <div class="pricing-price">$109<span>/month</span></div>
-      <div class="pricing-divider"></div>
-      <ul class="pricing-features">
-        <li><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Monthly lawn inspection</li>
-        <li><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Organic weed control (4×/year)</li>
-        <li><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Organic fertilization (4×/year)</li>
-        <li><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>pH &amp; soil test (annual)</li>
-        <li><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Grub &amp; insect prevention</li>
-        <li><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Compost top-dressing</li>
-        <li><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Eco-certification report</li>
+    <!-- GrassNatural -->
+    <div class="lc-price-card">
+      <div class="lc-price-header">
+        <div class="lc-price-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 22V12M12 12C12 7 7 3 2 4c0 5 4 9 10 8zM12 12c0-5 5-9 10-8-1 5-5 9-10 8z"/></svg>
+        </div>
+        <div class="lc-price-name">GrassNatural</div>
+        <div class="lc-price-sub">100% organic for people, pets &amp; the planet</div>
+      </div>
+      <div class="lc-price-amount">
+        <span class="amount">$109</span><span class="period">/month</span>
+      </div>
+      <ul class="lc-price-features">
+        <li class="included"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Monthly lawn inspection</li>
+        <li class="included"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Organic weed control (4&times;/year)</li>
+        <li class="included"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Organic fertilization (4&times;/year)</li>
+        <li class="included"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>pH &amp; soil test (annual)</li>
+        <li class="included"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Grub &amp; insect prevention</li>
+        <li class="included"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Compost top-dressing</li>
+        <li class="included"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>Eco-certification report</li>
       </ul>
-      <a class="pricing-btn" href="contact.html">Start GrassNatural</a>
+      <a class="lc-price-btn lc-price-btn-gold" href="contact.html">Start GrassNatural</a>
+      <div class="lc-price-guarantee">Premium organic. Zero compromise.</div>
     </div>
 
   </div>
 </section>
 
-<section class="cta-section">
-  <h2>Not Sure Which Plan Fits?</h2>
-  <p>Our lawn specialists will assess your property and recommend the right plan — no upsell pressure.</p>
-  <a class="btn-primary cta-btn" href="contact.html">Get a Free Assessment</a>
+<!-- ═══ TESTIMONIALS ═══ -->
+<section class="lc-testimonials">
+  <div class="lc-section-header">
+    <div class="lc-section-eyebrow">What Customers Say</div>
+    <h2 class="lc-section-title">Trusted by Homeowners Like You</h2>
+    <p class="lc-section-desc">Hear from customers who transformed their lawns with NPLawn.</p>
+  </div>
+  <div class="lc-testimonials-grid">
+    <div class="lc-testimonial">
+      <div class="lc-testimonial-stars">
+        <svg viewBox="0 0 16 16"><path d="M8 1.12l1.84 4.46 4.8.41-3.62 3.17 1.1 4.72L8 11.24 3.88 13.88l1.1-4.72L1.36 5.99l4.8-.41z"/></svg>
+        <svg viewBox="0 0 16 16"><path d="M8 1.12l1.84 4.46 4.8.41-3.62 3.17 1.1 4.72L8 11.24 3.88 13.88l1.1-4.72L1.36 5.99l4.8-.41z"/></svg>
+        <svg viewBox="0 0 16 16"><path d="M8 1.12l1.84 4.46 4.8.41-3.62 3.17 1.1 4.72L8 11.24 3.88 13.88l1.1-4.72L1.36 5.99l4.8-.41z"/></svg>
+        <svg viewBox="0 0 16 16"><path d="M8 1.12l1.84 4.46 4.8.41-3.62 3.17 1.1 4.72L8 11.24 3.88 13.88l1.1-4.72L1.36 5.99l4.8-.41z"/></svg>
+        <svg viewBox="0 0 16 16"><path d="M8 1.12l1.84 4.46 4.8.41-3.62 3.17 1.1 4.72L8 11.24 3.88 13.88l1.1-4.72L1.36 5.99l4.8-.41z"/></svg>
+      </div>
+      <p>"Our lawn went from patchy and full of weeds to the greenest yard on the block in just two months. The GrassPro plan is worth every penny."</p>
+      <div class="lc-testimonial-author">
+        <div class="lc-testimonial-avatar">MJ</div>
+        <div>
+          <div class="lc-testimonial-name">Mike Johnson</div>
+          <div class="lc-testimonial-role">GrassPro customer since 2024</div>
+        </div>
+      </div>
+    </div>
+    <div class="lc-testimonial">
+      <div class="lc-testimonial-stars">
+        <svg viewBox="0 0 16 16"><path d="M8 1.12l1.84 4.46 4.8.41-3.62 3.17 1.1 4.72L8 11.24 3.88 13.88l1.1-4.72L1.36 5.99l4.8-.41z"/></svg>
+        <svg viewBox="0 0 16 16"><path d="M8 1.12l1.84 4.46 4.8.41-3.62 3.17 1.1 4.72L8 11.24 3.88 13.88l1.1-4.72L1.36 5.99l4.8-.41z"/></svg>
+        <svg viewBox="0 0 16 16"><path d="M8 1.12l1.84 4.46 4.8.41-3.62 3.17 1.1 4.72L8 11.24 3.88 13.88l1.1-4.72L1.36 5.99l4.8-.41z"/></svg>
+        <svg viewBox="0 0 16 16"><path d="M8 1.12l1.84 4.46 4.8.41-3.62 3.17 1.1 4.72L8 11.24 3.88 13.88l1.1-4.72L1.36 5.99l4.8-.41z"/></svg>
+        <svg viewBox="0 0 16 16"><path d="M8 1.12l1.84 4.46 4.8.41-3.62 3.17 1.1 4.72L8 11.24 3.88 13.88l1.1-4.72L1.36 5.99l4.8-.41z"/></svg>
+      </div>
+      <p>"I love the organic option. With two dogs and small kids, knowing everything is eco-safe gives me peace of mind. The lawn looks amazing."</p>
+      <div class="lc-testimonial-author">
+        <div class="lc-testimonial-avatar">SR</div>
+        <div>
+          <div class="lc-testimonial-name">Sarah Rivera</div>
+          <div class="lc-testimonial-role">GrassNatural customer since 2023</div>
+        </div>
+      </div>
+    </div>
+    <div class="lc-testimonial">
+      <div class="lc-testimonial-stars">
+        <svg viewBox="0 0 16 16"><path d="M8 1.12l1.84 4.46 4.8.41-3.62 3.17 1.1 4.72L8 11.24 3.88 13.88l1.1-4.72L1.36 5.99l4.8-.41z"/></svg>
+        <svg viewBox="0 0 16 16"><path d="M8 1.12l1.84 4.46 4.8.41-3.62 3.17 1.1 4.72L8 11.24 3.88 13.88l1.1-4.72L1.36 5.99l4.8-.41z"/></svg>
+        <svg viewBox="0 0 16 16"><path d="M8 1.12l1.84 4.46 4.8.41-3.62 3.17 1.1 4.72L8 11.24 3.88 13.88l1.1-4.72L1.36 5.99l4.8-.41z"/></svg>
+        <svg viewBox="0 0 16 16"><path d="M8 1.12l1.84 4.46 4.8.41-3.62 3.17 1.1 4.72L8 11.24 3.88 13.88l1.1-4.72L1.36 5.99l4.8-.41z"/></svg>
+        <svg viewBox="0 0 16 16"><path d="M8 1.12l1.84 4.46 4.8.41-3.62 3.17 1.1 4.72L8 11.24 3.88 13.88l1.1-4.72L1.36 5.99l4.8-.41z"/></svg>
+      </div>
+      <p>"Started with GrassBasic just to try it out. The improvement was so clear that I upgraded to Pro within the first season. Highly recommend."</p>
+      <div class="lc-testimonial-author">
+        <div class="lc-testimonial-avatar">DT</div>
+        <div>
+          <div class="lc-testimonial-name">David Torres</div>
+          <div class="lc-testimonial-role">GrassPro customer since 2025</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FAQ ═══ -->
+<section class="lc-faq">
+  <div class="lc-section-header">
+    <div class="lc-section-eyebrow">FAQ</div>
+    <h2 class="lc-section-title">Common Questions</h2>
+    <p class="lc-section-desc">Everything you need to know about our lawn care plans.</p>
+  </div>
+  <div class="lc-faq-list">
+    <div class="lc-faq-item">
+      <button class="lc-faq-toggle" onclick="this.parentElement.classList.toggle('open')">
+        <h3>Can I switch plans mid-season?</h3>
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="lc-faq-answer">
+        <p>Absolutely. You can upgrade or downgrade your plan at any time. Changes take effect at the start of your next billing cycle, and we'll adjust your treatment schedule accordingly.</p>
+      </div>
+    </div>
+    <div class="lc-faq-item">
+      <button class="lc-faq-toggle" onclick="this.parentElement.classList.toggle('open')">
+        <h3>What if my lawn doesn't improve?</h3>
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="lc-faq-answer">
+        <p>All plans include our satisfaction guarantee. If your lawn doesn't show visible improvement within the plan period, we'll re-treat at no additional cost until you're happy with the results.</p>
+      </div>
+    </div>
+    <div class="lc-faq-item">
+      <button class="lc-faq-toggle" onclick="this.parentElement.classList.toggle('open')">
+        <h3>Are the organic treatments safe for pets?</h3>
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="lc-faq-answer">
+        <p>Yes. Our GrassNatural plan uses 100% OMRI-certified organic products. They're safe for children, pets, and the environment. We recommend staying off the lawn for 2 hours after application as a precaution.</p>
+      </div>
+    </div>
+    <div class="lc-faq-item">
+      <button class="lc-faq-toggle" onclick="this.parentElement.classList.toggle('open')">
+        <h3>Is there a contract or cancellation fee?</h3>
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="lc-faq-answer">
+        <p>No long-term contracts. All plans are month-to-month. You can cancel anytime with 30 days' notice — no fees, no hassle.</p>
+      </div>
+    </div>
+    <div class="lc-faq-item">
+      <button class="lc-faq-toggle" onclick="this.parentElement.classList.toggle('open')">
+        <h3>How do I get started?</h3>
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="lc-faq-answer">
+        <p>Simply choose a plan and click "Start." We'll schedule a free lawn assessment within 48 hours. After the assessment, we'll confirm your customized treatment schedule and get to work.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FINAL CTA ═══ -->
+<section class="lc-cta">
+  <div class="lc-cta-inner">
+    <h2>Not Sure Which Plan Fits?</h2>
+    <p>Our lawn specialists will assess your property and recommend the right plan — no upsell pressure, just honest advice.</p>
+    <div class="lc-cta-actions">
+      <a class="lc-btn-primary" href="contact.html">
+        Get a Free Assessment
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a class="lc-btn-secondary" href="contact.html">Call Us Today</a>
+    </div>
+    <div class="lc-cta-guarantee">
+      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      30-day money-back guarantee on all plans
+    </div>
+  </div>
 </section>
 
 <footer class="site-footer">

@@ -546,6 +546,131 @@
       #landing-view .form-row { grid-template-columns: 1fr; }
       #landing-view .form-card { padding: 28px 20px; }
     }
+    /* ══════════════════════════════════════
+       ADMIN VIEW — LEAD LISTING
+    ══════════════════════════════════════ */
+    #admin-view { display: none; min-height: 100vh; background: #f0f4f8; font-family: 'Segoe UI', system-ui, sans-serif; }
+
+    #admin-view .admin-nav {
+      background: var(--dark); height: 60px; padding: 0 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    }
+    #admin-view .admin-nav-brand { display: flex; align-items: center; gap: 10px; }
+    #admin-view .admin-nav-brand svg { width: 22px; height: 22px; stroke: var(--green-lite); stroke-width: 2; fill: none; }
+    #admin-view .admin-nav-brand span { color: #fff; font-weight: 700; font-size: 1rem; }
+    #admin-view .admin-nav-brand span em { color: var(--green-lite); font-style: normal; }
+    #admin-view .admin-badge {
+      background: rgba(116,198,157,0.15); border: 1px solid rgba(116,198,157,0.35);
+      color: var(--green-lite); font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 10px; border-radius: 99px;
+    }
+    #admin-view .admin-nav-right { display: flex; align-items: center; gap: 14px; }
+    #admin-view .admin-logout {
+      background: transparent; border: 1px solid rgba(255,255,255,0.25);
+      color: rgba(255,255,255,0.7); font-size: 0.8rem; padding: 6px 14px;
+      border-radius: 6px; cursor: pointer; transition: border-color 0.2s, color 0.2s;
+    }
+    #admin-view .admin-logout:hover { border-color: #fff; color: #fff; }
+
+    #admin-view .admin-main { padding: 32px; max-width: 1300px; margin: 0 auto; }
+
+    #admin-view .admin-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px; margin-bottom: 28px;
+    }
+    #admin-view .admin-title { font-size: 1.5rem; font-weight: 800; color: var(--dark); letter-spacing: -0.3px; }
+    #admin-view .admin-sub   { font-size: 0.85rem; color: var(--muted); margin-top: 3px; }
+
+    #admin-view .admin-stats { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
+    #admin-view .stat-card {
+      background: #fff; border: 1px solid #dde5df; border-radius: 12px;
+      padding: 18px 24px; min-width: 140px;
+    }
+    #admin-view .stat-card .sc-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+    #admin-view .stat-card .sc-val   { font-size: 1.8rem; font-weight: 800; color: var(--dark); line-height: 1.1; margin-top: 4px; }
+
+    #admin-view .table-wrap {
+      background: #fff; border: 1px solid #dde5df; border-radius: 14px;
+      overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    #admin-view .table-toolbar {
+      padding: 16px 20px; border-bottom: 1px solid #dde5df;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    }
+    #admin-view .table-search-wrap { position: relative; }
+    #admin-view .table-search-wrap svg {
+      position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+      width: 15px; height: 15px; stroke: #aab8b0; stroke-width: 2; fill: none; pointer-events: none;
+    }
+    #admin-view #leadSearch {
+      padding: 8px 12px 8px 32px; border: 1px solid #d0ddd5; border-radius: 8px;
+      font-size: 0.85rem; color: var(--text); background: #f8fbf9; outline: none; width: 240px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    #admin-view #leadSearch:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(82,183,136,0.15); }
+    #admin-view .table-actions { display: flex; gap: 8px; }
+    #admin-view .btn-refresh {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--green); color: #fff; font-size: 0.8rem; font-weight: 700;
+      padding: 8px 14px; border: none; border-radius: 8px; cursor: pointer;
+      transition: background 0.2s;
+    }
+    #admin-view .btn-refresh:hover { background: var(--green-mid); }
+    #admin-view .btn-refresh svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2.5; fill: none; }
+    #admin-view .btn-export {
+      display: flex; align-items: center; gap: 6px;
+      background: #fff; color: var(--green); font-size: 0.8rem; font-weight: 700;
+      padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    #admin-view .btn-export:hover { background: #f0faf4; border-color: var(--green-mid); }
+    #admin-view .btn-export svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none; }
+
+    #admin-view table { width: 100%; border-collapse: collapse; }
+    #admin-view thead tr { background: #f8fbf9; }
+    #admin-view th {
+      padding: 12px 16px; text-align: left; font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.8px; text-transform: uppercase; color: var(--muted);
+      border-bottom: 1px solid #dde5df; white-space: nowrap; cursor: pointer; user-select: none;
+    }
+    #admin-view th:hover { color: var(--green); }
+    #admin-view th .sort-icon { display: inline-block; margin-left: 4px; opacity: 0.4; }
+    #admin-view th.sorted-asc  .sort-icon { opacity: 1; }
+    #admin-view th.sorted-desc .sort-icon { opacity: 1; transform: scaleY(-1); display: inline-block; }
+    #admin-view td {
+      padding: 13px 16px; font-size: 0.875rem; color: var(--text);
+      border-bottom: 1px solid #f0f4f1; white-space: nowrap;
+    }
+    #admin-view tbody tr:last-child td { border-bottom: none; }
+    #admin-view tbody tr:hover td { background: #f6fbf8; }
+    #admin-view td.num-col { color: var(--muted); font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+    #admin-view td.date-col { color: var(--muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+    #admin-view td.email-col { color: var(--green-mid); }
+    #admin-view td.addr-col { max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+
+    #admin-view .state-chip {
+      display: inline-block; padding: 2px 8px; background: #e8f5ee;
+      border-radius: 99px; font-size: 0.72rem; font-weight: 700; color: var(--green);
+    }
+
+    #admin-view .empty-state {
+      padding: 60px 24px; text-align: center;
+    }
+    #admin-view .empty-state svg { width: 48px; height: 48px; stroke: #c8d8ce; stroke-width: 1.5; fill: none; margin: 0 auto 16px; display: block; }
+    #admin-view .empty-state p { color: var(--muted); font-size: 0.95rem; }
+    #admin-view .empty-state strong { color: var(--dark); display: block; font-size: 1.05rem; margin-bottom: 6px; }
+
+    #admin-view .table-footer {
+      padding: 12px 20px; border-top: 1px solid #dde5df;
+      font-size: 0.78rem; color: var(--muted);
+    }
+
+    @media (max-width: 768px) {
+      #admin-view .admin-main { padding: 20px 16px; }
+      #admin-view #leadSearch { width: 100%; }
+      #admin-view .table-wrap { overflow-x: auto; }
+    }
   </style>
 </head>
 <body>
@@ -775,12 +900,72 @@
 
 </div><!-- /#landing-view -->
 
+<!-- ══════════════════════════════════════
+     ADMIN VIEW — LEAD LISTING
+══════════════════════════════════════ -->
+<div id="admin-view">
+
+  <nav class="admin-nav">
+    <div class="admin-nav-brand">
+      <svg viewBox="0 0 24 24"><path d="M12 22V12M12 12C12 7 7 3 2 4c0 5 4 9 10 8zM12 12c0-5 5-9 10-8-1 5-5 9-10 8z"/></svg>
+      <span>NP<em>Lawn</em> LLC</span>
+      <div class="admin-badge">Admin</div>
+    </div>
+    <div class="admin-nav-right">
+      <button class="admin-logout" id="adminLogout">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="admin-main">
+    <div class="admin-header">
+      <div>
+        <h1 class="admin-title">Quote Leads</h1>
+        <p class="admin-sub">All quote requests submitted through the website.</p>
+      </div>
+    </div>
+
+    <div class="admin-stats">
+      <div class="stat-card"><div class="sc-label">Total Leads</div><div class="sc-val" id="statTotal">0</div></div>
+      <div class="stat-card"><div class="sc-label">This Month</div><div class="sc-val" id="statMonth">0</div></div>
+      <div class="stat-card"><div class="sc-label">States</div><div class="sc-val" id="statStates">0</div></div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <div class="table-search-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="leadSearch" placeholder="Search leads…" />
+        </div>
+        <div class="table-actions">
+          <button class="btn-export" id="btnExport">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+          <button class="btn-refresh" id="btnRefresh">
+            <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <div id="leadsTableContainer">
+        <!-- rendered by JS -->
+      </div>
+
+      <div class="table-footer" id="tableFooter"></div>
+    </div>
+  </div>
+
+</div><!-- /#admin-view -->
+
 <script>
   /* ══════════════════════════════════════
      LOGIN LOGIC
   ══════════════════════════════════════ */
-  const VALID_EMAIL    = 'navpan@gmail.com';
-  const VALID_PASSWORD = 'H3lloW0rld$';
+  const USERS = [
+    { email: 'navpan@gmail.com',  password: 'H3lloW0rld$',  role: 'user'  },
+    { email: 'admin@admin.com',   password: 'Hell0World@',   role: 'admin' },
+  ];
 
   const emailInput    = document.getElementById('loginEmail');
   const passwordInput = document.getElementById('password');
@@ -866,7 +1051,8 @@
     setFieldState(passwordField, passwordHint, pResult);
     if (!eResult.ok || !pResult.ok) return;
 
-    if (emailVal !== VALID_EMAIL || passVal !== VALID_PASSWORD) {
+    const user = USERS.find(u => u.email === emailVal && u.password === passVal);
+    if (!user) {
       showLoginToast('Invalid email or password. Please try again.', 'error');
       return;
     }
@@ -875,7 +1061,12 @@
     loginForm.querySelectorAll('input, button').forEach(el => el.disabled = true);
     setTimeout(() => {
       document.getElementById('login-view').style.display = 'none';
-      document.getElementById('landing-view').style.display = 'block';
+      if (user.role === 'admin') {
+        renderAdminView();
+        document.getElementById('admin-view').style.display = 'block';
+      } else {
+        document.getElementById('landing-view').style.display = 'block';
+      }
       window.scrollTo(0, 0);
     }, 1200);
   });
@@ -953,16 +1144,161 @@
       phone:  document.getElementById('phone').value.trim(),
     };
 
-    const DB_KEY   = 'nplawn_submissions';
-    const existing = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+    const existing = JSON.parse(localStorage.getItem(DB_KEY_ADMIN) || '[]');
     existing.push(record);
-    localStorage.setItem(DB_KEY, JSON.stringify(existing));
+    localStorage.setItem(DB_KEY_ADMIN, JSON.stringify(existing));
 
     showQuoteToast("Thank you! We'll reach out within 24 hours with your free quote.", 'success');
     this.reset();
     fields.forEach(id => document.getElementById('f-' + id).classList.remove('valid','invalid'));
     document.getElementById('submitBtn').disabled = true;
     setTimeout(() => { document.getElementById('submitBtn').disabled = false; }, 4000);
+  });
+
+  /* ══════════════════════════════════════
+     ADMIN VIEW — LEAD LISTING
+  ══════════════════════════════════════ */
+  const DB_KEY_ADMIN = 'nplawn_submissions';
+
+  function getLeads() {
+    return JSON.parse(localStorage.getItem(DB_KEY_ADMIN) || '[]');
+  }
+
+  function formatDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      + ' ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  let adminLeads = [];
+  let sortCol    = 'timestamp';
+  let sortDir    = 'desc';
+  let searchQ    = '';
+
+  function filteredLeads() {
+    const q = searchQ.toLowerCase();
+    return adminLeads
+      .filter(l => !q || [l.street, l.city, l.state, l.zip, l.email, l.phone].join(' ').toLowerCase().includes(q))
+      .sort((a, b) => {
+        let va = a[sortCol] ?? '', vb = b[sortCol] ?? '';
+        if (va < vb) return sortDir === 'asc' ? -1 : 1;
+        if (va > vb) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      });
+  }
+
+  function renderAdminView() {
+    adminLeads = getLeads();
+    updateStats();
+    renderTable();
+  }
+
+  function updateStats() {
+    document.getElementById('statTotal').textContent = adminLeads.length;
+    const now = new Date();
+    const monthCount = adminLeads.filter(l => {
+      const d = new Date(l.timestamp);
+      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    }).length;
+    document.getElementById('statMonth').textContent = monthCount;
+    const stateSet = new Set(adminLeads.map(l => l.state).filter(Boolean));
+    document.getElementById('statStates').textContent = stateSet.size;
+  }
+
+  function renderTable() {
+    const leads = filteredLeads();
+    const container = document.getElementById('leadsTableContainer');
+    const footer    = document.getElementById('tableFooter');
+
+    if (leads.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <strong>${searchQ ? 'No results found' : 'No leads yet'}</strong>
+          <p>${searchQ ? 'Try a different search term.' : 'Quote requests will appear here once submitted.'}</p>
+        </div>`;
+      footer.textContent = '';
+      return;
+    }
+
+    const cols = [
+      { key: 'num',       label: '#',         sortable: false },
+      { key: 'timestamp', label: 'Submitted',  sortable: true  },
+      { key: 'street',    label: 'Street',     sortable: true  },
+      { key: 'city',      label: 'City',       sortable: true  },
+      { key: 'state',     label: 'State',      sortable: true  },
+      { key: 'zip',       label: 'ZIP',        sortable: true  },
+      { key: 'email',     label: 'Email',      sortable: true  },
+      { key: 'phone',     label: 'Phone',      sortable: false },
+    ];
+
+    const thHTML = cols.map(c => {
+      if (!c.sortable) return `<th>${c.label}</th>`;
+      const cls = sortCol === c.key ? (sortDir === 'asc' ? 'sorted-asc' : 'sorted-desc') : '';
+      return `<th class="${cls}" data-col="${c.key}">${c.label} <span class="sort-icon">↑</span></th>`;
+    }).join('');
+
+    const rowsHTML = leads.map((l, i) => `
+      <tr>
+        <td class="num-col">${i + 1}</td>
+        <td class="date-col">${formatDate(l.timestamp)}</td>
+        <td class="addr-col">${escHtml(l.street)}</td>
+        <td>${escHtml(l.city)}</td>
+        <td><span class="state-chip">${escHtml(l.state)}</span></td>
+        <td>${escHtml(l.zip)}</td>
+        <td class="email-col">${escHtml(l.email)}</td>
+        <td>${escHtml(l.phone)}</td>
+      </tr>`).join('');
+
+    container.innerHTML = `
+      <table>
+        <thead><tr>${thHTML}</tr></thead>
+        <tbody>${rowsHTML}</tbody>
+      </table>`;
+
+    footer.textContent = `Showing ${leads.length} of ${adminLeads.length} lead${adminLeads.length !== 1 ? 's' : ''}`;
+
+    // sort click handlers
+    container.querySelectorAll('th[data-col]').forEach(th => {
+      th.addEventListener('click', () => {
+        const col = th.dataset.col;
+        if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+        else { sortCol = col; sortDir = 'asc'; }
+        renderTable();
+      });
+    });
+  }
+
+  function escHtml(str) {
+    return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function exportCSV() {
+    const leads = filteredLeads();
+    if (!leads.length) return;
+    const header = ['#','Submitted','Street','City','State','ZIP','Email','Phone'];
+    const rows   = leads.map((l, i) => [
+      i + 1, formatDate(l.timestamp), l.street, l.city, l.state, l.zip, l.email, l.phone
+    ].map(v => '"' + String(v ?? '').replace(/"/g, '""') + '"'));
+    const csv  = [header, ...rows].map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    const a    = Object.assign(document.createElement('a'), { href: url, download: 'nplawn-leads.csv' });
+    a.click(); URL.revokeObjectURL(url);
+  }
+
+  document.getElementById('btnRefresh').addEventListener('click', () => { adminLeads = getLeads(); updateStats(); renderTable(); });
+  document.getElementById('btnExport').addEventListener('click', exportCSV);
+  document.getElementById('leadSearch').addEventListener('input', function () { searchQ = this.value; renderTable(); });
+  document.getElementById('adminLogout').addEventListener('click', () => {
+    document.getElementById('admin-view').style.display = 'none';
+    document.getElementById('login-view').style.display = 'flex';
+    loginForm.querySelectorAll('input, button').forEach(el => el.disabled = false);
+    loginForm.reset();
+    emailField.classList.remove('valid','invalid');
+    passwordField.classList.remove('valid','invalid');
+    loginToast.style.display = 'none';
+    strengthBar.className = 'strength-bar'; strengthLabel.textContent = '';
   });
 
   /* ══════════════════════════════════════

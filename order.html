@@ -475,45 +475,83 @@ async function lookupPropertySize() {
 
     if (!geoData.length) { setLookupState('notfound'); return; }
 
-    const lat = parseFloat(geoData[0].lat);
-    const lon = parseFloat(geoData[0].lon);
+    const lat     = parseFloat(geoData[0].lat);
+    const lon     = parseFloat(geoData[0].lon);
+    const osmType = geoData[0].osm_type;  // 'way', 'node', or 'relation'
+    const osmId   = geoData[0].osm_id;
 
-    /* 2. Overpass: prefer lot boundary, fall back to building footprint ─── */
-    const overpassQuery =
-      `[out:json][timeout:12];` +
-      `(way(around:50,${lat},${lon})["landuse"~"^(residential|garden|grass|meadow)$"];` +
-      ` way(around:60,${lat},${lon})["building"];` +
-      ` way(around:60,${lat},${lon})["leisure"="garden"];);` +
-      `out geom;`;
+    let target = null;
 
-    const ovRes  = await fetch('https://overpass-api.de/api/interpreter',
-      { method: 'POST', body: overpassQuery });
-    const ovData = await ovRes.json();
+    /* 2a. Best case: Nominatim resolved to a specific building way — use it directly.
+          This avoids pulling in any nearby features and is always accurate. */
+    if (osmType === 'way') {
+      const directQuery = `[out:json];way(${osmId});out geom;`;
+      const dRes  = await fetch('https://overpass-api.de/api/interpreter',
+        { method: 'POST', body: directQuery });
+      const dData = await dRes.json();
+      const el = dData.elements && dData.elements[0];
+      if (el && el.geometry && el.tags && el.tags.building) {
+        target = el;
+      }
+    }
 
-    if (!ovData.elements || !ovData.elements.length) { setLookupState('notfound'); return; }
+    /* 2b. Fallback: proximity search — ONLY individual gardens or buildings.
+          Crucially: DO NOT include landuse=residential (covers entire neighborhoods).
+          Tight 20 m radius for buildings so we don't grab a neighbour's house. */
+    if (!target) {
+      const fallbackQuery =
+        `[out:json][timeout:12];` +
+        `(way(around:20,${lat},${lon})["building"];` +
+        ` way(around:35,${lat},${lon})["leisure"="garden"];` +
+        ` way(around:35,${lat},${lon})["landuse"~"^(garden|grass)$"];` +
+        `);out geom;`;
 
-    /* Prefer lot/landuse polygon over building footprint */
-    const lot      = ovData.elements.find(e => e.tags && (e.tags.landuse || e.tags.leisure));
-    const building = ovData.elements.find(e => e.tags && e.tags.building);
-    const target   = lot || building;
+      const ovRes  = await fetch('https://overpass-api.de/api/interpreter',
+        { method: 'POST', body: fallbackQuery });
+      const ovData = await ovRes.json();
+
+      if (ovData.elements && ovData.elements.length) {
+        target = closestElement(ovData.elements, lat, lon);
+      }
+    }
 
     if (!target || !target.geometry || target.geometry.length < 3) {
       setLookupState('notfound'); return;
     }
 
     const sqft = Math.round(polygonAreaSqft(target.geometry, lat));
-    if (sqft < 100) { setLookupState('notfound'); return; }
 
-    /* Pre-fill input */
+    /* Sanity check: reject anything implausible for a residential lawn.
+       Lower bound: 100 sqft. Upper bound: ~3 acres = 130,680 sqft. */
+    if (sqft < 100 || sqft > 130680) { setLookupState('notfound'); return; }
+
+    /* Pre-fill the input */
     document.getElementById('sqft-input').value = sqft;
     updateQuote();
 
-    const source = lot ? 'OpenStreetMap lot boundary' : 'OpenStreetMap building footprint';
+    const isGarden = target.tags &&
+      (target.tags.leisure === 'garden' || target.tags.landuse === 'garden' || target.tags.landuse === 'grass');
+    const source = isGarden
+      ? 'garden/grass area from OpenStreetMap'
+      : 'building footprint from OpenStreetMap — adjust to include your full lawn';
     setLookupState('found', sqft, source);
 
   } catch (err) {
     setLookupState('error');
   }
+}
+
+/* Return the element whose polygon centroid is closest to (lat, lon) */
+function closestElement(elements, lat, lon) {
+  let best = null, bestDist = Infinity;
+  for (const el of elements) {
+    if (!el.geometry || el.geometry.length < 3) continue;
+    const cLat = el.geometry.reduce((s, n) => s + n.lat, 0) / el.geometry.length;
+    const cLon = el.geometry.reduce((s, n) => s + n.lon, 0) / el.geometry.length;
+    const dist = Math.hypot(cLat - lat, cLon - lon);
+    if (dist < bestDist) { bestDist = dist; best = el; }
+  }
+  return best;
 }
 
 /* Shoelace formula: lat/lng polygon → square feet */

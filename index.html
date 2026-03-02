@@ -1136,10 +1136,16 @@
   /* ══════════════════════════════════════
      LOGIN LOGIC
   ══════════════════════════════════════ */
+  /* Passwords are stored as SHA-256 hashes — never in plaintext. */
   const USERS = [
-    { email: 'navpan@gmail.com',  password: 'H3lloW0rld$',  role: 'user'  },
-    { email: 'admin@admin.com',   password: 'Hell0World@',   role: 'admin' },
+    { email: 'navpan@gmail.com', hash: 'ac3dcbcd3e71bbb60120cd8ad9a72d296b1b1286588d6a99f80c62e6cd7904f3', role: 'user'  },
+    { email: 'admin@admin.com',  hash: 'e3e31c95446c914fe21f4d653ccfdd47a0da5d466075869ac48555ded43e59a8', role: 'admin' },
   ];
+
+  async function sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
 
   const emailInput    = document.getElementById('loginEmail');
   const passwordInput = document.getElementById('password');
@@ -1215,7 +1221,7 @@
     loginToast.style.display = 'block';
   }
 
-  loginForm.addEventListener('submit', (e) => {
+  loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const emailVal = emailInput.value.trim();
     const passVal  = passwordInput.value;
@@ -1225,7 +1231,8 @@
     setFieldState(passwordField, passwordHint, pResult);
     if (!eResult.ok || !pResult.ok) return;
 
-    const user = USERS.find(u => u.email === emailVal && u.password === passVal);
+    const passHash = await sha256(passVal);
+    const user = USERS.find(u => u.email === emailVal && u.hash === passHash);
     if (!user) {
       showLoginToast('Invalid email or password. Please try again.', 'error');
       return;

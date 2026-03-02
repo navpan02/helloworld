@@ -773,6 +773,15 @@
     #admin-view .plan-chip.standard { background: #d8f3dc; color: #1b4332; }
     #admin-view .plan-chip.premium  { background: #fff6e0; color: #7a5f00; }
 
+    /* ── User status badge ── */
+    #admin-view .status-chip {
+      display: inline-block; padding: 2px 10px; border-radius: 99px;
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.3px;
+    }
+    #admin-view .status-chip.verified   { background: #d8f3dc; color: #1b4332; }
+    #admin-view .status-chip.unverified { background: #fde8ed; color: #9b1c3d; }
+    #admin-view td.email-col-u { color: var(--green-mid); }
+
     /* ── Amount column ── */
     #admin-view td.amount-col { font-weight: 700; color: var(--green); font-variant-numeric: tabular-nums; }
     #admin-view td.order-col  { font-weight: 700; color: var(--dark); font-family: monospace; font-size: 0.82rem; }
@@ -831,6 +840,10 @@
         <button type="button" class="glitch-btn" id="glitchBtn">⚡ SIGNAL GLITCH ⚡</button>
         <div class="toast" id="loginToast"></div>
       </form>
+    </div>
+
+    <div style="padding:16px 40px 28px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:rgba(0,255,159,0.45);letter-spacing:.5px">
+      no account? // <a href="signup.html" style="color:#00ff9f;text-decoration:none;border-bottom:1px solid rgba(0,255,159,0.3)">create one</a>
     </div>
 
   </div>
@@ -1066,6 +1079,11 @@
         Orders
         <span class="tab-count" id="tabOrdersCount">0</span>
       </button>
+      <button class="admin-tab" id="tabUsers" onclick="switchTab('users')">
+        <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;stroke-width:2;fill:none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Users
+        <span class="tab-count" id="tabUsersCount">0</span>
+      </button>
     </div>
 
     <!-- ── LEADS PANEL ── -->
@@ -1103,7 +1121,7 @@
       <div class="admin-stats">
         <div class="stat-card"><div class="sc-label">Total Orders</div><div class="sc-val" id="oStatTotal">0</div></div>
         <div class="stat-card"><div class="sc-label">This Month</div><div class="sc-val" id="oStatMonth">0</div></div>
-        <div class="stat-card"><div class="sc-label">Monthly Revenue</div><div class="sc-val" id="oStatMRR">$0</div></div>
+        <div class="stat-card"><div class="sc-label">Annual Revenue</div><div class="sc-val" id="oStatMRR">$0</div></div>
       </div>
 
       <div class="table-wrap">
@@ -1125,6 +1143,32 @@
         </div>
         <div id="ordersTableContainer"></div>
         <div class="table-footer" id="ordersTableFooter"></div>
+      </div>
+    </div>
+
+    <!-- ── USERS PANEL ── -->
+    <div id="panelUsers" style="display:none">
+      <div class="admin-stats">
+        <div class="stat-card"><div class="sc-label">Registered Users</div><div class="sc-val" id="uStatTotal">0</div></div>
+        <div class="stat-card"><div class="sc-label">Verified</div><div class="sc-val" id="uStatVerified">0</div></div>
+        <div class="stat-card"><div class="sc-label">Pending</div><div class="sc-val" id="uStatPending">0</div></div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <div class="table-search-wrap">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="userSearch" placeholder="Search users…" />
+          </div>
+          <div class="table-actions">
+            <button class="btn-refresh" id="btnRefreshUsers">
+              <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              Refresh
+            </button>
+          </div>
+        </div>
+        <div id="usersTableContainer"></div>
+        <div class="table-footer" id="usersTableFooter"></div>
       </div>
     </div>
 
@@ -1221,6 +1265,15 @@
     loginToast.style.display = 'block';
   }
 
+  /* Show welcome toast when redirected from signup */
+  if (new URLSearchParams(window.location.search).get('registered') === '1') {
+    showLoginToast('Account activated! Sign in to continue.', 'success');
+  }
+
+  function getRegisteredUsers() {
+    try { return JSON.parse(localStorage.getItem('nplawn_users') || '[]'); } catch { return []; }
+  }
+
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const emailVal = emailInput.value.trim();
@@ -1232,7 +1285,21 @@
     if (!eResult.ok || !pResult.ok) return;
 
     const passHash = await sha256(passVal);
-    const user = USERS.find(u => u.email === emailVal && u.hash === passHash);
+
+    /* Check hardcoded accounts first, then localStorage-registered users */
+    let user = USERS.find(u => u.email === emailVal && u.hash === passHash);
+    if (!user) {
+      const regUsers = getRegisteredUsers();
+      const regUser  = regUsers.find(u => u.email.toLowerCase() === emailVal.toLowerCase() && u.hash === passHash);
+      if (regUser) {
+        if (!regUser.verified) {
+          showLoginToast('Email not verified. Check your inbox for the verification code.', 'error');
+          return;
+        }
+        user = regUser;
+      }
+    }
+
     if (!user) {
       showLoginToast('Invalid email or password. Please try again.', 'error');
       return;
@@ -1375,6 +1442,7 @@
     renderTable();
     document.getElementById('tabLeadsCount').textContent  = adminLeads.length;
     document.getElementById('tabOrdersCount').textContent = adminOrders.length;
+    document.getElementById('tabUsersCount').textContent  = getRegisteredUsersAdmin().length;
   }
 
   function updateStats() {
@@ -1545,7 +1613,7 @@
       { key: 'st',        label: 'State',         sortable: true  },
       { key: 'zip',       label: 'ZIP',           sortable: true  },
       { key: 'sqft',      label: 'Sqft',          sortable: true  },
-      { key: 'total',     label: 'Monthly Total', sortable: true  },
+      { key: 'total',     label: 'Annual Total',  sortable: true  },
       { key: 'notes',     label: 'Notes',         sortable: false },
     ];
 
@@ -1591,7 +1659,7 @@
   function exportOrdersCSV() {
     const orders = filteredOrders();
     if (!orders.length) return;
-    const header = ['#','Submitted','Order #','Plan','Street','City','State','ZIP','Sqft','Monthly Total','Notes'];
+    const header = ['#','Submitted','Order #','Plan','Street','City','State','ZIP','Sqft','Annual Total','Notes'];
     const rows   = orders.map((o, i) => [
       i + 1, formatDate(o.timestamp), o.orderNum, o.plan,
       o.street, o.city, o.st, o.zip, o.sqft,
@@ -1619,10 +1687,82 @@
     activeTab = tab;
     document.getElementById('tabLeads').classList.toggle('active',  tab === 'leads');
     document.getElementById('tabOrders').classList.toggle('active', tab === 'orders');
+    document.getElementById('tabUsers').classList.toggle('active',  tab === 'users');
     document.getElementById('panelLeads').style.display  = tab === 'leads'  ? 'block' : 'none';
     document.getElementById('panelOrders').style.display = tab === 'orders' ? 'block' : 'none';
+    document.getElementById('panelUsers').style.display  = tab === 'users'  ? 'block' : 'none';
     if (tab === 'orders') { adminOrders = getOrders(); updateOrderStats(); renderOrdersTable(); }
+    if (tab === 'users')  { renderUsersPanel(); }
   }
+
+  /* ══════════════════════════════════════
+     ADMIN VIEW — USERS
+  ══════════════════════════════════════ */
+  let uSearchQ = '';
+
+  function getRegisteredUsersAdmin() {
+    try { return JSON.parse(localStorage.getItem('nplawn_users') || '[]'); } catch { return []; }
+  }
+
+  function renderUsersPanel() {
+    const all    = getRegisteredUsersAdmin();
+    const q      = uSearchQ.toLowerCase();
+    const users  = all.filter(u => !q || u.email.toLowerCase().includes(q))
+                      .sort((a, b) => new Date(b.registeredAt) - new Date(a.registeredAt));
+
+    document.getElementById('uStatTotal').textContent   = all.length;
+    document.getElementById('uStatVerified').textContent = all.filter(u => u.verified).length;
+    document.getElementById('uStatPending').textContent  = all.filter(u => !u.verified).length;
+
+    const container = document.getElementById('usersTableContainer');
+    const footer    = document.getElementById('usersTableFooter');
+
+    if (users.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <strong>${q ? 'No results found' : 'No registered users yet'}</strong>
+          <p>${q ? 'Try a different search term.' : 'Users who sign up via the registration page will appear here.'}</p>
+        </div>`;
+      footer.textContent = '';
+      return;
+    }
+
+    const thHTML = `
+      <th>Email</th>
+      <th>Registered</th>
+      <th>Status</th>
+      <th>Orders</th>`;
+
+    const orders = JSON.parse(localStorage.getItem('nplawn_orders') || '[]');
+    const rowsHTML = users.map(u => {
+      const statusClass = u.verified ? 'verified' : 'unverified';
+      const statusLabel = u.verified ? 'Verified' : 'Pending';
+      const userOrders  = orders.filter(o => o.email && o.email.toLowerCase() === u.email.toLowerCase());
+      const latestPlan  = userOrders.length
+        ? '<span class="plan-chip ' + (userOrders[userOrders.length - 1].plan || '').toLowerCase() + '">'
+          + escHtml(userOrders[userOrders.length - 1].plan || '—') + '</span>'
+        : '<span style="color:var(--muted)">—</span>';
+      return `
+        <tr>
+          <td class="email-col-u">${escHtml(u.email)}</td>
+          <td class="date-col">${formatDate(u.registeredAt)}</td>
+          <td><span class="status-chip ${statusClass}">${statusLabel}</span></td>
+          <td>${userOrders.length ? userOrders.length + ' &nbsp;' + latestPlan : '<span style="color:var(--muted)">0</span>'}</td>
+        </tr>`;
+    }).join('');
+
+    container.innerHTML = `
+      <table>
+        <thead><tr>${thHTML}</tr></thead>
+        <tbody>${rowsHTML}</tbody>
+      </table>`;
+
+    footer.textContent = `Showing ${users.length} of ${all.length} user${all.length !== 1 ? 's' : ''}`;
+  }
+
+  document.getElementById('userSearch').addEventListener('input', function () { uSearchQ = this.value; renderUsersPanel(); });
+  document.getElementById('btnRefreshUsers').addEventListener('click', renderUsersPanel);
 
   document.getElementById('adminLogout').addEventListener('click', () => {
     document.getElementById('admin-view').style.display = 'none';

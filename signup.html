@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account — NPLawn LLC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <!-- EmailJS — fill in your Public Key below to enable real email sending -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <style>
+    /* ── EmailJS config ─────────────────────────────────────
+       To send real verification emails:
+       1. Sign up at https://www.emailjs.com (free tier: 200 emails/month)
+       2. Create a service (Gmail, Outlook, etc.) and note the Service ID
+       3. Create an email template with variables {{to_email}} and {{code}}
+       4. Copy your Public Key from Account → API Keys
+       5. Fill the three constants below
+    ─────────────────────────────────────────────────────── */
+
+    :root {
+      --cp-bg:     #07000f;
+      --cp-card:   #0c0018;
+      --cp-border: rgba(0,255,159,0.18);
+      --cp-green:  #00ff9f;
+      --cp-pink:   #ff2d78;
+      --cp-yellow: #ffe01b;
+      --cp-muted:  rgba(0,255,159,0.45);
+      --cp-glow-g: 0 0 12px rgba(0,255,159,0.35);
+      --cp-glow-p: 0 0 12px rgba(255,45,120,0.35);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--cp-bg);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Share Tech Mono', monospace;
+      padding: 24px 16px;
+    }
+
+    /* ── Scanline overlay ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
+      pointer-events: none; z-index: 0;
+    }
+
+    .card {
+      position: relative; z-index: 1;
+      background: var(--cp-card);
+      border: 1px solid var(--cp-border);
+      border-radius: 4px;
+      width: 100%; max-width: 440px;
+      box-shadow: 0 0 40px rgba(0,255,159,0.07), 0 4px 32px rgba(0,0,0,0.6);
+      overflow: hidden;
+    }
+
+    /* corner accents */
+    .card::before, .card::after {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+      border-color: var(--cp-green);
+      border-style: solid;
+      opacity: 0.6;
+    }
+    .card::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+    .card::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+    .card-header {
+      padding: 32px 40px 24px;
+      border-bottom: 1px solid var(--cp-border);
+      position: relative;
+    }
+
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 16px;
+    }
+    .logo svg { width: 28px; height: 28px; fill: none; stroke: var(--cp-green); stroke-width: 1.5; }
+
+    h1 {
+      font-family: 'VT323', monospace;
+      font-size: 2rem;
+      color: var(--cp-green);
+      text-shadow: 0 0 18px rgba(0,255,159,0.6);
+      letter-spacing: 2px;
+      line-height: 1;
+    }
+
+    .subtitle {
+      font-size: 0.72rem;
+      color: var(--cp-muted);
+      letter-spacing: 1.5px;
+      margin-top: 6px;
+      text-transform: uppercase;
+    }
+
+    .card-body { padding: 28px 40px 0; }
+
+    .field { margin-bottom: 20px; }
+
+    label {
+      display: block;
+      font-size: 0.7rem;
+      letter-spacing: 1.5px;
+      color: var(--cp-muted);
+      text-transform: uppercase;
+      margin-bottom: 7px;
+    }
+
+    .input-wrap { position: relative; display: flex; align-items: center; }
+    .input-wrap svg {
+      position: absolute; left: 12px;
+      width: 15px; height: 15px;
+      stroke: var(--cp-muted); stroke-width: 2; fill: none;
+      pointer-events: none;
+    }
+    .input-wrap:focus-within > svg { stroke: var(--cp-green); }
+
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
+      width: 100%; padding: 10px 14px 10px 38px;
+      background: rgba(0,255,159,0.04);
+      border: 1px solid rgba(0,255,159,0.2);
+      border-radius: 3px;
+      color: var(--cp-green);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    input::placeholder { color: rgba(0,255,159,0.2); }
+    input:focus {
+      border-color: var(--cp-green);
+      box-shadow: var(--cp-glow-g);
+    }
+
+    .toggle-pw {
+      position: absolute; right: 10px;
+      background: none; border: none; cursor: pointer;
+      color: var(--cp-muted); padding: 4px;
+    }
+    .toggle-pw:hover { color: var(--cp-green); }
+    .toggle-pw svg { width: 17px; height: 17px; stroke: currentColor; stroke-width: 2; fill: none; }
+
+    .field.valid   input { border-color: var(--cp-green); box-shadow: var(--cp-glow-g); }
+    .field.invalid input { border-color: var(--cp-pink);  box-shadow: var(--cp-glow-p); }
+
+    .hint {
+      font-size: 0.68rem;
+      color: var(--cp-muted);
+      margin-top: 5px;
+      min-height: 14px;
+    }
+    .field.invalid .hint { color: var(--cp-pink);  text-shadow: 0 0 6px rgba(255,45,120,0.5); }
+    .field.valid   .hint { color: var(--cp-green); text-shadow: 0 0 6px rgba(0,255,159,0.5); }
+
+    .strength-bar { display: flex; gap: 4px; margin-top: 8px; }
+    .strength-bar span {
+      flex: 1; height: 3px;
+      background: rgba(0,255,159,0.1);
+      border-radius: 2px;
+      transition: background .3s, box-shadow .3s;
+    }
+    .strength-bar.s1 span:nth-child(1)    { background: var(--cp-pink);   box-shadow: 0 0 6px var(--cp-pink); }
+    .strength-bar.s2 span:nth-child(-n+2) { background: #ff8c00;           box-shadow: 0 0 6px #ff8c00; }
+    .strength-bar.s3 span:nth-child(-n+3) { background: var(--cp-yellow);  box-shadow: 0 0 6px var(--cp-yellow); }
+    .strength-bar.s4 span                 { background: var(--cp-green);   box-shadow: 0 0 6px var(--cp-green); }
+    .strength-label {
+      font-size: 0.65rem; color: var(--cp-muted);
+      letter-spacing: 1px; margin-top: 4px;
+    }
+
+    button[type="submit"] {
+      width: 100%; margin-top: 4px;
+      padding: 13px;
+      background: transparent;
+      border: 1px solid var(--cp-green);
+      border-radius: 3px;
+      color: var(--cp-green);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.95rem;
+      letter-spacing: 2px;
+      cursor: pointer;
+      text-shadow: 0 0 8px rgba(0,255,159,0.5);
+      box-shadow: var(--cp-glow-g);
+      transition: background .2s, box-shadow .2s, transform .1s;
+    }
+    button[type="submit"]:hover {
+      background: rgba(0,255,159,0.08);
+      box-shadow: 0 0 22px rgba(0,255,159,0.5);
+    }
+    button[type="submit"]:active  { transform: translateY(1px); }
+    button[type="submit"]:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+    .card-footer {
+      padding: 20px 40px 28px;
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--cp-muted);
+      letter-spacing: .5px;
+    }
+    .card-footer a {
+      color: var(--cp-green);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(0,255,159,0.3);
+    }
+    .card-footer a:hover { border-bottom-color: var(--cp-green); }
+
+    .toast {
+      display: none;
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-radius: 3px;
+      font-size: 0.8rem;
+      letter-spacing: .5px;
+    }
+    .toast.success { background: rgba(0,255,159,0.1); border: 1px solid rgba(0,255,159,0.3); color: var(--cp-green); }
+    .toast.error   { background: rgba(255,45,120,0.1); border: 1px solid rgba(255,45,120,0.3); color: var(--cp-pink); }
+
+    /* ── Verification screen ── */
+    #verify-screen { display: none; }
+    #verify-screen.active { display: block; }
+    #signup-screen.hidden { display: none; }
+
+    .verify-heading {
+      font-family: 'VT323', monospace;
+      font-size: 1.6rem;
+      color: var(--cp-green);
+      text-shadow: 0 0 14px rgba(0,255,159,0.6);
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+    }
+    .verify-desc {
+      font-size: 0.75rem;
+      color: var(--cp-muted);
+      line-height: 1.6;
+      margin-bottom: 22px;
+      letter-spacing: .4px;
+    }
+    .verify-desc strong { color: var(--cp-green); }
+
+    .code-input-wrap {
+      display: flex; gap: 8px; justify-content: center;
+      margin-bottom: 20px;
+    }
+    .code-digit {
+      width: 44px; height: 54px;
+      background: rgba(0,255,159,0.04);
+      border: 1px solid rgba(0,255,159,0.2);
+      border-radius: 3px;
+      color: var(--cp-green);
+      font-family: 'VT323', monospace;
+      font-size: 2rem;
+      text-align: center;
+      outline: none;
+      padding: 0;
+      transition: border-color .2s, box-shadow .2s;
+      caret-color: var(--cp-green);
+    }
+    .code-digit:focus {
+      border-color: var(--cp-green);
+      box-shadow: var(--cp-glow-g);
+    }
+    .code-digit.filled { border-color: rgba(0,255,159,0.5); }
+
+    /* Demo fallback box — shown only when EmailJS is not configured */
+    .demo-code-box {
+      background: rgba(255,224,27,0.07);
+      border: 1px dashed rgba(255,224,27,0.4);
+      border-radius: 3px;
+      padding: 12px 16px;
+      margin-bottom: 18px;
+      font-size: 0.72rem;
+      color: var(--cp-yellow);
+      line-height: 1.6;
+    }
+    .demo-code-box strong { font-size: 1.3rem; letter-spacing: 4px; display: block; margin-top: 4px; }
+
+    .resend-link {
+      background: none; border: none;
+      color: var(--cp-muted); font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem; cursor: pointer;
+      text-decoration: underline;
+      letter-spacing: .4px;
+    }
+    .resend-link:hover { color: var(--cp-green); }
+    .resend-link:disabled { opacity: 0.4; cursor: not-allowed; text-decoration: none; }
+
+    @media (max-width: 480px) {
+      .card-header, .card-body, .card-footer { padding-left: 24px; padding-right: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card" id="mainCard">
+
+  <!-- ── SIGNUP SCREEN ── -->
+  <div id="signup-screen">
+    <div class="card-header">
+      <div class="logo">
+        <svg viewBox="0 0 24 24"><path d="M12 22V12M12 12C12 7 7 3 2 4c0 5 4 9 10 8zM12 12c0-5 5-9 10-8-1 5-5 9-10 8z"/></svg>
+        <span style="font-family:'Share Tech Mono',monospace;color:var(--cp-muted);font-size:.8rem;letter-spacing:2px">NPLAWN LLC</span>
+      </div>
+      <h1>CREATE ACCOUNT</h1>
+      <p class="subtitle">register new operator credentials</p>
+    </div>
+
+    <div class="card-body">
+      <form id="signupForm" novalidate>
+
+        <div class="field" id="su-emailField">
+          <label for="su-email">// email address</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>
+            <input type="email" id="su-email" placeholder="user@net.corp" autocomplete="email" required />
+          </div>
+          <p class="hint" id="su-emailHint"></p>
+        </div>
+
+        <div class="field" id="su-pwField">
+          <label for="su-pw">// passkey</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <input type="password" id="su-pw" placeholder="Min 8 chars, A-Z, 0-9, symbol" autocomplete="new-password" required />
+            <button type="button" class="toggle-pw" id="su-togglePw" aria-label="Toggle password visibility">
+              <svg id="su-eyeIcon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div class="strength-bar" id="su-strengthBar"><span></span><span></span><span></span><span></span></div>
+          <p class="strength-label" id="su-strengthLabel"></p>
+          <p class="hint" id="su-pwHint"></p>
+        </div>
+
+        <div class="field" id="su-cpwField">
+          <label for="su-cpw">// confirm passkey</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 0 0 1.946-.806 3.42 3.42 0 0 1 4.438 0 3.42 3.42 0 0 0 1.946.806 3.42 3.42 0 0 1 3.138 3.138 3.42 3.42 0 0 0 .806 1.946 3.42 3.42 0 0 1 0 4.438 3.42 3.42 0 0 0-.806 1.946 3.42 3.42 0 0 1-3.138 3.138 3.42 3.42 0 0 0-1.946.806 3.42 3.42 0 0 1-4.438 0 3.42 3.42 0 0 0-1.946-.806 3.42 3.42 0 0 1-3.138-3.138 3.42 3.42 0 0 0-.806-1.946 3.42 3.42 0 0 1 0-4.438 3.42 3.42 0 0 0 .806-1.946 3.42 3.42 0 0 1 3.138-3.138z"/></svg>
+            <input type="password" id="su-cpw" placeholder="Re-enter your passkey" autocomplete="new-password" required />
+          </div>
+          <p class="hint" id="su-cpwHint"></p>
+        </div>
+
+        <button type="submit" id="su-submitBtn">[ INITIALIZE ACCOUNT ]</button>
+        <div class="toast" id="su-toast"></div>
+      </form>
+    </div>
+
+    <div class="card-footer">
+      already registered? // <a href="index.html">sign in</a>
+    </div>
+  </div>
+
+  <!-- ── VERIFY SCREEN ── -->
+  <div id="verify-screen">
+    <div class="card-header">
+      <div class="logo">
+        <svg viewBox="0 0 24 24"><path d="M12 22V12M12 12C12 7 7 3 2 4c0 5 4 9 10 8zM12 12c0-5 5-9 10-8-1 5-5 9-10 8z"/></svg>
+        <span style="font-family:'Share Tech Mono',monospace;color:var(--cp-muted);font-size:.8rem;letter-spacing:2px">NPLAWN LLC</span>
+      </div>
+      <h1>VERIFY EMAIL</h1>
+      <p class="subtitle">confirm your identity to activate</p>
+    </div>
+
+    <div class="card-body" style="padding-bottom:4px">
+      <p class="verify-desc">
+        A 6-digit verification code was sent to<br>
+        <strong id="verify-email-display">—</strong>.<br><br>
+        Enter the code below to activate your account.
+      </p>
+
+      <!-- Shown only when EmailJS is not configured (demo/dev mode) -->
+      <div class="demo-code-box" id="demo-code-box" style="display:none">
+        // demo mode — email service not configured<br>
+        your verification code is:<br>
+        <strong id="demo-code-value">——————</strong>
+      </div>
+
+      <div class="code-input-wrap" id="codeInputWrap">
+        <input class="code-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="cd0" />
+        <input class="code-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="cd1" />
+        <input class="code-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="cd2" />
+        <input class="code-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="cd3" />
+        <input class="code-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="cd4" />
+        <input class="code-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="cd5" />
+      </div>
+
+      <button type="button" id="verifyBtn" style="width:100%;margin-bottom:8px;padding:13px;background:transparent;border:1px solid var(--cp-green);border-radius:3px;color:var(--cp-green);font-family:'Share Tech Mono',monospace;font-size:.95rem;letter-spacing:2px;cursor:pointer;text-shadow:0 0 8px rgba(0,255,159,0.5);box-shadow:var(--cp-glow-g);transition:background .2s">
+        [ VERIFY &amp; ACTIVATE ]
+      </button>
+
+      <div class="toast" id="vc-toast"></div>
+    </div>
+
+    <div class="card-footer" style="padding-top:14px">
+      didn't receive it?&nbsp;
+      <button class="resend-link" id="resendBtn">resend code</button>
+      &nbsp;//&nbsp;<a href="index.html">back to login</a>
+    </div>
+  </div>
+
+</div><!-- /.card -->
+
+<script>
+/* ══════════════════════════════════════
+   EMAILJS CONFIGURATION
+   Fill in your credentials from emailjs.com
+══════════════════════════════════════ */
+const EMAILJS_PUBLIC_KEY  = '';   // e.g. 'user_aBcDeFgHiJkLmNoP'
+const EMAILJS_SERVICE_ID  = '';   // e.g. 'service_xxxxxxx'
+const EMAILJS_TEMPLATE_ID = '';   // e.g. 'template_xxxxxxx'
+// Template must have {{to_email}} and {{code}} as variables
+
+const EMAIL_CONFIGURED = EMAILJS_PUBLIC_KEY && EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID;
+if (EMAIL_CONFIGURED) emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
+/* ══════════════════════════════════════
+   HELPERS
+══════════════════════════════════════ */
+const DB_KEY = 'nplawn_users';
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function getUsers() {
+  try { return JSON.parse(localStorage.getItem(DB_KEY) || '[]'); } catch { return []; }
+}
+function saveUsers(users) {
+  localStorage.setItem(DB_KEY, JSON.stringify(users));
+}
+
+function generateCode() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+/* ══════════════════════════════════════
+   VALIDATION
+══════════════════════════════════════ */
+function scorePassword(val) {
+  const checks = {
+    length:  val.length >= 8,
+    upper:   /[A-Z]/.test(val),
+    number:  /[0-9]/.test(val),
+    special: /[^A-Za-z0-9]/.test(val)
+  };
+  return { score: Object.values(checks).filter(Boolean).length, checks };
+}
+
+function validatePassword(val) {
+  if (!val) return { ok: false, msg: 'Password is required.' };
+  const { checks } = scorePassword(val);
+  const missing = [];
+  if (!checks.length)  missing.push('at least 8 characters');
+  if (!checks.upper)   missing.push('1 uppercase letter');
+  if (!checks.number)  missing.push('1 number');
+  if (!checks.special) missing.push('1 special character');
+  if (missing.length)  return { ok: false, msg: 'Needs ' + missing.join(', ') + '.' };
+  return { ok: true, msg: '✓ Strong password!' };
+}
+
+function setFieldState(field, hint, result) {
+  field.classList.toggle('valid',   result.ok);
+  field.classList.toggle('invalid', !result.ok);
+  hint.textContent = result.msg;
+}
+
+/* ══════════════════════════════════════
+   ELEMENTS
+══════════════════════════════════════ */
+const emailEl      = document.getElementById('su-email');
+const emailField   = document.getElementById('su-emailField');
+const emailHint    = document.getElementById('su-emailHint');
+const pwEl         = document.getElementById('su-pw');
+const pwField      = document.getElementById('su-pwField');
+const pwHint       = document.getElementById('su-pwHint');
+const cpwEl        = document.getElementById('su-cpw');
+const cpwField     = document.getElementById('su-cpwField');
+const cpwHint      = document.getElementById('su-cpwHint');
+const strengthBar  = document.getElementById('su-strengthBar');
+const strengthLbl  = document.getElementById('su-strengthLabel');
+const suToast      = document.getElementById('su-toast');
+const vcToast      = document.getElementById('vc-toast');
+const STRENGTH_MAP   = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+const STRENGTH_CLASS = ['', 's1', 's2', 's3', 's4'];
+
+/* ── strength meter ── */
+pwEl.addEventListener('input', () => {
+  const val = pwEl.value;
+  if (!val) { strengthBar.className = 'strength-bar'; strengthLbl.textContent = ''; return; }
+  const { score } = scorePassword(val);
+  strengthBar.className = 'strength-bar ' + STRENGTH_CLASS[score];
+  strengthLbl.textContent = score ? STRENGTH_MAP[score] : '';
+  setFieldState(pwField, pwHint, validatePassword(val));
+});
+
+/* ── confirm password live check ── */
+cpwEl.addEventListener('input', () => {
+  if (!cpwEl.value) { cpwField.classList.remove('valid','invalid'); cpwHint.textContent = ''; return; }
+  const match = cpwEl.value === pwEl.value;
+  setFieldState(cpwField, cpwHint, { ok: match, msg: match ? '✓ Passwords match!' : 'Passwords do not match.' });
+});
+
+/* ── email live validation ── */
+emailEl.addEventListener('input', () => {
+  if (!emailEl.value) { emailField.classList.remove('valid','invalid'); emailHint.textContent = ''; return; }
+  const ok = EMAIL_RE.test(emailEl.value.trim());
+  setFieldState(emailField, emailHint, { ok, msg: ok ? '✓ Looks good!' : 'Enter a valid email address.' });
+});
+
+/* ── toggle password visibility ── */
+document.getElementById('su-togglePw').addEventListener('click', () => {
+  const isText = pwEl.type === 'text';
+  pwEl.type = isText ? 'password' : 'text';
+  document.getElementById('su-eyeIcon').innerHTML = isText
+    ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+    : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+});
+
+function showToast(el, msg, type) {
+  el.textContent = msg;
+  el.className = 'toast ' + type;
+  el.style.display = 'block';
+}
+
+/* ══════════════════════════════════════
+   SIGNUP FORM SUBMIT
+══════════════════════════════════════ */
+document.getElementById('signupForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const emailVal = emailEl.value.trim();
+  const pwVal    = pwEl.value;
+  const cpwVal   = cpwEl.value;
+
+  /* Validate all fields */
+  const emailOk = EMAIL_RE.test(emailVal);
+  setFieldState(emailField, emailHint, { ok: emailOk, msg: emailOk ? '✓ Looks good!' : 'Enter a valid email address.' });
+
+  const pwResult = validatePassword(pwVal);
+  setFieldState(pwField, pwHint, pwResult);
+
+  const cpwOk = cpwVal === pwVal && cpwVal.length > 0;
+  setFieldState(cpwField, cpwHint, { ok: cpwOk, msg: cpwOk ? '✓ Passwords match!' : 'Passwords do not match.' });
+
+  if (!emailOk || !pwResult.ok || !cpwOk) return;
+
+  /* Check if email is already taken (in hardcoded admin list or localStorage) */
+  const RESERVED = ['admin@admin.com', 'navpan@gmail.com'];
+  if (RESERVED.includes(emailVal.toLowerCase())) {
+    showToast(suToast, 'This email is already registered. Please sign in.', 'error');
+    return;
+  }
+  const existingUsers = getUsers();
+  if (existingUsers.some(u => u.email.toLowerCase() === emailVal.toLowerCase())) {
+    showToast(suToast, 'This email is already registered. Please sign in.', 'error');
+    return;
+  }
+
+  /* Disable form while processing */
+  const btn = document.getElementById('su-submitBtn');
+  btn.disabled = true;
+  btn.textContent = '[ PROCESSING... ]';
+
+  const hash = await sha256(pwVal);
+  const code = generateCode();
+
+  /* Save user as unverified */
+  existingUsers.push({
+    email:        emailVal,
+    hash,
+    role:         'user',
+    verified:     false,
+    verifyCode:   code,
+    registeredAt: new Date().toISOString()
+  });
+  saveUsers(existingUsers);
+
+  /* Try to send email via EmailJS */
+  let emailSent = false;
+  if (EMAIL_CONFIGURED) {
+    try {
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        to_email: emailVal,
+        code
+      });
+      emailSent = true;
+    } catch (err) {
+      console.warn('EmailJS send failed:', err);
+    }
+  }
+
+  /* Show verification screen */
+  document.getElementById('signup-screen').classList.add('hidden');
+  document.getElementById('verify-screen').classList.add('active');
+  document.getElementById('verify-email-display').textContent = emailVal;
+
+  /* If email couldn't be sent, show code in UI (demo/dev fallback) */
+  if (!emailSent) {
+    document.getElementById('demo-code-box').style.display = 'block';
+    document.getElementById('demo-code-value').textContent  = code;
+  }
+
+  setupCodeInputs(emailVal, code);
+});
+
+/* ══════════════════════════════════════
+   6-DIGIT CODE INPUT BEHAVIOUR
+══════════════════════════════════════ */
+function setupCodeInputs(emailVal, expectedCode) {
+  const digits = Array.from({ length: 6 }, (_, i) => document.getElementById('cd' + i));
+
+  digits.forEach((d, i) => {
+    d.addEventListener('input', () => {
+      d.value = d.value.replace(/\D/g, '').slice(-1);
+      d.classList.toggle('filled', d.value !== '');
+      if (d.value && i < 5) digits[i + 1].focus();
+    });
+    d.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !d.value && i > 0) digits[i - 1].focus();
+    });
+    d.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+      pasted.split('').forEach((ch, idx) => {
+        if (digits[idx]) { digits[idx].value = ch; digits[idx].classList.add('filled'); }
+      });
+      if (pasted.length < 6 && digits[pasted.length]) digits[pasted.length].focus();
+    });
+  });
+
+  document.getElementById('verifyBtn').onclick = () => verifyCode(digits, emailVal);
+
+  document.getElementById('resendBtn').onclick = async () => {
+    const btn = document.getElementById('resendBtn');
+    btn.disabled = true;
+
+    /* Generate a fresh code */
+    const newCode = generateCode();
+    const users = getUsers();
+    const user = users.find(u => u.email.toLowerCase() === emailVal.toLowerCase());
+    if (user) { user.verifyCode = newCode; saveUsers(users); }
+
+    if (EMAIL_CONFIGURED) {
+      try {
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_email: emailVal, code: newCode });
+        showToast(vcToast, 'New code sent! Check your inbox.', 'success');
+      } catch {
+        showToast(vcToast, 'Could not send email. Check your inbox or try again.', 'error');
+      }
+    }
+    if (!EMAIL_CONFIGURED) {
+      document.getElementById('demo-code-value').textContent = newCode;
+      showToast(vcToast, 'New code generated (demo mode).', 'success');
+    }
+
+    /* Re-wire verify with new code */
+    document.getElementById('verifyBtn').onclick = () => verifyCode(digits, emailVal);
+
+    setTimeout(() => { btn.disabled = false; }, 30000);
+  };
+}
+
+/* ══════════════════════════════════════
+   CODE VERIFICATION
+══════════════════════════════════════ */
+function verifyCode(digits, emailVal) {
+  const entered = digits.map(d => d.value).join('');
+  if (entered.length < 6) {
+    showToast(vcToast, 'Please enter all 6 digits.', 'error');
+    return;
+  }
+
+  const users = getUsers();
+  const user  = users.find(u => u.email.toLowerCase() === emailVal.toLowerCase());
+
+  if (!user || user.verifyCode !== entered) {
+    showToast(vcToast, 'Incorrect code. Please try again.', 'error');
+    digits.forEach(d => { d.style.borderColor = 'var(--cp-pink)'; d.style.boxShadow = 'var(--cp-glow-p)'; });
+    setTimeout(() => digits.forEach(d => { d.style.borderColor = ''; d.style.boxShadow = ''; }), 1400);
+    return;
+  }
+
+  /* Mark as verified */
+  user.verified    = true;
+  delete user.verifyCode;
+  saveUsers(users);
+
+  /* Success UI */
+  document.getElementById('verifyBtn').disabled = true;
+  digits.forEach(d => { d.disabled = true; d.style.borderColor = 'var(--cp-green)'; d.style.boxShadow = 'var(--cp-glow-g)'; });
+  showToast(vcToast, '✓ Account activated! Redirecting to login…', 'success');
+
+  setTimeout(() => { window.location.href = 'index.html?registered=1'; }, 1600);
+}
+</script>
+</body>
+</html>

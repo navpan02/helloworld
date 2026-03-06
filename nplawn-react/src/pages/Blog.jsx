@@ -2,6 +2,27 @@ import { Link } from 'react-router-dom';
 
 export const BLOG_POSTS = [
   {
+    slug: 'winter-prep-guide',
+    tag: 'Seasonal Care',
+    title: 'How to Prep Your Lawn for Winter: A Chicagoland Checklist',
+    excerpt: 'Fall is the most important maintenance window of the year. This checklist covers fertilization timing, aeration windows, leaf removal, and everything your lawn needs before the ground freezes.',
+    date: 'March 6, 2026',
+    readTime: '7 min read',
+    icon: <>
+      <path d="M2 12h20M12 2v20"/>
+      <path d="M4.93 4.93l14.14 14.14M19.07 4.93L4.93 19.07"/>
+    </>,
+  },
+  {
+    slug: 'best-grass-types',
+    tag: 'Lawn Education',
+    title: 'Best Grass Types for Naperville and Chicagoland Lawns',
+    excerpt: 'Kentucky Bluegrass, Tall Fescue, Fine Fescue, Perennial Ryegrass — which one belongs in your yard? A practical guide to cool-season grasses for the Midwest, including how to identify what you already have.',
+    date: 'March 6, 2026',
+    readTime: '8 min read',
+    icon: <path d="M12 22V12M12 12C12 7 7 3 2 4c0 5 4 9 10 8zM12 12c0-5 5-9 10-8-1 5-5 9-10 8z"/>,
+  },
+  {
     slug: 'aerate-guide',
     tag: 'Aeration & Seeding',
     title: 'When to Aerate Your Lawn: A Seasonal Guide',

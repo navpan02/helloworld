@@ -11,6 +11,10 @@ import Blog             from './pages/Blog';
 import Login            from './pages/Login';
 import Signup           from './pages/Signup';
 import Order            from './pages/Order';
+import Account          from './pages/Account';
+import FAQ              from './pages/FAQ';
+import QuoteEstimator   from './pages/QuoteEstimator';
+import GrassGuide       from './pages/GrassGuide';
 
 // Service pages
 import Mowing           from './pages/services/Mowing';
@@ -27,6 +31,8 @@ import TreeTrimmingSigns        from './pages/blog/TreeTrimmingSigns';
 import LowMaintenanceLandscape  from './pages/blog/LowMaintenanceLandscape';
 import OneThirdRule             from './pages/blog/OneThirdRule';
 import MidwestShrubs            from './pages/blog/MidwestShrubs';
+import WinterPrepGuide          from './pages/blog/WinterPrepGuide';
+import BestGrassTypes           from './pages/blog/BestGrassTypes';
 
 function AppRoutes() {
   return (
@@ -36,6 +42,10 @@ function AppRoutes() {
       <Route path="/about"              element={<Layout><About/></Layout>} />
       <Route path="/contact"            element={<Layout><Contact/></Layout>} />
       <Route path="/blog"               element={<Layout><Blog/></Layout>} />
+      <Route path="/faq"                element={<Layout><FAQ/></Layout>} />
+      <Route path="/grass-guide"        element={<Layout><GrassGuide/></Layout>} />
+      <Route path="/quote-estimator"    element={<Layout><QuoteEstimator/></Layout>} />
+      <Route path="/account"            element={<Layout><Account/></Layout>} />
       <Route path="/mowing"             element={<Layout><Mowing/></Layout>} />
       <Route path="/tree-trimming"      element={<Layout><TreeTrimming/></Layout>} />
       <Route path="/tree-shrubs"        element={<Layout><TreeShrubs/></Layout>} />
@@ -50,6 +60,8 @@ function AppRoutes() {
       <Route path="/blog/low-maintenance-landscape" element={<Layout><LowMaintenanceLandscape/></Layout>} />
       <Route path="/blog/one-third-rule"            element={<Layout><OneThirdRule/></Layout>} />
       <Route path="/blog/midwest-shrubs"            element={<Layout><MidwestShrubs/></Layout>} />
+      <Route path="/blog/winter-prep-guide"         element={<Layout><WinterPrepGuide/></Layout>} />
+      <Route path="/blog/best-grass-types"          element={<Layout><BestGrassTypes/></Layout>} />
 
       {/* Order — accessible without login, uses user info if available */}
       <Route path="/order"  element={<Layout noFooter><Order/></Layout>} />

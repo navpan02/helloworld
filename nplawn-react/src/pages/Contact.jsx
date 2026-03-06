@@ -9,11 +9,19 @@ const SERVICES_LIST = [
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', service: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
+  const [contactError, setContactError] = useState('');
 
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const set = (k, v) => {
+    setContactError('');
+    setForm(f => ({ ...f, [k]: v }));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!form.email.trim() && !form.phone.trim()) {
+      setContactError('Please provide at least an email address or a phone number.');
+      return;
+    }
     const leads = JSON.parse(localStorage.getItem('nplawn_leads') || '[]');
     leads.push({ ...form, submittedAt: Date.now() });
     localStorage.setItem('nplawn_leads', JSON.stringify(leads));
@@ -87,8 +95,8 @@ export default function Contact() {
                       onChange={e => set('name', e.target.value)} placeholder="Jane Smith" />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Email *</label>
-                    <input className="form-input" type="email" required value={form.email}
+                    <label className="form-label">Email</label>
+                    <input className="form-input" type="email" value={form.email}
                       onChange={e => set('email', e.target.value)} placeholder="jane@example.com" />
                   </div>
                 </div>
@@ -112,6 +120,11 @@ export default function Contact() {
                     onChange={e => set('message', e.target.value)}
                     placeholder="Tell us about your lawn — size, current issues, or what you're looking to achieve." />
                 </div>
+                {contactError && (
+                  <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2">
+                    {contactError}
+                  </p>
+                )}
                 <button type="submit" className="btn-primary w-full text-center py-3 text-base">
                   Send Message
                 </button>

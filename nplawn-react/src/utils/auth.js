@@ -7,7 +7,7 @@ export async function sha256(str) {
 // Hardcoded accounts (password hashes, no plaintext)
 const SEED_USERS = [
   { email: 'navpan@gmail.com', hash: 'ac3dcbcd3e71bbb60120cd8ad9a72d296b1b1286588d6a99f80c62e6cd7904f3', role: 'user',  verified: true },
-  { email: 'admin@admin.com',  hash: 'e3e31c95446c914fe21f4d653ccfdd47a0da5d466075869ac48555ded43e59a8', role: 'admin', verified: true },
+  { email: 'admin@admin.com',  hash: 'd3daae485d1d3f013cff263e6344b4b1f3a1e6ffb105e593f6615776a8aca121', role: 'admin', verified: true },
 ];
 
 // Reserved emails (can't be re-registered)

@@ -11,6 +11,7 @@ import Blog             from './pages/Blog';
 import Login            from './pages/Login';
 import Signup           from './pages/Signup';
 import Order            from './pages/Order';
+import BuyNow           from './pages/BuyNow';
 import Account          from './pages/Account';
 import FAQ              from './pages/FAQ';
 import QuoteEstimator   from './pages/QuoteEstimator';
@@ -64,7 +65,8 @@ function AppRoutes() {
       <Route path="/blog/best-grass-types"          element={<Layout><BestGrassTypes/></Layout>} />
 
       {/* Order — accessible without login, uses user info if available */}
-      <Route path="/order"  element={<Layout noFooter><Order/></Layout>} />
+      <Route path="/order"    element={<Layout noFooter><Order/></Layout>} />
+      <Route path="/buy-now"  element={<Layout noFooter><BuyNow/></Layout>} />
 
       {/* Auth — full screen, no shared layout */}
       <Route path="/login"  element={<Login/>} />

@@ -73,6 +73,10 @@ export default function Landing() {
           Professional lawn care, tree trimming, and landscape design — serving Naperville and surrounding Chicagoland communities.
         </p>
         <div className="flex gap-3.5 flex-wrap mt-9">
+          <Link to="/buy-now"
+            className="bg-white text-np-dark font-extrabold text-base px-8 py-3.5 rounded-full no-underline shadow-[0_6px_20px_rgba(255,255,255,0.25)] hover:bg-np-lite hover:-translate-y-0.5 transition-all">
+            Buy Now
+          </Link>
           <Link to="/order"
             className="bg-np-accent text-np-dark font-extrabold text-base px-8 py-3.5 rounded-full no-underline shadow-[0_6px_20px_rgba(82,183,136,0.45)] hover:bg-np-lite hover:-translate-y-0.5 transition-all">
             Get a Free Quote
@@ -156,8 +160,11 @@ export default function Landing() {
       {/* CTA */}
       <section className="cta-section">
         <h2>Ready for a Lawn You're Proud Of?</h2>
-        <p>Get your free custom quote today. Our team will assess your property and recommend the right service for your needs and budget.</p>
-        <Link to="/order" className="btn-primary text-base px-8 py-4">Get a Free Quote</Link>
+        <p>Get started in minutes. Enter your address and we'll calculate your lawn size and pricing instantly.</p>
+        <div className="flex gap-3 justify-center flex-wrap">
+          <Link to="/buy-now" className="btn-primary text-base px-8 py-4">Buy Now</Link>
+          <Link to="/order" className="btn-outline text-base px-8 py-4">Get a Free Quote</Link>
+        </div>
       </section>
     </>
   );

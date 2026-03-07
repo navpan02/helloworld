@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 
 const PLANS = {
   Basic: {
@@ -80,14 +81,33 @@ export default function Order() {
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  const submitOrder = () => {
+  const submitOrder = async () => {
     const id = 'NPL-' + Date.now().toString().slice(-6);
     setOrderId(id);
+    const orderData = {
+      id,
+      plan: planObj.label,
+      sqft: Number(sqft),
+      total,
+      avg_per_app: avgPerApp,
+      rounds: planObj.rounds,
+      customer_name: form.name,
+      customer_email: form.email || null,
+      customer_phone: form.phone || null,
+      customer_address: form.address,
+      customer_city: form.city,
+      customer_zip: form.zip,
+      customer_notes: form.notes || null,
+      submitted_at: new Date().toISOString(),
+    };
+
+    if (supabase) {
+      const { error } = await supabase.from('orders').insert(orderData);
+      if (error) console.error('Supabase insert error:', error.message);
+    }
+
     const orders = JSON.parse(localStorage.getItem('nplawn_orders') || '[]');
-    orders.push({
-      id, plan: planObj.label, sqft: Number(sqft), total, avgPerApp,
-      rounds: planObj.rounds, customer: form, submittedAt: Date.now(),
-    });
+    orders.push(orderData);
     localStorage.setItem('nplawn_orders', JSON.stringify(orders));
     setStep(3);
   };

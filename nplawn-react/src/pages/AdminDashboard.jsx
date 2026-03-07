@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { getRegisteredUsers } from '../utils/auth';
+import { supabase } from '../lib/supabase';
 
 function getLeads() {
   try { return JSON.parse(localStorage.getItem('nplawn_leads') || '[]'); } catch { return []; }
@@ -20,9 +21,24 @@ export default function AdminDashboard() {
   const navigate              = useNavigate();
 
   useEffect(() => {
-    setOrders(getOrders());
-    setLeads(getLeads());
-    setUsers(getRegisteredUsers());
+    async function loadData() {
+      let remoteOrders = [];
+      if (supabase) {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*')
+          .order('submitted_at', { ascending: false });
+        if (!error && data) remoteOrders = data;
+      }
+      // Merge with localStorage, deduplicating by id
+      const localOrders = getOrders();
+      const remoteIds = new Set(remoteOrders.map(o => o.id));
+      const localOnly = localOrders.filter(o => !remoteIds.has(o.id));
+      setOrders([...remoteOrders, ...localOnly]);
+      setLeads(getLeads());
+      setUsers(getRegisteredUsers());
+    }
+    loadData();
   }, []);
 
   const totalRevenue = orders.reduce((s, o) => s + (o.total || 0), 0);
@@ -33,9 +49,13 @@ export default function AdminDashboard() {
     const headers = ['Order ID', 'Plan', 'Sqft', 'Annual Total', 'Customer', 'Email', 'Phone', 'Address', 'Date'];
     const rows = orders.map(o => [
       o.id, o.plan, o.sqft, o.total,
-      o.customer?.name, o.customer?.email, o.customer?.phone,
-      `${o.customer?.address} ${o.customer?.city} ${o.customer?.zip}`,
-      new Date(o.submittedAt).toLocaleDateString(),
+      o.customer_name || o.customer?.name,
+      o.customer_email || o.customer?.email,
+      o.customer_phone || o.customer?.phone,
+      o.customer_address
+        ? `${o.customer_address} ${o.customer_city || ''} ${o.customer_zip || ''}`.trim()
+        : `${o.customer?.address || ''} ${o.customer?.city || ''} ${o.customer?.zip || ''}`.trim(),
+      new Date(o.submitted_at || o.submittedAt).toLocaleDateString(),
     ]);
     const csv = [headers, ...rows].map(r => r.map(c => `"${c || ''}"`).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -133,12 +153,12 @@ export default function AdminDashboard() {
                         <td className="px-4 py-3 font-semibold text-np-dark">{o.plan}</td>
                         <td className="px-4 py-3">{o.sqft?.toLocaleString()}</td>
                         <td className="px-4 py-3 font-bold text-np-dark">${o.total?.toLocaleString()}</td>
-                        <td className="px-4 py-3 text-np-accent">${o.avgPerApp}</td>
+                        <td className="px-4 py-3 text-np-accent">${o.avg_per_app ?? o.avgPerApp}</td>
                         <td className="px-4 py-3">
-                          <div className="font-medium text-np-dark">{o.customer?.name}</div>
-                          <div className="text-np-muted text-xs">{o.customer?.email}</div>
+                          <div className="font-medium text-np-dark">{o.customer_name || o.customer?.name}</div>
+                          <div className="text-np-muted text-xs">{o.customer_email || o.customer?.email}</div>
                         </td>
-                        <td className="px-4 py-3 text-np-muted">{new Date(o.submittedAt).toLocaleDateString()}</td>
+                        <td className="px-4 py-3 text-np-muted">{new Date(o.submitted_at || o.submittedAt).toLocaleDateString()}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -192,7 +212,7 @@ export default function AdminDashboard() {
                   </thead>
                   <tbody>
                     {users.map((u, i) => {
-                      const userOrders = orders.filter(o => o.customer?.email === u.email);
+                      const userOrders = orders.filter(o => (o.customer_email || o.customer?.email) === u.email);
                       return (
                         <tr key={i} className="border-b border-np-border/50 hover:bg-np-surface/50">
                           <td className="px-4 py-3 font-medium text-np-dark">{u.email}</td>
@@ -205,7 +225,7 @@ export default function AdminDashboard() {
                           <td className="px-4 py-3 text-np-muted">{u.registeredAt ? new Date(u.registeredAt).toLocaleDateString() : '—'}</td>
                           <td className="px-4 py-3">
                             {userOrders.length > 0
-                              ? <span className="font-semibold text-np-dark">{userOrders.length} · {userOrders[userOrders.length - 1]?.plan}</span>
+                              ? <span className="font-semibold text-np-dark">{userOrders.length} · {userOrders[0]?.plan}</span>
                               : <span className="text-np-muted">0</span>}
                           </td>
                         </tr>

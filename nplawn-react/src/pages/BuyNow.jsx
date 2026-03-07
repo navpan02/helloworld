@@ -279,6 +279,7 @@ export default function BuyNow() {
       customer_email: email || null,
       customer_phone: phone || null,
       customer_address: addressInput,
+      submitted_at: new Date().toISOString(),
     };
 
     // Save to Supabase if configured
@@ -289,7 +290,7 @@ export default function BuyNow() {
 
     // Always keep a local copy as fallback
     const orders = JSON.parse(localStorage.getItem('nplawn_orders') || '[]');
-    orders.push({ ...orderData, submittedAt: Date.now() });
+    orders.push(orderData);
     localStorage.setItem('nplawn_orders', JSON.stringify(orders));
 
     setOrderId(id);

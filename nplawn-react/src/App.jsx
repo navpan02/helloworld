@@ -17,6 +17,7 @@ import AdminDashboard   from './pages/AdminDashboard';
 import FAQ              from './pages/FAQ';
 import QuoteEstimator   from './pages/QuoteEstimator';
 import GetQuote         from './pages/GetQuote';
+import QuoteThanks      from './pages/QuoteThanks';
 import GrassGuide       from './pages/GrassGuide';
 
 // Service pages
@@ -67,7 +68,8 @@ function AppRoutes() {
       <Route path="/blog/best-grass-types"          element={<Layout><BestGrassTypes/></Layout>} />
 
       {/* Quote lead form */}
-      <Route path="/quote"    element={<Layout><GetQuote/></Layout>} />
+      <Route path="/quote"       element={<Layout><GetQuote/></Layout>} />
+      <Route path="/quote/thanks" element={<Layout><QuoteThanks/></Layout>} />
 
       {/* Order — accessible without login, uses user info if available */}
       <Route path="/order"    element={<Layout noFooter><Order/></Layout>} />

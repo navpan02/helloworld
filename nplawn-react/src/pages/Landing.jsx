@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import heroImg from '../assets/mylawn.jpeg';
 
 const SERVICES = [
   {
@@ -58,7 +59,7 @@ export default function Landing() {
       {/* HERO */}
       <section className="min-h-[88vh] flex flex-col items-start justify-center px-[8%] py-20"
         style={{
-          background: 'linear-gradient(160deg, rgba(27,46,36,0.82) 0%, rgba(45,106,79,0.65) 60%, transparent 100%), url("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&q=80") center/cover no-repeat',
+          background: `linear-gradient(160deg, rgba(27,46,36,0.82) 0%, rgba(45,106,79,0.65) 60%, transparent 100%), url("${heroImg}") center/cover no-repeat`,
         }}>
         <div className="inline-block bg-np-accent/20 border border-np-accent/50 text-np-lite text-xs font-bold tracking-[1.5px] uppercase px-4 py-1.5 rounded-full mb-5">
           Locally Owned Since 2017

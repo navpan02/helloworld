@@ -69,7 +69,7 @@ export default function Landing() {
           Your Lawn, <span className="text-np-lite">Our Expertise</span>.<br/>
           Every Single Cut.
         </h1>
-        <p className="text-white/72 text-lg max-w-[520px] mt-4">
+        <p className="text-white/90 text-lg max-w-[520px] mt-4">
           Professional lawn care, tree trimming, and landscape design — serving Naperville and surrounding Chicagoland communities.
         </p>
         <div className="flex gap-3.5 flex-wrap mt-9">

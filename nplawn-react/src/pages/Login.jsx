@@ -100,6 +100,12 @@ export default function LoginPage() {
               Create one
             </Link>
           </p>
+
+          <p className="text-center text-sm text-gray-500 mt-2">
+            <Link to="/" className="text-green-600 hover:text-green-700 font-medium">
+              ← Back to Home
+            </Link>
+          </p>
         </div>
 
         <div className="text-center text-xs text-gray-300 pb-4">© 2026 NPLawn LLC</div>

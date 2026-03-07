@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { getRegisteredUsers } from '../utils/auth';
 
 function getLeads() {
@@ -61,6 +61,10 @@ export default function AdminDashboard() {
         </div>
         <div className="flex items-center gap-4">
           <span className="text-white/60 text-sm hidden md:block">{user?.email}</span>
+          <Link to="/"
+            className="text-np-lite text-sm font-semibold hover:text-white transition-colors border border-np-lite/30 px-3 py-1.5 rounded-lg">
+            Home
+          </Link>
           <button onClick={handleLogout}
             className="text-np-lite text-sm font-semibold hover:text-white transition-colors border border-np-lite/30 px-3 py-1.5 rounded-lg">
             Logout

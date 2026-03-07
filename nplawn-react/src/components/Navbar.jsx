@@ -10,7 +10,9 @@ const NAV_LINKS = [
   { to: '/tree-shrubs',     label: 'Tree & Shrubs' },
   { to: '/aeration-seeding',label: 'Aeration' },
   { to: '/landscape-design',label: 'Design' },
+  { to: '/grass-guide',     label: 'Grass Guide' },
   { to: '/blog',            label: 'Blog' },
+  { to: '/faq',             label: 'FAQ' },
   { to: '/about',           label: 'About' },
 ];
 
@@ -57,9 +59,10 @@ export default function Navbar() {
       <div className="flex items-center gap-3">
         {user ? (
           <>
-            <span className="hidden md:block text-white/60 text-sm">{user.email}</span>
+            <Link to="/account" className="hidden md:block text-white/60 text-sm hover:text-np-lite transition-colors">{user.email}</Link>
+            <Link to="/account" className="hidden md:inline text-np-lite text-sm font-semibold hover:text-white transition-colors">My Orders</Link>
             <button onClick={handleLogout}
-              className="text-np-lite text-sm font-semibold hover:text-white transition-colors">
+              className="text-white/50 text-sm font-semibold hover:text-white transition-colors">
               Logout
             </button>
           </>
@@ -96,6 +99,11 @@ export default function Navbar() {
               {l.label}
             </NavLink>
           ))}
+          {user && (
+            <Link to="/account" onClick={() => setOpen(false)} className="text-sm font-medium py-1 text-np-lite hover:text-white transition-colors">
+              My Orders
+            </Link>
+          )}
           <Link to="/order" onClick={() => setOpen(false)} className="btn-primary text-center mt-2">
             Get a Quote
           </Link>

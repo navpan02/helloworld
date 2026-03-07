@@ -147,6 +147,7 @@ export default function BuyNow() {
   const [name, setName] = useState('');
   const [ordered, setOrdered] = useState(false);
   const [orderId, setOrderId] = useState('');
+  const [dbError, setDbError] = useState('');
 
   // Debounced Nominatim autocomplete
   useEffect(() => {
@@ -285,7 +286,10 @@ export default function BuyNow() {
     // Save to Supabase if configured
     if (supabase) {
       const { error } = await supabase.from('orders').insert(orderData);
-      if (error) console.error('Supabase insert error:', error.message);
+      if (error) {
+        console.error('Supabase insert error:', error);
+        setDbError(`DB error: ${error.message} (code: ${error.code})`);
+      }
     }
 
     // Always keep a local copy as fallback
@@ -681,6 +685,11 @@ export default function BuyNow() {
               </p>
             </div>
 
+            {dbError && (
+              <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm mb-4 font-mono">
+                {dbError}
+              </div>
+            )}
             <div className="flex justify-between">
               <button onClick={() => setStep(2)} className="btn-outline px-6 py-2.5">← Back</button>
               <button

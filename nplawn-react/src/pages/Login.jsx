@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { findUser } from '../utils/auth';
 import { useAuth } from '../context/AuthContext';
-import AdminDashboard from './AdminDashboard';
 
 export default function LoginPage() {
   const [email, setEmail]       = useState('');
@@ -21,8 +20,8 @@ export default function LoginPage() {
     }
   }, [params]);
 
-  // If already logged in as admin, show dashboard
-  if (user?.role === 'admin') return <AdminDashboard />;
+  // If already logged in as admin, redirect to admin page
+  if (user?.role === 'admin') { navigate('/admin'); return null; }
 
   // If logged in as regular user, redirect
   if (user) { navigate('/'); return null; }
@@ -39,7 +38,7 @@ export default function LoginPage() {
         setError('Please verify your email before logging in.');
       } else {
         login(found);
-        navigate(found.role === 'admin' ? '/login' : '/');
+        navigate(found.role === 'admin' ? '/admin' : '/');
       }
     } catch {
       setError('Something went wrong. Please try again.');

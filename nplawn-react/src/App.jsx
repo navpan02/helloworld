@@ -13,6 +13,7 @@ import Signup           from './pages/Signup';
 import Order            from './pages/Order';
 import BuyNow           from './pages/BuyNow';
 import Account          from './pages/Account';
+import AdminDashboard   from './pages/AdminDashboard';
 import FAQ              from './pages/FAQ';
 import QuoteEstimator   from './pages/QuoteEstimator';
 import GrassGuide       from './pages/GrassGuide';
@@ -71,6 +72,7 @@ function AppRoutes() {
       {/* Auth — full screen, no shared layout */}
       <Route path="/login"  element={<Login/>} />
       <Route path="/signup" element={<Signup/>} />
+      <Route path="/admin"  element={<AdminDashboard/>} />
 
       {/* Catch-all */}
       <Route path="*" element={<Navigate to="/" replace />} />

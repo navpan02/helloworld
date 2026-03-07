@@ -17,6 +17,7 @@ export default function AdminDashboard() {
   const [orders, setOrders]   = useState([]);
   const [leads, setLeads]     = useState([]);
   const [users, setUsers]     = useState([]);
+  const [dbStatus, setDbStatus] = useState(null); // null | 'ok' | string (error)
   const { user, logout }      = useAuth();
   const navigate              = useNavigate();
 
@@ -28,7 +29,14 @@ export default function AdminDashboard() {
           .from('orders')
           .select('*')
           .order('submitted_at', { ascending: false });
-        if (!error && data) remoteOrders = data;
+        if (error) {
+          setDbStatus(`${error.message} (code: ${error.code})`);
+        } else {
+          setDbStatus('ok');
+          remoteOrders = data;
+        }
+      } else {
+        setDbStatus('Supabase not configured — check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY');
       }
       // Merge with localStorage, deduplicating by id
       const localOrders = getOrders();
@@ -91,6 +99,18 @@ export default function AdminDashboard() {
           </button>
         </div>
       </div>
+
+      {/* DB Status Banner */}
+      {dbStatus && dbStatus !== 'ok' && (
+        <div className="bg-red-50 border-b border-red-200 px-[5%] py-3 text-red-700 text-sm font-mono">
+          <strong>Supabase error:</strong> {dbStatus}
+        </div>
+      )}
+      {dbStatus === 'ok' && (
+        <div className="bg-green-50 border-b border-green-200 px-[5%] py-2 text-green-700 text-xs">
+          Supabase connected
+        </div>
+      )}
 
       {/* Stats */}
       <div className="px-[5%] py-6 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-6xl mx-auto">

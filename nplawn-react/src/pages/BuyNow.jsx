@@ -350,6 +350,12 @@ export default function BuyNow() {
             No payment is needed today — you'll receive an invoice after each service visit.
           </div>
 
+          {dbError && (
+            <div className="bg-red-50 border border-red-300 text-red-700 rounded-xl px-4 py-3 text-xs font-mono mb-6 break-all">
+              <strong className="block mb-1">Supabase error (order saved locally only):</strong>
+              {dbError}
+            </div>
+          )}
           <div className="flex gap-3 justify-center flex-wrap">
             <Link to="/" className="btn-primary px-6 py-3">Back to Home</Link>
             <Link to="/contact" className="btn-outline px-6 py-3">Contact Us</Link>

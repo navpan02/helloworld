@@ -95,8 +95,12 @@ export default function Navbar() {
       {/* Brand */}
       <Link to="/" className="flex items-center gap-2.5 no-underline">
         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-np-lite to-np-accent flex items-center justify-center">
-          <svg className="w-5 h-5 fill-np-dark" viewBox="0 0 24 24">
-            <path d="M12 22V12M12 12C12 7 7 3 2 4c0 5 4 9 10 8zM12 12c0-5 5-9 10-8-1 5-5 9-10 8z"/>
+          {/* Grass blades icon */}
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+            <path d="M12 20V10C12 6 9 3 5 4c1 4 4 7 7 7" stroke="#1a2e1a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M12 20V12C12 8 15 5 19 6c-1 4-4 7-7 7" stroke="#1a2e1a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M9 20V14C9 11 7 9 4 9.5c.5 3 2.5 5.5 5 5.5" stroke="#1a2e1a" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+            <line x1="4" y1="20" x2="20" y2="20" stroke="#1a2e1a" strokeWidth="1.8" strokeLinecap="round"/>
           </svg>
         </div>
         <span className="text-white font-extrabold text-lg tracking-tight">

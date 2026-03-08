@@ -1,7 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
-import Layout from './components/Layout';
+import Layout      from './components/Layout';
+import AdminRoute  from './components/AdminRoute';
 
 // Pages
 import Landing          from './pages/Landing';
@@ -128,7 +129,7 @@ function AppRoutes() {
       {/* Auth — full screen, no shared layout */}
       <Route path="/login"            element={<Login/>} />
       <Route path="/signup"           element={<Signup/>} />
-      <Route path="/admin"            element={<AdminDashboard/>} />
+      <Route path="/admin"            element={<AdminRoute><AdminDashboard/></AdminRoute>} />
 
       {/* Homeowner portal — under /CleanLawn/homeowner */}
       <Route path="/CleanLawn/homeowner"                  element={<Layout><HomeownerDashboard/></Layout>} />

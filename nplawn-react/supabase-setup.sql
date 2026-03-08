@@ -54,7 +54,46 @@ create trigger on_auth_user_created
 
 
 -- ============================================================
--- 4. Seed admin & provider accounts
+-- 4. Leads table (Get a Quote form submissions)
+-- ============================================================
+create table if not exists public.leads (
+  id            bigint        generated always as identity primary key,
+  name          text          not null,
+  email         text,
+  phone         text,
+  address       text,
+  city          text,
+  state         text,
+  zip           text,
+  sqft          text,
+  services      text[],
+  frequency     text,
+  message       text,
+  source        text          default 'get_quote',
+  submitted_at  timestamptz   default now()
+);
+
+-- Only admins/service roles can read leads (no public access)
+alter table public.leads enable row level security;
+
+-- Allow anonymous inserts (form submissions don't require login)
+create policy "Anyone can submit a lead"
+  on public.leads for insert
+  with check (true);
+
+-- Only authenticated admin-role users can read leads
+create policy "Admins can read leads"
+  on public.leads for select
+  using (
+    exists (
+      select 1 from public.profiles
+      where id = auth.uid() and role = 'admin'
+    )
+  );
+
+
+-- ============================================================
+-- 5. Seed admin & provider accounts
 --    Replace the placeholder UUIDs + emails after running the
 --    actual Supabase signUp for each seed account.
 --    Easiest: create the accounts via the Supabase dashboard

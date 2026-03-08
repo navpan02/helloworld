@@ -92,7 +92,7 @@ export default function BestGrassTypes() {
       <section className="cta-section">
         <h2>Get a Lawn Plan Built for Your Grass Type</h2>
         <p>Generic lawn care doesn't work. We build plans around what's actually growing in your yard.</p>
-        <Link to="/order" className="btn-primary text-base px-8 py-4">Get a Custom Quote</Link>
+        <Link to="/quote" className="btn-primary text-base px-8 py-4">Get a Custom Quote</Link>
       </section>
     </>
   );

@@ -389,7 +389,7 @@ export default function GrassGuide() {
         <h2>Know Your Grass. Grow It Better.</h2>
         <p>Our lawn care plans are tailored to the cool-season grasses of Chicagoland — the right timing, the right inputs, every visit.</p>
         <div className="flex gap-3 justify-center flex-wrap">
-          <Link to="/order" className="btn-primary text-base px-8 py-4">Get a Quote</Link>
+          <Link to="/quote" className="btn-primary text-base px-8 py-4">Get a Quote</Link>
           <Link to="/blog" className="btn-outline text-base px-8 py-4 border-white/30 text-white hover:bg-white/10">Read the Blog</Link>
         </div>
       </section>

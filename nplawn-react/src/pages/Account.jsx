@@ -45,7 +45,7 @@ export default function Account() {
             </div>
             <h2 className="text-np-dark text-2xl font-bold mb-3">No orders yet</h2>
             <p className="text-np-muted mb-8">You haven't placed any orders with this account. Get started with a free quote.</p>
-            <Link to="/order" className="btn-primary px-8 py-3 text-base">Get a Quote</Link>
+            <Link to="/quote" className="btn-primary px-8 py-3 text-base">Get a Quote</Link>
           </div>
         ) : (
           <>

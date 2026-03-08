@@ -44,7 +44,7 @@ export default function Mowing() {
               <div className="text-np-accent font-bold text-2xl mb-1">{p.price}</div>
               <div className="font-bold text-np-dark text-lg mb-2">{p.name}</div>
               <p className="text-np-muted text-sm leading-relaxed mb-5">{p.desc}</p>
-              <Link to="/order" className="btn-primary text-sm">Get a Quote</Link>
+              <Link to="/quote" className="btn-primary text-sm">Get a Quote</Link>
             </div>
           ))}
         </div>
@@ -53,7 +53,7 @@ export default function Mowing() {
       <section className="cta-section">
         <h2>Ready for a Perfectly Manicured Lawn?</h2>
         <p>Get a custom quote based on your property size and frequency preference.</p>
-        <Link to="/order" className="btn-primary text-base px-8 py-4">Get a Free Quote</Link>
+        <Link to="/quote" className="btn-primary text-base px-8 py-4">Get a Free Quote</Link>
       </section>
     </>
   );

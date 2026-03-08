@@ -48,7 +48,7 @@ export default function Footer() {
             Professional lawn care and landscaping — trusted by hundreds of homeowners.
             Locally owned and operated since 2017.
           </p>
-          <Link to="/contact" className="footer-cta-link">Get a Free Quote &rarr;</Link>
+          <Link to="/quote" className="footer-cta-link">Get a Free Quote &rarr;</Link>
         </div>
 
         {/* Services */}

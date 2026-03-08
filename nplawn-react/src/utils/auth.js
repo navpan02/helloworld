@@ -38,7 +38,7 @@ export async function findUser(email, password) {
   const found = registered.find(u => u.email === lc && u.hash === inputHash);
   if (found) {
     if (!found.verified) return { error: 'unverified' };
-    return { ...found, role: 'user' };
+    return { ...found, role: found.role || 'user' };
   }
   return null;
 }

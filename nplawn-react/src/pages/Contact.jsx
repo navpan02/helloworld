@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { supabase } from '../lib/supabase';
 
 const SERVICES_LIST = [
   'Lawn Mowing', 'Tree Trimming', 'Lawn Care Plan (GrassBasic)',
@@ -16,15 +17,31 @@ export default function Contact() {
     setForm(f => ({ ...f, [k]: v }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.email.trim() && !form.phone.trim()) {
       setContactError('Please provide at least an email address or a phone number.');
       return;
     }
+    const lead = { ...form, submitted_at: new Date().toISOString() };
+
+    // Save to Supabase
+    const { error } = await supabase.from('leads').insert([{
+      name:         lead.name,
+      email:        lead.email,
+      phone:        lead.phone,
+      service:      lead.service,
+      message:      lead.message,
+      source:       'contact_form',
+      submitted_at: lead.submitted_at,
+    }]);
+    if (error) console.error('Supabase lead insert error:', error.message);
+
+    // Always keep localStorage copy as fallback
     const leads = JSON.parse(localStorage.getItem('nplawn_leads') || '[]');
     leads.push({ ...form, submittedAt: Date.now() });
     localStorage.setItem('nplawn_leads', JSON.stringify(leads));
+
     setSubmitted(true);
   };
 

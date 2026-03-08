@@ -23,27 +23,34 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     async function loadData() {
+      // Fetch orders
       let remoteOrders = [];
-      if (supabase) {
-        const { data, error } = await supabase
-          .from('orders')
-          .select('*')
-          .order('submitted_at', { ascending: false });
-        if (error) {
-          setDbStatus(`${error.message} (code: ${error.code})`);
-        } else {
-          setDbStatus('ok');
-          remoteOrders = data;
-        }
+      const { data: ordersData, error: ordersError } = await supabase
+        .from('orders')
+        .select('*')
+        .order('submitted_at', { ascending: false });
+      if (ordersError) {
+        setDbStatus(`${ordersError.message} (code: ${ordersError.code})`);
       } else {
-        setDbStatus('Supabase not configured — check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY');
+        setDbStatus('ok');
+        remoteOrders = ordersData;
       }
-      // Merge with localStorage, deduplicating by id
       const localOrders = getOrders();
-      const remoteIds = new Set(remoteOrders.map(o => o.id));
-      const localOnly = localOrders.filter(o => !remoteIds.has(o.id));
-      setOrders([...remoteOrders, ...localOnly]);
-      setLeads(getLeads());
+      const remoteOrderIds = new Set(remoteOrders.map(o => o.id));
+      setOrders([...remoteOrders, ...localOrders.filter(o => !remoteOrderIds.has(o.id))]);
+
+      // Fetch leads
+      let remoteLeads = [];
+      const { data: leadsData, error: leadsError } = await supabase
+        .from('leads')
+        .select('*')
+        .order('submitted_at', { ascending: false });
+      if (!leadsError) remoteLeads = leadsData;
+      const localLeads = getLeads();
+      const remoteLeadEmails = new Set(remoteLeads.map(l => l.email + l.submitted_at));
+      const localOnlyLeads = localLeads.filter(l => !remoteLeadEmails.has(l.email + new Date(l.submittedAt).toISOString()));
+      setLeads([...remoteLeads, ...localOnlyLeads]);
+
       setUsers(getRegisteredUsers());
     }
     loadData();
@@ -191,22 +198,30 @@ export default function AdminDashboard() {
         {/* LEADS TAB */}
         {tab === 'leads' && (
           <div>
-            <h2 className="text-np-dark font-bold text-xl mb-4">Contact Form Leads</h2>
+            <h2 className="text-np-dark font-bold text-xl mb-4">Leads</h2>
             {leads.length === 0 ? (
-              <EmptyState message="No leads yet. Contact form submissions will appear here." />
+              <EmptyState message="No leads yet. Quote requests and contact form submissions will appear here." />
             ) : (
               <div className="space-y-4">
                 {leads.map((l, i) => (
                   <div key={i} className="bg-white rounded-2xl border border-np-border p-5">
                     <div className="flex justify-between items-start mb-3">
                       <div>
-                        <div className="font-bold text-np-dark">{l.name}</div>
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="font-bold text-np-dark">{l.name}</span>
+                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                            l.source === 'get_quote'
+                              ? 'bg-np-accent/20 text-np-dark'
+                              : 'bg-np-surface text-np-muted border border-np-border'}`}>
+                            {l.source === 'get_quote' ? 'Quote Request' : 'Contact Form'}
+                          </span>
+                        </div>
                         <div className="text-np-muted text-sm">{l.email} · {l.phone}</div>
                       </div>
-                      <div className="text-np-muted text-xs">{new Date(l.submittedAt).toLocaleDateString()}</div>
+                      <div className="text-np-muted text-xs">{new Date(l.submitted_at || l.submittedAt).toLocaleDateString()}</div>
                     </div>
                     {l.service && <div className="text-xs font-semibold text-np-accent uppercase tracking-wide mb-2">{l.service}</div>}
-                    <p className="text-np-text text-sm leading-relaxed">{l.message}</p>
+                    <p className="text-np-text text-sm leading-relaxed whitespace-pre-line">{l.message}</p>
                   </div>
                 ))}
               </div>

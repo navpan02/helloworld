@@ -14,8 +14,12 @@ import Order            from './pages/Order';
 import BuyNow           from './pages/BuyNow';
 import Account          from './pages/Account';
 import AdminDashboard   from './pages/AdminDashboard';
+import ProviderDashboard from './pages/provider/ProviderDashboard';
+import ProviderSignup   from './pages/provider/ProviderSignup';
 import FAQ              from './pages/FAQ';
 import QuoteEstimator   from './pages/QuoteEstimator';
+import GetQuote         from './pages/GetQuote';
+import QuoteThanks      from './pages/QuoteThanks';
 import GrassGuide       from './pages/GrassGuide';
 
 // Service pages
@@ -65,14 +69,22 @@ function AppRoutes() {
       <Route path="/blog/winter-prep-guide"         element={<Layout><WinterPrepGuide/></Layout>} />
       <Route path="/blog/best-grass-types"          element={<Layout><BestGrassTypes/></Layout>} />
 
+      {/* Quote lead form */}
+      <Route path="/quote"       element={<Layout><GetQuote/></Layout>} />
+      <Route path="/quote/thanks" element={<Layout><QuoteThanks/></Layout>} />
+
       {/* Order — accessible without login, uses user info if available */}
       <Route path="/order"    element={<Layout noFooter><Order/></Layout>} />
       <Route path="/buy-now"  element={<Layout noFooter><BuyNow/></Layout>} />
 
       {/* Auth — full screen, no shared layout */}
-      <Route path="/login"  element={<Login/>} />
-      <Route path="/signup" element={<Signup/>} />
-      <Route path="/admin"  element={<AdminDashboard/>} />
+      <Route path="/login"            element={<Login/>} />
+      <Route path="/signup"           element={<Signup/>} />
+      <Route path="/admin"            element={<AdminDashboard/>} />
+
+      {/* Provider portal — full screen */}
+      <Route path="/provider"         element={<ProviderDashboard/>} />
+      <Route path="/provider/signup"  element={<ProviderSignup/>} />
 
       {/* Catch-all */}
       <Route path="*" element={<Navigate to="/" replace />} />

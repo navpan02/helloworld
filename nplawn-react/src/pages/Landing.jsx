@@ -77,10 +77,6 @@ export default function Landing() {
             className="bg-white text-np-dark font-extrabold text-base px-8 py-3.5 rounded-full no-underline shadow-[0_6px_20px_rgba(255,255,255,0.25)] hover:bg-np-lite hover:-translate-y-0.5 transition-all">
             Buy Now
           </Link>
-          <Link to="/order"
-            className="bg-np-accent text-np-dark font-extrabold text-base px-8 py-3.5 rounded-full no-underline shadow-[0_6px_20px_rgba(82,183,136,0.45)] hover:bg-np-lite hover:-translate-y-0.5 transition-all">
-            Get a Free Quote
-          </Link>
           <Link to="/lawn-care"
             className="border-2 border-white/50 text-white font-bold text-base px-7 py-3.5 rounded-full no-underline hover:border-white hover:bg-white/10 transition-all">
             View Services
@@ -163,7 +159,7 @@ export default function Landing() {
         <p>Get started in minutes. Enter your address and we'll calculate your lawn size and pricing instantly.</p>
         <div className="flex gap-3 justify-center flex-wrap">
           <Link to="/buy-now" className="btn-primary text-base px-8 py-4">Buy Now</Link>
-          <Link to="/order" className="btn-outline text-base px-8 py-4">Get a Free Quote</Link>
+          <Link to="/quote" className="btn-outline text-base px-8 py-4">Get a Free Quote</Link>
         </div>
       </section>
     </>

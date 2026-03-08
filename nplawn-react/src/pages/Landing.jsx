@@ -3,12 +3,6 @@ import heroImg from '../assets/mylawn.jpeg';
 
 const SERVICES = [
   {
-    to: '/mowing',
-    title: 'Lawn Mowing',
-    desc: 'Weekly or bi-weekly cuts, edging, and cleanup. Every visit leaves your lawn looking sharp.',
-    icon: <path d="M3 17h18M3 12h18M3 7h18"/>,
-  },
-  {
     to: '/tree-trimming',
     title: 'Tree Trimming',
     desc: 'Crown shaping, deadwood removal, and hazard pruning by trained arborists.',
@@ -25,12 +19,6 @@ const SERVICES = [
     title: 'Tree & Shrubs',
     desc: 'Plant health care, shrub shaping, deep root feeding, and new plant installation.',
     icon: <path d="M12 22V12M12 12C12 7 7 3 2 4c0 5 4 9 10 8zM12 12c0-5 5-9 10-8-1 5-5 9-10 8z"/>,
-  },
-  {
-    to: '/aeration-seeding',
-    title: 'Aeration & Seeding',
-    desc: 'Core aeration breaks compaction. Overseeding fills in thin areas. Done together, they transform tired lawns.',
-    icon: <><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></>,
   },
   {
     to: '/landscape-design',
@@ -114,6 +102,25 @@ export default function Landing() {
               <span className="text-np-accent text-sm font-semibold">Learn more &rarr;</span>
             </Link>
           ))}
+        </div>
+      </section>
+
+      {/* CLEANLAWN PROMO */}
+      <section className="px-[8%] py-14 bg-np-dark text-white">
+        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+          <div>
+            <p className="text-np-lite text-xs font-bold tracking-[2px] uppercase mb-2">Marketplace</p>
+            <h2 className="text-white text-2xl md:text-3xl font-extrabold mb-2">
+              Need Mowing or Aeration? Try <span className="text-np-lite">CleanLawn</span>.
+            </h2>
+            <p className="text-white/60 max-w-lg">
+              Book on-demand lawn maintenance — mowing and aeration & seeding — through our dedicated marketplace. Local providers, transparent pricing.
+            </p>
+          </div>
+          <Link to="/CleanLawn"
+            className="flex-shrink-0 bg-np-accent text-np-dark font-extrabold px-8 py-3.5 rounded-full no-underline hover:bg-np-lite transition-all whitespace-nowrap">
+            Explore CleanLawn →
+          </Link>
         </div>
       </section>
 

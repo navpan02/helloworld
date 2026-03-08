@@ -1,12 +1,18 @@
 import { Link } from 'react-router-dom';
 
 const SERVICES = [
-  { to: '/mowing',          label: 'Lawn Mowing' },
   { to: '/tree-trimming',   label: 'Tree Trimming' },
   { to: '/lawn-care',       label: 'Lawn Care Plans' },
   { to: '/tree-shrubs',     label: 'Tree & Shrubs' },
-  { to: '/aeration-seeding',label: 'Aeration & Seeding' },
   { to: '/landscape-design',label: 'Landscape Design' },
+];
+
+const CLEANLAWN = [
+  { to: '/CleanLawn',                  label: 'CleanLawn Home' },
+  { to: '/CleanLawn/mowing',           label: 'Lawn Mowing' },
+  { to: '/CleanLawn/aeration-seeding', label: 'Aeration & Seeding' },
+  { to: '/CleanLawn/provider/signup',  label: 'Join as a Provider' },
+  { to: '/CleanLawn/provider',         label: 'Provider Portal' },
 ];
 
 const COMPANY = [
@@ -61,13 +67,13 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* For Professionals */}
+        {/* CleanLawn */}
         <div>
-          <h4 className="footer-heading">For Professionals</h4>
+          <h4 className="footer-heading">CleanLawn</h4>
           <ul className="footer-links">
-            <li><Link to="/provider/signup">Join as a Provider</Link></li>
-            <li><Link to="/login">Provider Login</Link></li>
-            <li><Link to="/provider">Provider Portal</Link></li>
+            {CLEANLAWN.map(c => (
+              <li key={c.to}><Link to={c.to}>{c.label}</Link></li>
+            ))}
           </ul>
         </div>
       </div>

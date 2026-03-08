@@ -5,6 +5,7 @@ import Layout from './components/Layout';
 
 // Pages
 import Landing          from './pages/Landing';
+import CleanLawn        from './pages/CleanLawn';
 import About            from './pages/About';
 import Contact          from './pages/Contact';
 import Blog             from './pages/Blog';
@@ -52,12 +53,21 @@ function AppRoutes() {
       <Route path="/grass-guide"        element={<Layout><GrassGuide/></Layout>} />
       <Route path="/quote-estimator"    element={<Layout><QuoteEstimator/></Layout>} />
       <Route path="/account"            element={<Layout><Account/></Layout>} />
-      <Route path="/mowing"             element={<Layout><Mowing/></Layout>} />
       <Route path="/tree-trimming"      element={<Layout><TreeTrimming/></Layout>} />
       <Route path="/tree-shrubs"        element={<Layout><TreeShrubs/></Layout>} />
-      <Route path="/aeration-seeding"   element={<Layout><AerationSeeding/></Layout>} />
       <Route path="/landscape-design"   element={<Layout><LandscapeDesign/></Layout>} />
       <Route path="/lawn-care"          element={<Layout><LawnCare/></Layout>} />
+
+      {/* CleanLawn marketplace — home + lawn maintenance services + provider */}
+      <Route path="/CleanLawn"                    element={<Layout><CleanLawn/></Layout>} />
+      <Route path="/CleanLawn/mowing"             element={<Layout><Mowing/></Layout>} />
+      <Route path="/CleanLawn/aeration-seeding"   element={<Layout><AerationSeeding/></Layout>} />
+
+      {/* Redirects from old paths */}
+      <Route path="/mowing"             element={<Navigate to="/CleanLawn/mowing" replace />} />
+      <Route path="/aeration-seeding"   element={<Navigate to="/CleanLawn/aeration-seeding" replace />} />
+      <Route path="/provider"           element={<Navigate to="/CleanLawn/provider" replace />} />
+      <Route path="/provider/signup"    element={<Navigate to="/CleanLawn/provider/signup" replace />} />
 
       {/* Blog post routes */}
       <Route path="/blog/aerate-guide"              element={<Layout><AerateGuide/></Layout>} />
@@ -82,9 +92,9 @@ function AppRoutes() {
       <Route path="/signup"           element={<Signup/>} />
       <Route path="/admin"            element={<AdminDashboard/>} />
 
-      {/* Provider portal — full screen */}
-      <Route path="/provider"         element={<ProviderDashboard/>} />
-      <Route path="/provider/signup"  element={<ProviderSignup/>} />
+      {/* Provider portal — full screen, now under /CleanLawn */}
+      <Route path="/CleanLawn/provider"         element={<ProviderDashboard/>} />
+      <Route path="/CleanLawn/provider/signup"  element={<ProviderSignup/>} />
 
       {/* Catch-all */}
       <Route path="*" element={<Navigate to="/" replace />} />
@@ -101,3 +111,4 @@ export default function App() {
     </BrowserRouter>
   );
 }
+

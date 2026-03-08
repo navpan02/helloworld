@@ -13,10 +13,12 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: 'Lawn Maintenance',
+    label: 'CleanLawn',
     links: [
-      { to: '/mowing',          label: 'Mowing' },
-      { to: '/aeration-seeding',label: 'Aeration & Seeding' },
+      { to: '/CleanLawn',                  label: 'CleanLawn Home' },
+      { to: '/CleanLawn/mowing',           label: 'Mowing' },
+      { to: '/CleanLawn/aeration-seeding', label: 'Aeration & Seeding' },
+      { to: '/CleanLawn/provider/signup',  label: 'Join as Provider' },
     ],
   },
   {
@@ -121,7 +123,7 @@ export default function Navbar() {
           <>
             <Link to="/account" className="hidden md:block text-white/60 text-sm hover:text-np-lite transition-colors">{user.email}</Link>
             {user.role === 'provider' ? (
-              <Link to="/provider" className="hidden md:inline text-np-lite text-sm font-semibold hover:text-white transition-colors">Provider Portal</Link>
+              <Link to="/CleanLawn/provider" className="hidden md:inline text-np-lite text-sm font-semibold hover:text-white transition-colors">Provider Portal</Link>
             ) : (
               <Link to="/account" className="hidden md:inline text-np-lite text-sm font-semibold hover:text-white transition-colors">My Orders</Link>
             )}

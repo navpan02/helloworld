@@ -104,7 +104,7 @@ export default function LawnCare() {
                   </li>
                 ))}
               </ul>
-              <Link to="/order" className={`mt-8 text-center py-3 rounded-full font-bold text-sm transition-all ${
+              <Link to={`/buy-now?plan=${p.key}`} className={`mt-8 text-center py-3 rounded-full font-bold text-sm transition-all ${
                 p.dark
                   ? 'bg-np-accent text-np-dark hover:bg-np-lite'
                   : 'border-2 border-np-green text-np-green hover:bg-np-green hover:text-white'

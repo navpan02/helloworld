@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+
+// Map LawnCare plan keys → BuyNow plan keys
+const PLAN_KEY_MAP = { basic: 'Basic', pro: 'Standard', natural: 'Premium' };
 
 const PLANS = {
   Basic: {
@@ -121,6 +124,8 @@ function CheckIcon({ className = 'w-4 h-4' }) {
 }
 
 export default function BuyNow() {
+  const [searchParams] = useSearchParams();
+  const initialPlan = PLAN_KEY_MAP[searchParams.get('plan')] || 'Standard';
   const [step, setStep] = useState(0);
 
   // Step 0
@@ -141,7 +146,7 @@ export default function BuyNow() {
   const leafletMapRef = useRef(null);
 
   // Step 2
-  const [selectedPlan, setSelectedPlan] = useState('Standard');
+  const [selectedPlan, setSelectedPlan] = useState(initialPlan);
 
   // Step 3 / Confirm
   const [name, setName] = useState('');

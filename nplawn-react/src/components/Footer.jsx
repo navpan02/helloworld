@@ -25,7 +25,6 @@ const COMPANY = [
   { to: '/blog',             label: 'Blog' },
   { to: '/faq',              label: 'FAQ' },
   { to: '/grass-guide',      label: 'Grass Type Guide' },
-  { to: '/quote-estimator',  label: 'Quote Estimator' },
   { to: '/contact',          label: 'Contact' },
   { to: '/lawn-care#plans',  label: 'View Plans' },
   { to: '/order',            label: 'Order Online' },

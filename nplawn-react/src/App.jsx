@@ -14,6 +14,8 @@ import Order            from './pages/Order';
 import BuyNow           from './pages/BuyNow';
 import Account          from './pages/Account';
 import AdminDashboard   from './pages/AdminDashboard';
+import ProviderDashboard from './pages/provider/ProviderDashboard';
+import ProviderSignup   from './pages/provider/ProviderSignup';
 import FAQ              from './pages/FAQ';
 import QuoteEstimator   from './pages/QuoteEstimator';
 import GetQuote         from './pages/GetQuote';
@@ -76,9 +78,13 @@ function AppRoutes() {
       <Route path="/buy-now"  element={<Layout noFooter><BuyNow/></Layout>} />
 
       {/* Auth — full screen, no shared layout */}
-      <Route path="/login"  element={<Login/>} />
-      <Route path="/signup" element={<Signup/>} />
-      <Route path="/admin"  element={<AdminDashboard/>} />
+      <Route path="/login"            element={<Login/>} />
+      <Route path="/signup"           element={<Signup/>} />
+      <Route path="/admin"            element={<AdminDashboard/>} />
+
+      {/* Provider portal — full screen */}
+      <Route path="/provider"         element={<ProviderDashboard/>} />
+      <Route path="/provider/signup"  element={<ProviderSignup/>} />
 
       {/* Catch-all */}
       <Route path="*" element={<Navigate to="/" replace />} />

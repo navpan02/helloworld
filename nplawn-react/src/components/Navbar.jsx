@@ -120,7 +120,11 @@ export default function Navbar() {
         {user ? (
           <>
             <Link to="/account" className="hidden md:block text-white/60 text-sm hover:text-np-lite transition-colors">{user.email}</Link>
-            <Link to="/account" className="hidden md:inline text-np-lite text-sm font-semibold hover:text-white transition-colors">My Orders</Link>
+            {user.role === 'provider' ? (
+              <Link to="/provider" className="hidden md:inline text-np-lite text-sm font-semibold hover:text-white transition-colors">Provider Portal</Link>
+            ) : (
+              <Link to="/account" className="hidden md:inline text-np-lite text-sm font-semibold hover:text-white transition-colors">My Orders</Link>
+            )}
             <button onClick={handleLogout}
               className="text-white/50 text-sm font-semibold hover:text-white transition-colors">
               Logout

@@ -6,8 +6,10 @@ export async function sha256(str) {
 
 // Hardcoded accounts (password hashes, no plaintext)
 const SEED_USERS = [
-  { email: 'navpan@gmail.com', hash: 'ac3dcbcd3e71bbb60120cd8ad9a72d296b1b1286588d6a99f80c62e6cd7904f3', role: 'user',  verified: true },
-  { email: 'admin@admin.com',  hash: 'd3daae485d1d3f013cff263e6344b4b1f3a1e6ffb105e593f6615776a8aca121', role: 'admin', verified: true },
+  { email: 'navpan@gmail.com',    hash: 'ac3dcbcd3e71bbb60120cd8ad9a72d296b1b1286588d6a99f80c62e6cd7904f3', role: 'user',     verified: true },
+  { email: 'admin@admin.com',     hash: 'd3daae485d1d3f013cff263e6344b4b1f3a1e6ffb105e593f6615776a8aca121', role: 'admin',    verified: true },
+  // Demo provider account — password: Provider123!
+  { email: 'provider@nplawn.com', hash: '8a9a4f99c3ac0b4ab2ba68b4d7c37d94b0ae2bb7e0b6a6b91f58b9e2eae5f2d4', role: 'provider', verified: true },
 ];
 
 // Reserved emails (can't be re-registered)

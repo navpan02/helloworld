@@ -1,49 +1,110 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { validateName, validateEmail, validatePhone } from '../utils/validate';
 
 const SERVICES = [
-  'Lawn Care Plan (GrassBasic)',
-  'Lawn Care Plan (GrassPro)',
-  'Lawn Care Plan (GrassNatural)',
   'Lawn Mowing',
-  'Tree Trimming',
-  'Tree & Shrub Care',
+  'Tree Trimming & Pruning',
+  'Hedge Trimming',
+  'Leaf Removal & Yard Cleanup',
+  'Sod Installation',
+  'Mulching',
+  'Brush Clearing',
+  'Stump Grinding / Removal',
+  'Snow Removal',
   'Aeration & Seeding',
-  'Landscape Design',
-  'Not sure — need advice',
+  'Irrigation System',
+  'Landscaping & Garden Design',
+  'Lawn Care Plan',
+  'Tree & Shrub Care',
+  'Other',
+];
+
+const FREQUENCIES = [
+  { value: 'one_time',   label: 'One-time' },
+  { value: 'weekly',     label: 'Weekly' },
+  { value: 'biweekly',   label: 'Bi-weekly' },
+  { value: 'monthly',    label: 'Monthly' },
+  { value: 'quarterly',  label: 'Quarterly' },
+];
+
+const SQFT_OPTIONS = [
+  'Under 2,000 sq ft',
+  '2,000 – 5,000 sq ft',
+  '5,000 – 10,000 sq ft',
+  '10,000 – 20,000 sq ft',
+  '20,000 – 43,560 sq ft (up to 1 acre)',
+  'Over 1 acre',
 ];
 
 export default function GetQuote() {
-  const navigate = useNavigate();
-  const [form, setForm] = useState({ name: '', email: '', phone: '', service: '', notes: '' });
+  const [step, setStep] = useState(1);
+  const [form, setForm] = useState({
+    name: '', email: '', phone: '',
+    address: '', city: '', state: 'IL', zip: '',
+    sqft: '',
+    services: [],
+    frequency: '',
+    notes: '',
+  });
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [error, setError]   = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [fieldErrors, setFieldErrors] = useState({ name: '', email: '', phone: '' });
+  const [submitted, setSubmitted] = useState(false);
 
   const set = (k, v) => { setError(''); setFieldErrors(e => ({ ...e, [k]: '' })); setForm(f => ({ ...f, [k]: v })); };
-  const blurField = (k, v) => {
-    const validators = { name: validateName, email: validateEmail, phone: validatePhone };
-    if (validators[k]) setFieldErrors(e => ({ ...e, [k]: validators[k](v) }));
+
+  const toggleService = (s) => setForm(f => ({
+    ...f,
+    services: f.services.includes(s) ? f.services.filter(x => x !== s) : [...f.services, s],
+  }));
+
+  /* Step 1 validation */
+  const validateStep1 = () => {
+    const errs = {};
+    const n = validateName(form.name);    if (n) errs.name = n;
+    const em = validateEmail(form.email); if (em) errs.email = em;
+    const ph = validatePhone(form.phone); if (ph) errs.phone = ph;
+    if (!form.name.trim()) errs.name = 'Name is required.';
+    if (!form.email.trim() && !form.phone.trim()) { errs.email = 'Provide email or phone.'; errs.phone = 'Provide email or phone.'; }
+    if (!form.address.trim()) errs.address = 'Address is required.';
+    setFieldErrors(errs);
+    return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const errs = { name: validateName(form.name), email: validateEmail(form.email), phone: validatePhone(form.phone) };
+  /* Step 2 validation */
+  const validateStep2 = () => {
+    const errs = {};
+    if (form.services.length === 0) errs.services = 'Select at least one service.';
+    if (!form.frequency) errs.frequency = 'Choose a frequency.';
     setFieldErrors(errs);
-    if (errs.name || errs.email || errs.phone) return;
-    if (!form.email.trim() && !form.phone.trim()) {
-      setError('Please provide at least an email or phone number.');
-      return;
-    }
+    return Object.keys(errs).length === 0;
+  };
+
+  const goNext = () => {
+    if (step === 1 && !validateStep1()) return;
+    if (step === 2 && !validateStep2()) return;
+    setError('');
+    setStep(s => s + 1);
+  };
+
+  const handleSubmit = async () => {
+    if (!validateStep2()) return;
     setLoading(true);
+    setError('');
 
     const lead = {
       name:         form.name.trim(),
       email:        form.email.trim() || null,
       phone:        form.phone.trim() || null,
-      service:      form.service || null,
+      address:      form.address.trim(),
+      city:         form.city.trim() || null,
+      state:        form.state.trim() || null,
+      zip:          form.zip.trim() || null,
+      sqft:         form.sqft || null,
+      services:     form.services,
+      frequency:    form.frequency,
       message:      form.notes.trim() || null,
       source:       'get_quote',
       submitted_at: new Date().toISOString(),
@@ -52,75 +113,205 @@ export default function GetQuote() {
     const { error: dbError } = await supabase.from('leads').insert([lead]);
     if (dbError) console.error('Supabase lead insert error:', dbError.message);
 
+    // localStorage fallback
     const leads = JSON.parse(localStorage.getItem('nplawn_leads') || '[]');
-    leads.push({ ...form, source: 'get_quote', submittedAt: Date.now() });
+    leads.push({ ...lead, submittedAt: Date.now() });
     localStorage.setItem('nplawn_leads', JSON.stringify(leads));
 
     setLoading(false);
-    navigate('/quote/thanks', { state: { name: form.name } });
+    setSubmitted(true);
+    setStep(3);
   };
 
+  const STEP_LABELS = ['Property & Contact', 'Services & Frequency', 'Confirmation'];
+
+  const Field = ({ label, id, required, ...rest }) => (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">{label}{required && ' *'}</label>
+      <input id={id}
+        className={`w-full px-4 py-2.5 text-sm rounded-lg border outline-none transition-all ${
+          fieldErrors[id] ? 'border-red-400 focus:ring-2 focus:ring-red-100' : 'border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-100'
+        }`}
+        {...rest} />
+      {fieldErrors[id] && <p className="mt-1 text-xs text-red-600">{fieldErrors[id]}</p>}
+    </div>
+  );
+
+  /* ========== STEP 3: CONFIRMATION ========== */
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-np-surface flex items-center justify-center px-4">
+        <div className="max-w-md w-full text-center">
+          <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
+            <svg className="w-10 h-10 stroke-green-600 fill-none stroke-2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>
+          </div>
+          <h1 className="text-np-dark text-3xl font-extrabold mb-3">You're all set, {form.name.split(' ')[0]}!</h1>
+          <p className="text-np-muted text-base mb-3 leading-relaxed">
+            We've received your quote request and will get back to you within <strong className="text-np-dark">1 business day</strong>.
+          </p>
+          <div className="bg-white rounded-xl border border-gray-200 p-5 text-left mb-8">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">Request Summary</h3>
+            <dl className="space-y-2 text-sm">
+              <div className="flex justify-between"><dt className="text-gray-500">Name</dt><dd className="text-gray-800 font-medium">{form.name}</dd></div>
+              {form.email && <div className="flex justify-between"><dt className="text-gray-500">Email</dt><dd className="text-gray-800">{form.email}</dd></div>}
+              {form.phone && <div className="flex justify-between"><dt className="text-gray-500">Phone</dt><dd className="text-gray-800">{form.phone}</dd></div>}
+              <div className="flex justify-between"><dt className="text-gray-500">Address</dt><dd className="text-gray-800">{form.address}{form.city ? `, ${form.city}` : ''}</dd></div>
+              {form.sqft && <div className="flex justify-between"><dt className="text-gray-500">Lot Size</dt><dd className="text-gray-800">{form.sqft}</dd></div>}
+              <div><dt className="text-gray-500 mb-1">Services</dt><dd className="flex flex-wrap gap-1">{form.services.map(s => <span key={s} className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{s}</span>)}</dd></div>
+              <div className="flex justify-between"><dt className="text-gray-500">Frequency</dt><dd className="text-gray-800 capitalize">{form.frequency.replace('_', '-')}</dd></div>
+            </dl>
+          </div>
+          <Link to="/" className="btn-primary px-8 py-3 text-base">Back to Home</Link>
+        </div>
+      </div>
+    );
+  }
+
+  /* ========== STEPS 1 & 2 ========== */
   return (
     <div className="min-h-screen bg-np-surface">
+      {/* Header */}
       <div className="bg-np-dark text-white px-[5%] py-12 text-center">
         <div className="page-hero-badge">Free Quote</div>
         <h1 className="text-3xl md:text-4xl font-extrabold mb-2">Get Your Free Quote</h1>
-        <p className="text-white/60 max-w-xl mx-auto">Fill in your details and we'll get back to you within 1 business day. No commitment required.</p>
+        <p className="text-white/60 max-w-xl mx-auto">Tell us about your property and the services you need. No commitment required.</p>
       </div>
 
-      <div className="max-w-xl mx-auto px-[5%] py-12">
+      <div className="max-w-xl mx-auto px-[5%] py-10">
+        {/* Progress bar */}
+        <div className="flex gap-2 mb-8">
+          {STEP_LABELS.map((l, i) => (
+            <div key={l} className="flex-1">
+              <div className={`h-1.5 rounded-full ${i + 1 <= step ? 'bg-green-500' : 'bg-gray-200'}`} />
+              <p className={`text-xs mt-1.5 ${i + 1 === step ? 'text-green-600 font-medium' : 'text-gray-400'}`}>{l}</p>
+            </div>
+          ))}
+        </div>
+
         <div className="bg-white rounded-2xl border border-np-border shadow-np p-8">
           {error && (
-            <div className="mb-6 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">{error}</div>
+            <div className="mb-5 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">{error}</div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="form-group">
-              <label className="form-label">Full Name *</label>
-              <input className={`form-input ${fieldErrors.name ? 'border-red-400' : ''}`} type="text" value={form.name}
-                onChange={e => set('name', e.target.value)} onBlur={e => blurField('name', e.target.value)}
+          {/* STEP 1: Property & Contact */}
+          {step === 1 && (
+            <div className="space-y-4">
+              <h2 className="text-lg font-bold text-gray-800 mb-1">Your Details</h2>
+              <p className="text-sm text-gray-500 mb-4">Tell us who you are and where the property is.</p>
+
+              <Field label="Full Name" id="name" required type="text" value={form.name}
+                onChange={e => set('name', e.target.value)}
+                onBlur={e => setFieldErrors(p => ({ ...p, name: validateName(e.target.value) }))}
                 placeholder="Jane Smith" maxLength={50} />
-              {fieldErrors.name && <p className="mt-1 text-xs text-red-600">{fieldErrors.name}</p>}
-              <p className="mt-1 text-xs text-np-muted text-right">{form.name.length}/50</p>
-            </div>
 
-            <div className="grid sm:grid-cols-2 gap-5">
-              <div className="form-group">
-                <label className="form-label">Email</label>
-                <input className={`form-input ${fieldErrors.email ? 'border-red-400' : ''}`} type="email" value={form.email}
-                  onChange={e => set('email', e.target.value)} onBlur={e => blurField('email', e.target.value)}
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Field label="Email" id="email" type="email" value={form.email}
+                  onChange={e => set('email', e.target.value)}
+                  onBlur={e => setFieldErrors(p => ({ ...p, email: validateEmail(e.target.value) }))}
                   placeholder="jane@example.com" />
-                {fieldErrors.email && <p className="mt-1 text-xs text-red-600">{fieldErrors.email}</p>}
-              </div>
-              <div className="form-group">
-                <label className="form-label">Phone</label>
-                <input className={`form-input ${fieldErrors.phone ? 'border-red-400' : ''}`} type="tel" value={form.phone}
-                  onChange={e => set('phone', e.target.value)} onBlur={e => blurField('phone', e.target.value)}
+                <Field label="Phone" id="phone" type="tel" value={form.phone}
+                  onChange={e => set('phone', e.target.value)}
+                  onBlur={e => setFieldErrors(p => ({ ...p, phone: validatePhone(e.target.value) }))}
                   placeholder="(630) 555-0100" />
-                {fieldErrors.phone && <p className="mt-1 text-xs text-red-600">{fieldErrors.phone}</p>}
+              </div>
+
+              <Field label="Street Address" id="address" required type="text" value={form.address}
+                onChange={e => set('address', e.target.value)} placeholder="123 Main St" />
+
+              <div className="grid grid-cols-3 gap-3">
+                <Field label="City" id="city" type="text" value={form.city}
+                  onChange={e => set('city', e.target.value)} placeholder="Chicago" />
+                <Field label="State" id="state" type="text" value={form.state}
+                  onChange={e => set('state', e.target.value)} placeholder="IL" />
+                <Field label="ZIP" id="zip" type="text" value={form.zip}
+                  onChange={e => set('zip', e.target.value)} placeholder="60601" />
               </div>
             </div>
+          )}
 
-            <div className="form-group">
-              <label className="form-label">Service Interested In</label>
-              <select className="form-input" value={form.service} onChange={e => set('service', e.target.value)}>
-                <option value="">Select a service…</option>
-                {SERVICES.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
+          {/* STEP 2: Services & Frequency */}
+          {step === 2 && (
+            <div className="space-y-5">
+              <h2 className="text-lg font-bold text-gray-800 mb-1">Services & Frequency</h2>
+              <p className="text-sm text-gray-500 mb-2">Select the services you need and how often.</p>
+
+              {/* Lot size */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Property Size (sq ft)</label>
+                <select value={form.sqft} onChange={e => set('sqft', e.target.value)}
+                  className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-300 outline-none focus:border-green-500 bg-white">
+                  <option value="">— Select approximate size —</option>
+                  {SQFT_OPTIONS.map(o => <option key={o}>{o}</option>)}
+                </select>
+              </div>
+
+              {/* Services multi-select */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Services Needed *</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {SERVICES.map(s => (
+                    <button key={s} type="button" onClick={() => toggleService(s)}
+                      className={`text-left px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                        form.services.includes(s)
+                          ? 'border-green-500 bg-green-50 text-green-700'
+                          : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                      }`}>
+                      {s}
+                    </button>
+                  ))}
+                </div>
+                {fieldErrors.services && <p className="mt-1 text-xs text-red-600">{fieldErrors.services}</p>}
+              </div>
+
+              {/* Frequency */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Frequency *</label>
+                <div className="flex flex-wrap gap-2">
+                  {FREQUENCIES.map(f => (
+                    <button key={f.value} type="button" onClick={() => set('frequency', f.value)}
+                      className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                        form.frequency === f.value
+                          ? 'border-green-500 bg-green-50 text-green-700'
+                          : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                      }`}>
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+                {fieldErrors.frequency && <p className="mt-1 text-xs text-red-600">{fieldErrors.frequency}</p>}
+              </div>
+
+              {/* Notes */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Additional Notes</label>
+                <textarea value={form.notes} onChange={e => set('notes', e.target.value)}
+                  rows={3} placeholder="Describe any issues, preferences, or special instructions…"
+                  className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-300 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100 resize-none" />
+              </div>
             </div>
+          )}
 
-            <div className="form-group">
-              <label className="form-label">Additional Notes</label>
-              <textarea className="form-textarea" rows={3} value={form.notes}
-                onChange={e => set('notes', e.target.value)}
-                placeholder="Describe your lawn, any current issues, preferred schedule…" />
-            </div>
+          {/* Navigation buttons */}
+          <div className="flex justify-between mt-8">
+            {step > 1 ? (
+              <button onClick={() => { setStep(s => s - 1); setFieldErrors({}); }}
+                className="text-sm text-gray-500 hover:text-gray-700 font-medium">← Back</button>
+            ) : <span />}
 
-            <button type="submit" disabled={loading}
-              className="btn-primary w-full py-3 text-base disabled:opacity-60 disabled:cursor-not-allowed">
-              {loading ? 'Sending…' : 'Request My Free Quote →'}
-            </button>
-          </form>
+            {step < 2 ? (
+              <button onClick={goNext}
+                className="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg transition-colors">
+                Continue →
+              </button>
+            ) : (
+              <button onClick={handleSubmit} disabled={loading}
+                className="px-6 py-2.5 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white text-sm font-semibold rounded-lg transition-colors">
+                {loading ? 'Submitting…' : 'Submit Quote Request →'}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

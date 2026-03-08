@@ -1,10 +1,9 @@
 import { Link } from 'react-router-dom';
 
 const SERVICES = [
-  { to: '/tree-trimming',   label: 'Tree Trimming' },
-  { to: '/lawn-care',       label: 'Lawn Care Plans' },
-  { to: '/tree-shrubs',     label: 'Tree & Shrubs' },
-  { to: '/landscape-design',label: 'Landscape Design' },
+  { to: '/lawn-care',                    label: 'Lawn Care Plans' },
+  { to: '/tree-shrubs',                  label: 'Tree & Shrub Plans' },
+  { to: '/CleanLawn/aeration-seeding',   label: 'Aeration & Seeding' },
 ];
 
 const CLEANLAWN = [
@@ -55,7 +54,7 @@ export default function Footer() {
 
         {/* Services */}
         <div>
-          <h4 className="footer-heading">Services</h4>
+          <h4 className="footer-heading">Lawn Care</h4>
           <ul className="footer-links">
             {SERVICES.map(s => (
               <li key={s.to}><Link to={s.to}>{s.label}</Link></li>

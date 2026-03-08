@@ -20,22 +20,22 @@ export default function LoginPage() {
     }
   }, [params]);
 
-  // Redirect already-logged-in users to their role's home
-  if (user?.role === 'admin')    { navigate('/admin');             return null; }
-  if (user?.role === 'provider') { navigate('/CleanLawn/provider'); return null; }
-  if (user)                      { navigate('/');                   return null; }
+  // Navigate only after AuthContext has resolved the user — avoids race condition
+  // where navigate('/admin') fires before onAuthStateChange updates user state.
+  useEffect(() => {
+    if (!user) return;
+    if (user.role === 'admin')    navigate('/admin');
+    else if (user.role === 'provider') navigate('/CleanLawn/provider');
+    else navigate('/');
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     const { data, error } = await signInUser({ email, password });
-    if (error) {
-      setError(authErrorMessage(error));
-    } else {
-      const role = data.user?.user_metadata?.role ?? 'user';
-      navigate(role === 'admin' ? '/admin' : role === 'provider' ? '/CleanLawn/provider' : '/');
-    }
+    if (error) setError(authErrorMessage(error));
+    // navigation is handled by the useEffect above once AuthContext updates
     setLoading(false);
   };
 

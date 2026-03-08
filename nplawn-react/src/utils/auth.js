@@ -108,7 +108,7 @@ export function sessionToUser(session) {
   return {
     id:    user.id,
     email: user.email,
-    role:  user.user_metadata?.role  ?? 'user',
+    role:  user.user_metadata?.role ?? user.app_metadata?.role ?? 'user',
     name:  user.user_metadata?.name  ?? user.email?.split('@')[0] ?? '',
   };
 }

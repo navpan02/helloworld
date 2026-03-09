@@ -154,6 +154,17 @@ function CleanLawnDropdown() {
               </div>
             ))}
           </div>
+
+          {/* Find Providers link */}
+          <div className="px-5 pb-4 pt-2 border-t border-white/10">
+            <Link to="/discover"
+              className="text-np-lite font-bold text-sm hover:text-white transition-colors flex items-center gap-1.5">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              Find & Browse Providers
+            </Link>
+          </div>
         </div>
       )}
     </div>
@@ -260,6 +271,12 @@ export default function Navbar() {
                           `text-sm font-medium py-1.5 transition-colors ${isActive ? 'text-np-lite' : 'text-white/80 hover:text-np-lite'}`
                         }>
                         CleanLawn Home
+                      </NavLink>
+                      <NavLink to="/discover" onClick={() => setOpen(false)}
+                        className={({ isActive }) =>
+                          `text-sm font-medium py-1.5 transition-colors ${isActive ? 'text-np-lite' : 'text-np-lite/70 hover:text-np-lite'}`
+                        }>
+                        Find &amp; Browse Providers
                       </NavLink>
                       {group.sections.map(section => (
                         <div key={section.label} className="mt-2">

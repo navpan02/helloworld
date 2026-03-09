@@ -23,7 +23,9 @@ import GetQuote         from './pages/GetQuote';
 import QuoteThanks      from './pages/QuoteThanks';
 import GrassGuide       from './pages/GrassGuide';
 import HowItWorks       from './pages/HowItWorks';
-import ProviderLanding  from './pages/ProviderLanding';
+import ProviderLanding    from './pages/ProviderLanding';
+import ServiceDiscovery  from './pages/ServiceDiscovery';
+import ProviderProfile   from './pages/ProviderProfile';
 
 // Service pages — NPLawn core
 import Mowing           from './pages/services/Mowing';
@@ -79,7 +81,9 @@ function AppRoutes() {
       <Route path="/faq"                element={<Layout><FAQ/></Layout>} />
       <Route path="/grass-guide"        element={<Layout><GrassGuide/></Layout>} />
       <Route path="/how-it-works"       element={<Layout><HowItWorks/></Layout>} />
-      <Route path="/providers"          element={<Layout><ProviderLanding/></Layout>} />
+      <Route path="/providers"                      element={<Layout><ProviderLanding/></Layout>} />
+      <Route path="/discover"                       element={<Layout><ServiceDiscovery/></Layout>} />
+      <Route path="/discover/providers/:providerId" element={<Layout><ProviderProfile/></Layout>} />
       <Route path="/account"            element={<Layout><Account/></Layout>} />
       <Route path="/tree-trimming"      element={<Layout><TreeTrimming/></Layout>} />
       <Route path="/tree-shrubs"        element={<Layout><TreeShrubs/></Layout>} />

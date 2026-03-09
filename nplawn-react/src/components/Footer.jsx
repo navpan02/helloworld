@@ -8,6 +8,7 @@ const SERVICES = [
 
 const CLEANLAWN = [
   { to: '/CleanLawn',                       label: 'CleanLawn Home' },
+  { to: '/discover',                        label: 'Find Providers' },
   { to: '/CleanLawn/mowing',                label: 'Lawn Mowing' },
   { to: '/CleanLawn/hedge-trimming',        label: 'Hedge Trimming' },
   { to: '/CleanLawn/leaf-removal',          label: 'Leaf Removal' },

@@ -101,7 +101,7 @@ export default function ProviderProfile() {
 
       if (!providerId) { setNotFound(true); setLoading(false); return; }
 
-      // Demo provider lookup
+      // Demo provider — fast local lookup
       if (String(providerId).startsWith('demo-')) {
         const found = DEMO_PROVIDERS.find(p => p.id === providerId);
         setProvider(found || null);
@@ -110,18 +110,28 @@ export default function ProviderProfile() {
         return;
       }
 
-      // Supabase lookup by UUID id
+      // Real provider — fetch all and match by id OR email.
+      // This handles tables that use email as PK (no UUID id column),
+      // UUID-based tables, and URL-encoded email addresses (%40 → @).
+      const decoded = decodeURIComponent(providerId);
       const { data, error } = await supabase
         .from('provider_profiles')
-        .select('*')
-        .eq('id', providerId)
-        .single();
+        .select('*');
 
-      if (!error && data) {
-        setProvider(normalize(data));
-      } else {
-        setNotFound(true);
+      if (!error && data?.length) {
+        const found = data.find(p =>
+          (p.id   != null && (p.id    === providerId || p.id    === decoded)) ||
+          (p.email != null && (p.email === providerId || p.email === decoded))
+        );
+        if (found) {
+          setProvider(normalize(found));
+          setLoading(false);
+          return;
+        }
       }
+
+      // No match in Supabase — nothing to show
+      setNotFound(true);
       setLoading(false);
     })();
   }, [providerId]);

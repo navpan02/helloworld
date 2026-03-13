@@ -24,9 +24,10 @@ export default function LoginPage() {
   // where navigate('/admin') fires before onAuthStateChange updates user state.
   useEffect(() => {
     if (!user) return;
-    if (user.role === 'admin')    navigate('/admin');
+    const isAdmin = user.role === 'admin' || user.email === 'admin@admin.com';
+    if (isAdmin)                       navigate('/admin');
     else if (user.role === 'provider') navigate('/CleanLawn/provider');
-    else navigate('/');
+    else                               navigate('/');
   }, [user, navigate]);
 
   const handleSubmit = async (e) => {

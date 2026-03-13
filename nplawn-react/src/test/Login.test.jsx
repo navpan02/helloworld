@@ -7,13 +7,15 @@ vi.mock('../context/AuthContext', () => ({
   useAuth: () => ({ user: null, login: vi.fn() }),
 }));
 
-vi.mock('../utils/auth', () => ({
-  findUser: vi.fn(),
-  signInUser: vi.fn().mockResolvedValue({ data: null, error: null }),
-  authErrorMessage: vi.fn().mockReturnValue(''),
-  signInWithGoogle: vi.fn(),
-  signInWithFacebook: vi.fn(),
-}));
+vi.mock('../utils/auth', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    findUser: vi.fn(),
+    signInUser: vi.fn().mockResolvedValue({ data: null, error: null }),
+    authErrorMessage: vi.fn().mockReturnValue(''),
+  };
+});
 
 const renderLogin = () =>
   render(

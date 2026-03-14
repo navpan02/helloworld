@@ -41,12 +41,8 @@ export default function SignupPage() {
 
     if (err) { setError(authErrorMessage(err)); return; }
 
-    // If Supabase email confirmation is disabled, a session is returned immediately
-    if (data.session) { navigate('/'); return; }
-
-    // Email confirmation enabled — show OTP entry
-    setStep('verify');
-    startResendTimer();
+    // Skip email verification — redirect directly to login
+    navigate('/login?registered=1');
   };
 
   const startResendTimer = () => {

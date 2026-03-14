@@ -107,14 +107,7 @@ export default function HomeownerProfile() {
         {/* Password change note */}
         <div className="mt-4 bg-white rounded-xl border border-gray-100 shadow-sm px-6 py-5">
           <h2 className="font-semibold text-gray-700 mb-1">Password</h2>
-          <p className="text-sm text-gray-500 mb-3">To change your password, use the reset link sent to your email.</p>
-          <button onClick={async () => {
-            await supabase.auth.resetPasswordForEmail(user?.email ?? '', { redirectTo: window.location.origin + '/login' });
-            alert('Password reset email sent!');
-          }}
-            className="text-sm text-green-600 hover:text-green-700 font-medium">
-            Send Password Reset Email
-          </button>
+          <p className="text-sm text-gray-500">To change your password, please contact support or create a new account.</p>
         </div>
       </div>
     </div>

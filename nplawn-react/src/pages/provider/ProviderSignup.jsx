@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signUpUser, authErrorMessage } from '../../utils/auth';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase'; // used for provider_profiles table only
 
 const SERVICES = [
   'Lawn Mowing', 'Tree Trimming', 'Tree & Shrub Care', 'Aeration & Seeding',

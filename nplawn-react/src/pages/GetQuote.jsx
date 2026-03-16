@@ -78,10 +78,11 @@ export default function GetQuote() {
   const validateStep1 = () => {
     const errs = {};
     const n = validateName(form.name);    if (n) errs.name = n;
-    const em = validateEmail(form.email); if (em) errs.email = em;
-    const ph = validatePhone(form.phone); if (ph) errs.phone = ph;
+    if (!form.email.trim()) errs.email = 'Email is required.';
+    else { const em = validateEmail(form.email); if (em) errs.email = em; }
+    if (!form.phone.trim()) errs.phone = 'Phone is required.';
+    else { const ph = validatePhone(form.phone); if (ph) errs.phone = ph; }
     if (!form.name.trim()) errs.name = 'Name is required.';
-    if (!form.email.trim() && !form.phone.trim()) { errs.email = 'Provide email or phone.'; errs.phone = 'Provide email or phone.'; }
     if (!form.address.trim()) errs.address = 'Address is required.';
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
@@ -110,8 +111,8 @@ export default function GetQuote() {
 
     const lead = {
       name:         form.name.trim(),
-      email:        form.email.trim() || null,
-      phone:        form.phone.trim() || null,
+      email:        form.email.trim(),
+      phone:        form.phone.trim(),
       address:      form.address.trim(),
       city:         form.city.trim() || null,
       state:        form.state.trim() || null,
@@ -209,11 +210,11 @@ export default function GetQuote() {
                 placeholder="Jane Smith" maxLength={50} />
 
               <div className="grid sm:grid-cols-2 gap-4">
-                <Field label="Email" id="email" type="email" value={form.email} errors={fieldErrors}
+                <Field label="Email" id="email" required type="email" value={form.email} errors={fieldErrors}
                   onChange={e => set('email', e.target.value)}
                   onBlur={e => setFieldErrors(p => ({ ...p, email: validateEmail(e.target.value) }))}
                   placeholder="jane@example.com" />
-                <Field label="Phone" id="phone" type="tel" value={form.phone} errors={fieldErrors}
+                <Field label="Phone" id="phone" required type="tel" value={form.phone} errors={fieldErrors}
                   onChange={e => set('phone', e.target.value)}
                   onBlur={e => setFieldErrors(p => ({ ...p, phone: validatePhone(e.target.value) }))}
                   placeholder="(630) 555-0100" />

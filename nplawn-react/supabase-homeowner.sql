@@ -100,9 +100,9 @@ create policy "Provider views assigned jobs" on public.jobs
 -- ── Recurring Schedules ────────────────────────────────────
 create table if not exists public.recurring_schedules (
   id             uuid default gen_random_uuid() primary key,
-  homeowner_id   uuid references auth.users(id) on delete cascade not null,
+  homeowner_id   uuid references public.users(id) on delete cascade not null,
   property_id    uuid references public.homeowner_properties(id),
-  provider_id    uuid references auth.users(id),
+  provider_id    uuid references public.users(id),
   service_type   text not null,
   frequency      text not null,  -- weekly | biweekly | monthly | seasonal
   day_of_week    int,            -- 0=Sun … 6=Sat

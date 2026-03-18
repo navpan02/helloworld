@@ -6,7 +6,7 @@
 -- ── Properties ─────────────────────────────────────────────
 create table if not exists public.homeowner_properties (
   id           uuid default gen_random_uuid() primary key,
-  homeowner_id uuid references auth.users(id) on delete cascade not null,
+  homeowner_id uuid references public.users(id) on delete cascade not null,
   nickname     text,
   address      text not null,
   city         text,
@@ -26,7 +26,7 @@ create policy "Owner manages own properties" on public.homeowner_properties
 -- ── Quote Requests ─────────────────────────────────────────
 create table if not exists public.quote_requests (
   id                   uuid default gen_random_uuid() primary key,
-  homeowner_id         uuid references auth.users(id) on delete cascade not null,
+  homeowner_id         uuid references public.users(id) on delete cascade not null,
   property_id          uuid references public.homeowner_properties(id),
   service_types        text[] not null,
   description          text,
@@ -54,7 +54,7 @@ create policy "Providers can view open requests" on public.quote_requests
 create table if not exists public.quotes (
   id                 uuid default gen_random_uuid() primary key,
   request_id         uuid references public.quote_requests(id) on delete cascade,
-  provider_id        uuid references auth.users(id) not null,
+  provider_id        uuid references public.users(id) not null,
   provider_email     text,
   provider_name      text,
   amount             decimal(10,2),
@@ -78,8 +78,8 @@ create policy "Provider manages own quotes" on public.quotes
 -- ── Jobs ───────────────────────────────────────────────────
 create table if not exists public.jobs (
   id             uuid default gen_random_uuid() primary key,
-  homeowner_id   uuid references auth.users(id) on delete cascade not null,
-  provider_id    uuid references auth.users(id),
+  homeowner_id   uuid references public.users(id) on delete cascade not null,
+  provider_id    uuid references public.users(id),
   quote_id       uuid references public.quotes(id),
   property_id    uuid references public.homeowner_properties(id),
   service_type   text not null,
@@ -120,8 +120,8 @@ create policy "Homeowner manages own schedules" on public.recurring_schedules
 create table if not exists public.reviews (
   id                uuid default gen_random_uuid() primary key,
   job_id            uuid references public.jobs(id),
-  homeowner_id      uuid references auth.users(id) not null,
-  provider_id       uuid references auth.users(id) not null,
+  homeowner_id      uuid references public.users(id) not null,
+  provider_id       uuid references public.users(id) not null,
   rating            int check (rating between 1 and 5),
   body              text,
   before_photo_urls text[] default '{}',
@@ -139,8 +139,8 @@ create policy "Reviews are publicly readable" on public.reviews
 -- ── Messages ───────────────────────────────────────────────
 create table if not exists public.messages (
   id               uuid default gen_random_uuid() primary key,
-  from_user_id     uuid references auth.users(id) not null,
-  to_user_id       uuid references auth.users(id) not null,
+  from_user_id     uuid references public.users(id) not null,
+  to_user_id       uuid references public.users(id) not null,
   quote_request_id uuid references public.quote_requests(id),
   job_id           uuid references public.jobs(id),
   body             text not null,
@@ -158,7 +158,7 @@ alter publication supabase_realtime add table public.messages;
 -- ── Notifications ──────────────────────────────────────────
 create table if not exists public.notifications (
   id         uuid default gen_random_uuid() primary key,
-  user_id    uuid references auth.users(id) on delete cascade not null,
+  user_id    uuid references public.users(id) on delete cascade not null,
   type       text not null,  -- new_quote | new_message | job_reminder | review_request
   title      text not null,
   body       text,

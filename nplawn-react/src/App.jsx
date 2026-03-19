@@ -46,6 +46,13 @@ import Quotes              from './pages/cleanlawn/homeowner/Quotes';
 import Jobs                from './pages/cleanlawn/homeowner/Jobs';
 import Schedule            from './pages/cleanlawn/homeowner/Schedule';
 import Messages            from './pages/cleanlawn/homeowner/Messages';
+import Billing             from './pages/cleanlawn/homeowner/Billing';
+import Payments            from './pages/cleanlawn/homeowner/Payments';
+import Feedback            from './pages/cleanlawn/homeowner/Feedback';
+import ProviderNotes       from './pages/cleanlawn/homeowner/ProviderNotes';
+import ManagePlan          from './pages/cleanlawn/homeowner/ManagePlan';
+import NotificationPrefs   from './pages/cleanlawn/homeowner/NotificationPrefs';
+import Referral            from './pages/cleanlawn/homeowner/Referral';
 
 // CleanLawn service pages
 import HedgeTrimming    from './pages/cleanlawn/HedgeTrimming';
@@ -156,6 +163,13 @@ function AppRoutes() {
       <Route path="/CleanLawn/homeowner/jobs"             element={<Layout><Jobs/></Layout>} />
       <Route path="/CleanLawn/homeowner/schedule"         element={<Layout><Schedule/></Layout>} />
       <Route path="/CleanLawn/homeowner/messages"         element={<Layout><Messages/></Layout>} />
+      <Route path="/CleanLawn/homeowner/billing"          element={<Layout><Billing/></Layout>} />
+      <Route path="/CleanLawn/homeowner/payments"         element={<Layout><Payments/></Layout>} />
+      <Route path="/CleanLawn/homeowner/feedback"         element={<Layout><Feedback/></Layout>} />
+      <Route path="/CleanLawn/homeowner/notes"            element={<Layout><ProviderNotes/></Layout>} />
+      <Route path="/CleanLawn/homeowner/plan"             element={<Layout><ManagePlan/></Layout>} />
+      <Route path="/CleanLawn/homeowner/notifications"    element={<Layout><NotificationPrefs/></Layout>} />
+      <Route path="/CleanLawn/homeowner/referral"         element={<Layout><Referral/></Layout>} />
 
       {/* Provider portal — full screen, now under /CleanLawn */}
       <Route path="/CleanLawn/provider"         element={<ProviderDashboard/>} />

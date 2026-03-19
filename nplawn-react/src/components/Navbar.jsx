@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 // Simple flat dropdown groups
@@ -176,6 +176,12 @@ export default function Navbar() {
   const [expandedGroup, setExpandedGroup] = useState(null);
   const { user, logout }          = useAuth();
   const navigate                  = useNavigate();
+  const { pathname }              = useLocation();
+
+  useEffect(() => {
+    setOpen(false);
+    setExpandedGroup(null);
+  }, [pathname]);
 
   const handleLogout = () => { logout(); navigate('/'); };
 

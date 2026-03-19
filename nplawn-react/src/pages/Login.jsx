@@ -26,7 +26,7 @@ export default function LoginPage() {
     const isAdmin = user.role === 'admin' || user.email === 'admin@admin.com';
     if (isAdmin)                       navigate('/admin');
     else if (user.role === 'provider') navigate('/CleanLawn/provider');
-    else                               navigate('/');
+    else                               navigate('/CleanLawn/homeowner');
   }, [user, navigate]);
 
   const handleSubmit = async (e) => {

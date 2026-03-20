@@ -224,11 +224,22 @@ export default function Navbar() {
       <div className="flex items-center gap-3">
         {user ? (
           <>
-            <Link to="/account" className="hidden md:block text-white/60 text-sm hover:text-np-lite transition-colors">{user.email}</Link>
             {user.role === 'provider' ? (
-              <Link to="/CleanLawn/provider" className="hidden md:inline text-np-lite text-sm font-semibold hover:text-white transition-colors">Provider Portal</Link>
+              <Link to="/CleanLawn/provider"
+                className="flex items-center gap-1.5 text-np-lite text-sm font-semibold hover:text-white transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span className="hidden sm:inline">{user.name || 'Provider Portal'}</span>
+              </Link>
             ) : (
-              <Link to="/account" className="hidden md:inline text-np-lite text-sm font-semibold hover:text-white transition-colors">My Orders</Link>
+              <Link to="/CleanLawn/homeowner"
+                className="flex items-center gap-1.5 text-np-lite text-sm font-semibold hover:text-white transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span className="hidden sm:inline">{user.name || 'My Dashboard'}</span>
+              </Link>
             )}
             <button onClick={handleLogout} className="text-white/50 text-sm font-semibold hover:text-white transition-colors">
               Logout

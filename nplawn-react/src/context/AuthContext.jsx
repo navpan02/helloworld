@@ -1,5 +1,6 @@
 import { createContext, useContext, useState } from 'react';
 import { getSession, saveSession, clearSession } from '../utils/auth';
+import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext(null);
 
@@ -13,6 +14,7 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     clearSession();
+    supabase.auth.signOut();
     setUser(null);
   };
 

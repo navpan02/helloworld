@@ -61,6 +61,7 @@ export function clearSession() {
 
 /**
  * Register a new user in the public.users table.
+ * Also creates a Supabase Auth account so RLS policies (auth.email()) work.
  * role: 'user' | 'provider' | 'admin'
  */
 export async function signUpUser({ email, password, name, role = 'user' }) {
@@ -76,6 +77,10 @@ export async function signUpUser({ email, password, name, role = 'user' }) {
   if (existing) {
     return { data: null, error: { message: 'User already registered' } };
   }
+
+  // Create Supabase Auth account so auth.email() works in RLS policies.
+  // Ignore errors here — the custom-auth insert below is the source of truth.
+  await supabase.auth.signUp({ email: normalEmail, password });
 
   const id = crypto.randomUUID();
   const password_hash = await sha256(password);
@@ -97,6 +102,7 @@ export async function signUpUser({ email, password, name, role = 'user' }) {
 
 /**
  * Sign in by looking up the user in public.users and comparing password hash.
+ * Also establishes a Supabase Auth session so RLS policies (auth.email()) work.
  * Returns { data: { user }, error } on success.
  */
 export async function signInUser({ email, password }) {
@@ -114,6 +120,14 @@ export async function signInUser({ email, password }) {
   const hash = await sha256(password);
   if (hash !== dbUser.password_hash) {
     return { data: null, error: { message: 'Invalid login credentials' } };
+  }
+
+  // Establish a Supabase Auth session so auth.email() works in RLS policies.
+  const { error: signInErr } = await supabase.auth.signInWithPassword({ email: normalEmail, password });
+  if (signInErr) {
+    // User not in Supabase Auth yet (existing custom-auth account) — create and sign in.
+    await supabase.auth.signUp({ email: normalEmail, password });
+    await supabase.auth.signInWithPassword({ email: normalEmail, password });
   }
 
   const { password_hash: _omit, ...user } = dbUser;

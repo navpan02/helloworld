@@ -7,13 +7,15 @@
 -- auth.uid() policies are replaced with permissive ones.
 -- App-level auth (sessionStorage) enforces access control.
 --
--- Run once in: Supabase Dashboard → SQL Editor → New Query
+-- Run once in: Supabase Dashboard → SQL Editor → New Query 2
 -- ============================================================
 
 
 -- ── homeowner_properties ───────────────────────────────────
 alter table public.homeowner_properties enable row level security;
 drop policy if exists "Owner manages own properties" on public.homeowner_properties;
+drop policy if exists "Owner manages own properties" on public.homeowner_properties;
+
 create policy "Allow all on homeowner_properties" on public.homeowner_properties
   for all using (true) with check (true);
 

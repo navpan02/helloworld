@@ -3,7 +3,7 @@ trigger:
   - release/*
 
 pool:
-  name: 'Default' # This tells Azure to use your Mac
+  name: 'Default' 
 
 steps:
   - checkout: self
@@ -11,7 +11,11 @@ steps:
     persistCredentials: true
 
   - script: |
-      git remote add github https://github.com/navpan02/NP02.git
-      git push github --all --force
+      git config --global user.email "you@example.com"
+      git config --global user.name "Azure DevOps Agent"
+      git checkout main
+      git pull origin main
+      git remote add github https://github.com/navpan02/NP02.git || git remote set-url github https://github.com/navpan02/NP02.git
+      git push github main --force
       git push github --tags --force
-    displayName: Mirror to GitHub
+    displayName: 'Mirror to GitHub'

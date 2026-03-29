@@ -3,8 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
-function getLeads()  { try { return JSON.parse(localStorage.getItem('nplawn_leads')  || '[]'); } catch { return []; } }
-function getOrders() { try { return JSON.parse(localStorage.getItem('nplawn_orders') || '[]'); } catch { return []; } }
+function getLeads() { try { return JSON.parse(localStorage.getItem('nplawn_leads') || '[]'); } catch { return []; } }
 
 function fmt(dt) {
   if (!dt) return '—';
@@ -65,24 +64,21 @@ export default function AdminDashboard() {
         .from('orders').select('*').order('submitted_at', { ascending: false });
       if (ordersError) setDbStatus(`${ordersError.message} (code: ${ordersError.code})`);
       else setDbStatus('ok');
-      const remoteOrders = ordersData ?? [];
-      const localOrders  = getOrders();
-      const remoteIds    = new Set(remoteOrders.map(o => o.id));
-      setOrders([...remoteOrders, ...localOrders.filter(o => !remoteIds.has(o.id))]);
+      setOrders(ordersData ?? []);
 
       // Leads
       const { data: leadsData } = await supabase
         .from('leads').select('*').order('submitted_at', { ascending: false });
-      const remoteLeads    = leadsData ?? [];
-      const localLeads     = getLeads();
-      const remoteLeadKeys = new Set(remoteLeads.map(l => l.email + l.submitted_at));
+      const remoteLeads = leadsData ?? [];
+      const localLeads  = getLeads();
+      const remoteKeys  = new Set(remoteLeads.map(l => l.email + l.submitted_at));
       setLeads([...remoteLeads,
-        ...localLeads.filter(l => !remoteLeadKeys.has(l.email + new Date(l.submittedAt).toISOString()))]);
+        ...localLeads.filter(l => !remoteKeys.has(l.email + new Date(l.submittedAt).toISOString()))]);
 
       // Users
-      const { data: profilesData } = await supabase
-        .from('profiles').select('id, email, name, role, created_at');
-      setUsers(profilesData ?? []);
+      const { data: usersData } = await supabase
+        .from('users').select('id, email, name, role, created_at');
+      setUsers(usersData ?? []);
 
       // Marketplace providers
       const { data: providerData } = await supabase.from('provider_profiles').select('*');

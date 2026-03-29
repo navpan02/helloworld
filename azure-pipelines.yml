@@ -11,11 +11,13 @@ steps:
     persistCredentials: true
 
   - script: |
-      git config --global user.email "you@example.com"
-      git config --global user.name "Azure DevOps Agent"
-      git checkout main
-      git pull origin main
+      # 1. Force the agent to point its local 'main' to the commit we just downloaded
+      git checkout -B main
+      
+      # 2. Update the remote URL (handles "already exists" error gracefully)
       git remote add github https://github.com/navpan02/NP02.git || git remote set-url github https://github.com/navpan02/NP02.git
+      
+      # 3. Push to GitHub
       git push github main --force
       git push github --tags --force
     displayName: 'Mirror to GitHub'

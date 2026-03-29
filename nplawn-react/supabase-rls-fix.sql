@@ -7,7 +7,7 @@
 -- auth.uid() policies are replaced with permissive ones.
 -- App-level auth (sessionStorage) enforces access control.
 --
--- Run once in: Supabase Dashboard → SQL Editor → New Query
+-- Run once in: Supabase Dashboard → SQL Editor → New Query 2
 -- ============================================================
 
 

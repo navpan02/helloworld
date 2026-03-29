@@ -3,7 +3,7 @@ trigger:
   - release/*
 
 pool:
-  vmImage: ubuntu-latest
+  name: 'Default' # This tells Azure to use your Mac
 
 steps:
   - checkout: self

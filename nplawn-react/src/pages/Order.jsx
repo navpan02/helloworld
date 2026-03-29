@@ -94,45 +94,29 @@ export default function Order() {
 
   const submitOrder = async () => {
     const id = 'NPL-' + Date.now().toString().slice(-6);
-    setOrderId(id);
     const orderData = {
       id,
-      plan: planObj.label,
-      sqft: Number(sqft),
+      user_id:          user?.id ?? null,
+      plan:             planObj.label,
+      sqft:             Number(sqft),
       total,
-      avg_per_app: avgPerApp,
-      rounds: planObj.rounds,
-      customer_name: form.name,
-      customer_email: form.email || null,
-      customer_phone: form.phone || null,
+      avg_per_app:      avgPerApp,
+      rounds:           planObj.rounds,
+      customer_name:    form.name,
+      customer_email:   form.email || null,
+      customer_phone:   form.phone || null,
       customer_address: form.address,
-      customer_city: form.city,
-      customer_zip: form.zip,
-      customer_notes: form.notes || null,
-      submitted_at: new Date().toISOString(),
-      submittedAt: Date.now(),
-      customer: {
-        name: form.name,
-        email: form.email || null,
-        phone: form.phone || null,
-        address: form.address,
-        city: form.city,
-        zip: form.zip,
-      },
+      customer_city:    form.city,
+      customer_zip:     form.zip,
+      customer_notes:   form.notes || null,
+      status:           'pending',
     };
 
-    // Save to localStorage immediately and advance to confirmation
-    const orders = JSON.parse(localStorage.getItem('nplawn_orders') || '[]');
-    orders.push(orderData);
-    localStorage.setItem('nplawn_orders', JSON.stringify(orders));
-    setStep(3);
+    const { error } = await supabase.from('orders').insert(orderData);
+    if (error) console.error('Order save error:', error.message);
 
-    // Fire-and-forget Supabase insert
-    if (supabase) {
-      supabase.from('orders').insert(orderData)
-        .then(({ error }) => { if (error) console.error('Supabase insert error:', error.message); })
-        .catch(err => console.error('Supabase insert error:', err));
-    }
+    setOrderId(id);
+    setStep(3);
   };
 
   return (

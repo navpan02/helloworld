@@ -1,9 +1,10 @@
 trigger:
   - main
   - release/*
+  - claude/*
 
 pool:
-  name: 'Default' 
+  name: 'Default'
 
 steps:
   - checkout: self
@@ -11,13 +12,12 @@ steps:
     persistCredentials: true
 
   - script: |
-      # 1. Force the local agent to align its 'main' pointer with the ADO commit
-      git checkout -B main
-      
-      # 2. Add or update the remote (The || part prevents the 'already exists' error)
       git remote add github https://github.com/navpan02/NP02.git || git remote set-url github https://github.com/navpan02/NP02.git
       
-      # 3. Force push the actual content to GitHub
-      git push github main --force
+      # Fetch all branches from ADO
+      git fetch origin '+refs/heads/*:refs/remotes/origin/*'
+      
+      # Push all branches and tags to GitHub
+      git push github '+refs/remotes/origin/*:refs/heads/*' --force
       git push github --tags --force
     displayName: 'Mirror to GitHub'

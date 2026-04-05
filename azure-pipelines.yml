@@ -2,6 +2,7 @@ trigger:
   - main
   - release/*
   - claude/*
+  - feature*
 
 pool:
   name: 'Default'

@@ -2,6 +2,15 @@ import { Link } from 'react-router-dom';
 
 export const BLOG_POSTS = [
   {
+    slug: 'spring-care-guide',
+    tag: 'Seasonal Care',
+    title: 'Spring Lawn Care: Your Complete Chicagoland Checklist',
+    excerpt: 'After a Chicagoland winter, your lawn needs a strategic recovery plan. This checklist covers damage assessment, pre-emergent timing, first mow guidelines, fertilization, and everything your lawn needs to thrive from April through May.',
+    date: 'April 5, 2026',
+    readTime: '8 min read',
+    icon: <path d="M12 22V12M12 12C12 7 7 3 2 4c0 5 4 9 10 8zM12 12c0-5 5-9 10-8-1 5-5 9-10 8z"/>,
+  },
+  {
     slug: 'winter-prep-guide',
     tag: 'Seasonal Care',
     title: 'How to Prep Your Lawn for Winter: A Chicagoland Checklist',

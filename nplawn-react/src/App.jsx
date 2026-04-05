@@ -77,6 +77,7 @@ import BestGrassTypes               from './pages/blog/BestGrassTypes';
 import MentalBenefitsGreenLawn      from './pages/blog/MentalBenefitsGreenLawn';
 import FamilyOutdoorSpace           from './pages/blog/FamilyOutdoorSpace';
 import CleanLawnMarketplaceGuide    from './pages/blog/CleanLawnMarketplaceGuide';
+import SpringCareGuide              from './pages/blog/SpringCareGuide';
 
 function AppRoutes() {
   return (
@@ -139,6 +140,7 @@ function AppRoutes() {
       <Route path="/blog/mental-benefits-green-lawn"    element={<Layout><MentalBenefitsGreenLawn/></Layout>} />
       <Route path="/blog/family-outdoor-space"          element={<Layout><FamilyOutdoorSpace/></Layout>} />
       <Route path="/blog/cleanlawn-marketplace-guide"   element={<Layout><CleanLawnMarketplaceGuide/></Layout>} />
+      <Route path="/blog/spring-care-guide"              element={<Layout><SpringCareGuide/></Layout>} />
 
       {/* Quote lead form */}
       <Route path="/quote"       element={<Layout><GetQuote/></Layout>} />

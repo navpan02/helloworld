@@ -69,8 +69,12 @@ export default function CleanLawn() {
           From routine mowing to full landscape transformations — browse our services, book online, and let local pros handle the rest.
         </p>
         <div className="flex gap-3.5 flex-wrap justify-center mt-9">
-          <a href="#cuts-trims"
+          <Link to="/quote"
             className="bg-np-accent text-np-dark font-extrabold text-base px-8 py-3.5 rounded-full no-underline hover:bg-np-lite transition-all">
+            Get a Free Quote
+          </Link>
+          <a href="#cuts-trims"
+            className="border-2 border-white/50 text-white font-bold text-base px-7 py-3.5 rounded-full no-underline hover:border-np-lite hover:text-np-lite transition-all">
             Browse Services
           </a>
           <Link to="/CleanLawn/provider/signup"

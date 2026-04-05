@@ -12,9 +12,9 @@ const PLANS = {
     badge: 'Essential',
     badgeColor: 'bg-np-lite/30 text-np-green',
     tiers: [
-      { max: 1000, rate: 0.10 },
-      { max: 5000, rate: 0.09 },
-      { max: Infinity, rate: 0.08 },
+      { max: 1000, rate: 0.11 },
+      { max: 5000, rate: 0.099 },
+      { max: Infinity, rate: 0.088 },
     ],
   },
   Standard: {
@@ -24,9 +24,9 @@ const PLANS = {
     badge: 'Popular',
     badgeColor: 'bg-np-accent text-np-dark',
     tiers: [
-      { max: 1000, rate: 0.20 },
-      { max: 5000, rate: 0.18 },
-      { max: Infinity, rate: 0.16 },
+      { max: 1000, rate: 0.22 },
+      { max: 5000, rate: 0.198 },
+      { max: Infinity, rate: 0.176 },
     ],
   },
   Premium: {

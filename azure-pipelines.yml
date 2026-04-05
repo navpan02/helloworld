@@ -3,6 +3,7 @@ trigger:
   - release/*
   - claude/*
   - feature*
+  - gh-pages
 
 pool:
   name: 'Default'

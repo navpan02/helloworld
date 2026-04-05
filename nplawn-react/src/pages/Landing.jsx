@@ -3,16 +3,16 @@ import heroImg from '../assets/mylawn.jpeg';
 
 const SERVICES = [
   {
-    to: '/tree-trimming',
-    title: 'Tree Trimming',
-    desc: 'Crown shaping, deadwood removal, and hazard pruning by trained arborists.',
-    icon: <><path d="M6 3v18M6 3l6 6M6 3l-3 6"/><path d="M18 6v15M18 6l3 6M18 6l-3 6"/></>,
-  },
-  {
     to: '/lawn-care',
     title: 'Lawn Care Plans',
     desc: 'Seasonal fertilization, weed control, and soil health treatments — GrassBasic, GrassPro, or GrassNatural.',
     icon: <><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></>,
+  },
+  {
+    to: '/tree-trimming',
+    title: 'Tree Trimming',
+    desc: 'Crown shaping, deadwood removal, and hazard pruning by trained arborists.',
+    icon: <><path d="M6 3v18M6 3l6 6M6 3l-3 6"/><path d="M18 6v15M18 6l3 6M18 6l-3 6"/></>,
   },
   {
     to: '/tree-shrubs',
@@ -122,7 +122,7 @@ export default function Landing() {
       {/* SERVICES */}
       <section className="px-[8%] py-20 bg-np-surface">
         <p className="pg-label">What We Do</p>
-        <h2 className="pg-title">Complete Lawn &amp; Landscape Services</h2>
+        <h2 className="pg-title">Complete Lawn Care &amp; Landscape Services</h2>
         <p className="pg-sub mb-12">Everything your property needs, handled by a team that treats your yard like their own.</p>
         <div className="service-grid">
           {SERVICES.map(s => (

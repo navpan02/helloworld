@@ -31,21 +31,30 @@ const SEASON_ICONS = {
 /**
  * SeasonalBanner — permanent, non-dismissible seasonal lawn care recommendation.
  *
- * Props:
+ * Props (mutually exclusive — nominatimAddress takes priority):
+ *   nominatimAddress {object|null|undefined}
+ *     - object : Nominatim address object `{ state, postcode, ... }` from BuyNow.
+ *                Uses state name as the region signal (reliable for all search types).
+ *     - null   : address step not yet completed — hide the banner.
+ *     - undefined (omitted) : falls through to zipCode / localStorage.
+ *
  *   zipCode {string|undefined}
- *     - undefined → falls back to localStorage (Landing, Order, GetQuote)
- *     - explicit string → uses only that value; empty string = no banner
- *       (used in BuyNow so only the entered address drives the recommendation)
+ *     - string  : explicit zip (Landing, Order, GetQuote).
+ *     - undefined (omitted) : falls back to localStorage `nplawn_zip`.
  */
-export default function SeasonalBanner({ zipCode }) {
+export default function SeasonalBanner({ nominatimAddress, zipCode }) {
   const [rec, setRec] = useState(null);
 
   useEffect(() => {
-    // If zipCode prop is provided (even empty string), use it exclusively.
-    // If undefined, fall back to any zip previously stored by another page.
+    // BuyNow path: nominatimAddress is always provided (object when selected, null when not)
+    if (nominatimAddress !== undefined) {
+      setRec(nominatimAddress ? getSeasonalRecommendation(nominatimAddress) : null);
+      return;
+    }
+    // Zip / localStorage path: Landing, Order, GetQuote
     const zip = zipCode !== undefined ? zipCode : localStorage.getItem(STORAGE_KEY);
     setRec(zip ? getSeasonalRecommendation(zip) : null);
-  }, [zipCode]);
+  }, [nominatimAddress, zipCode]);
 
   if (!rec) return null;
 

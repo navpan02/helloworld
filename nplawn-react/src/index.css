@@ -300,4 +300,45 @@
   .form-textarea {
     @apply form-input resize-none;
   }
+
+  /* ── SEASONAL BANNER ── */
+  .seasonal-banner {
+    @apply bg-np-surface border border-np-border rounded-2xl px-5 py-4 my-6 mx-auto max-w-4xl;
+  }
+  .seasonal-banner-inner {
+    @apply flex gap-4 items-start;
+  }
+  .seasonal-banner-icon {
+    @apply w-10 h-10 rounded-xl bg-np-lite/40 flex items-center justify-center flex-shrink-0 mt-0.5;
+  }
+  .seasonal-banner-body {
+    @apply flex-1 min-w-0;
+  }
+  .seasonal-banner-heading {
+    @apply text-np-dark font-bold text-sm mb-1;
+  }
+  .seasonal-banner-summary {
+    @apply text-np-muted text-sm mb-3;
+  }
+  .seasonal-banner-pills {
+    @apply flex flex-wrap gap-2;
+  }
+  .seasonal-pill {
+    @apply inline-block bg-np-accent/15 text-np-green text-xs font-bold px-3 py-1.5 rounded-full
+           border border-np-accent/30 hover:bg-np-accent hover:text-np-dark transition-all no-underline;
+  }
+  .seasonal-banner-close {
+    @apply text-np-muted hover:text-np-dark transition-colors flex-shrink-0 p-1 -mt-0.5 -mr-1;
+  }
+
+  /* ── ZIP PROMPT (Landing page) ── */
+  .zip-prompt {
+    @apply flex items-center gap-2 bg-white border border-np-border rounded-2xl px-4 py-3 shadow-np max-w-sm mx-auto my-6;
+  }
+  .zip-prompt-input {
+    @apply flex-1 text-sm text-np-text placeholder-np-muted border-none outline-none bg-transparent font-medium;
+  }
+  .zip-prompt-btn {
+    @apply bg-np-accent text-np-dark text-xs font-bold px-4 py-2 rounded-full hover:bg-np-lite transition-all;
+  }
 }

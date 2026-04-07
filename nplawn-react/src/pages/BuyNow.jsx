@@ -593,10 +593,12 @@ export default function BuyNow() {
         {step === 2 && (
           <div>
             <h2 className="text-np-dark text-2xl font-bold mb-2">Choose Your Plan</h2>
-            <p className="text-np-muted text-sm mb-8">
+            <p className="text-np-muted text-sm mb-4">
               Pricing calculated for your <strong className="text-np-dark">{Number(sqft).toLocaleString()} sq ft</strong> lawn.
               Select the plan that fits your yard and budget.
             </p>
+
+            <SeasonalBanner nominatimAddress={selectedPlace?.address ?? null} />
 
             <div className="grid lg:grid-cols-3 gap-5 mb-8">
               {Object.entries(PLANS).map(([key, p]) => {

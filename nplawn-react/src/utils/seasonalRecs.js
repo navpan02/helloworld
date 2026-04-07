@@ -262,7 +262,12 @@ const MATRIX = {
  * @param {Date} [now] - optional date override (for testing)
  * @returns {{ season, region, heading, summary, treatments } | null}
  */
-export function getSeasonalRecommendation(input, now = new Date()) {
+export function getSeasonalRecommendation(input, now = (() => {
+  // Dev override: set localStorage.nplawn_date_override = 'YYYY-MM-DD' in the browser console
+  // to simulate any time of year. Ignored in production if not set.
+  const override = localStorage.getItem('nplawn_date_override');
+  return override ? new Date(override) : new Date();
+})()) {
   const region = typeof input === 'string'
     ? getClimateRegion(input)
     : getClimateRegionFromAddress(input);

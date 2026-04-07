@@ -1,5 +1,72 @@
-// Seasonal Intelligence — zip→region mapping + recommendation matrix
-// Epic #8: Phase 1 uses zip + current month only (no weather API, no account required)
+// Seasonal Intelligence — region mapping + recommendation matrix
+// Epic #8: Phase 1 uses location (zip or state from Nominatim) + current month.
+// No weather API, no account required.
+
+/**
+ * State name → climate grass region.
+ * Source: USDA hardiness zone data + turfgrass science literature.
+ * Cool = Kentucky bluegrass / fescue / ryegrass territory
+ * Warm = Bermuda / zoysia / St. Augustine territory
+ * Transition = mixed or either, depending on microclimate
+ */
+const STATE_REGIONS = {
+  // Cool-season states
+  Alaska:             'cool',
+  Connecticut:        'cool',
+  Colorado:           'cool',
+  Delaware:           'cool',
+  Idaho:              'cool',
+  Illinois:           'cool',
+  Indiana:            'cool',
+  Iowa:               'cool',
+  Kansas:             'cool',
+  Maine:              'cool',
+  Maryland:           'cool',
+  Massachusetts:      'cool',
+  Michigan:           'cool',
+  Minnesota:          'cool',
+  Montana:            'cool',
+  Nebraska:           'cool',
+  'New Hampshire':    'cool',
+  'New Jersey':       'cool',
+  'New York':         'cool',
+  'North Dakota':     'cool',
+  Ohio:               'cool',
+  Oregon:             'cool',
+  Pennsylvania:       'cool',
+  'Rhode Island':     'cool',
+  'South Dakota':     'cool',
+  Vermont:            'cool',
+  Washington:         'cool',
+  Wisconsin:          'cool',
+  Wyoming:            'cool',
+  'District of Columbia': 'cool',
+
+  // Warm-season states
+  Alabama:            'warm',
+  Arizona:            'warm',
+  Arkansas:           'warm',
+  Florida:            'warm',
+  Georgia:            'warm',
+  Hawaii:             'warm',
+  Louisiana:          'warm',
+  Mississippi:        'warm',
+  Nevada:             'warm',
+  'New Mexico':       'warm',
+  Oklahoma:           'warm',
+  'South Carolina':   'warm',
+  Texas:              'warm',
+
+  // Transition zone
+  California:         'transition',
+  Kentucky:           'transition',
+  Missouri:           'transition',
+  'North Carolina':   'transition',
+  Tennessee:          'transition',
+  Utah:               'transition',
+  Virginia:           'transition',
+  'West Virginia':    'transition',
+};
 
 /**
  * Maps a US zip code to a climate grass region.
@@ -9,17 +76,17 @@ export function getClimateRegion(zip) {
   if (!zip || !/^\d{5}/.test(zip)) return null;
   const p = parseInt(zip.slice(0, 3), 10);
 
-  // Cool-season grass regions: Midwest, Northeast, PNW, Mountain
+  // Cool-season grass regions: Midwest, Northeast, PNW, Mountain, Alaska
   if (
-    (p >= 10 && p <= 99)   ||  // New England, NY outer, NJ, PA, DE, MD, DC
+    (p >= 10 && p <= 99)   ||  // New England, NY, NJ, PA, DE, MD, DC
     (p >= 100 && p <= 212) ||  // NY, PA, DE, MD, DC, VA (north)
     (p >= 214 && p <= 219) ||  // MD
     (p >= 400 && p <= 499) ||  // KY, OH, IN, MI
     (p >= 500 && p <= 599) ||  // IA, WI, MN, SD, ND, MT
-    (p >= 600 && p <= 649) ||  // IL (includes 606 = Chicago, 605 = Naperville)
+    (p >= 600 && p <= 649) ||  // IL
     (p >= 660 && p <= 693) ||  // KS, NE
     (p >= 800 && p <= 838) ||  // CO, WY, ID
-    (p >= 970 && p <= 994)     // OR, WA
+    (p >= 970 && p <= 999)     // OR, WA, AK
   ) return 'cool';
 
   // Warm-season grass regions: South, Southeast, Southwest
@@ -29,8 +96,33 @@ export function getClimateRegion(zip) {
     (p >= 850 && p <= 898)     // AZ, NM, NV
   ) return 'warm';
 
-  // Transition zone: VA (south), NC, TN, MO (south), CA, UT, and others
+  // Transition zone: VA south, NC, TN, MO south, CA, UT, KY, WV
   return 'transition';
+}
+
+/**
+ * Derives a climate region from a Nominatim address object.
+ * Nominatim reliably returns `state` for all result types (city, street, POI).
+ * `postcode` is only present for specific addresses — so state takes priority.
+ *
+ * @param {{ state?: string, postcode?: string }} address
+ * @returns {'cool'|'warm'|'transition'|null}
+ */
+export function getClimateRegionFromAddress(address) {
+  if (!address) return null;
+
+  // Try state name first — always present and unambiguous
+  if (address.state) {
+    const byState = STATE_REGIONS[address.state];
+    if (byState) return byState;
+  }
+
+  // Fall back to postcode if state lookup failed (e.g. territories, unusual state names)
+  if (address.postcode) {
+    return getClimateRegion(address.postcode.split('-')[0]);
+  }
+
+  return null;
 }
 
 /**
@@ -114,8 +206,8 @@ const MATRIX = {
       ],
     },
     Winter: {
-      heading: "Your lawn is dormant",
-      summary: "Warm-season grass is dormant and doesn't need treatment. Plan your spring program now to get a head start.",
+      heading: "Your warm-season lawn is dormant",
+      summary: "Warm-season grass doesn't need treatment now. Plan your spring program and lock in your schedule before the rush.",
       treatments: [
         { label: 'View Lawn Care Plans', to: '/lawn-care' },
         { label: 'Get a Free Quote', to: '/quote' },
@@ -163,14 +255,23 @@ const MATRIX = {
 
 /**
  * Main entry point.
- * Given a zip code, returns a recommendation object or null.
  *
- * @param {string} zip
+ * @param {string | { state?: string, postcode?: string }} input
+ *   - string: a 5-digit US zip code (used by Landing, Order, GetQuote)
+ *   - object: a Nominatim address object (used by BuyNow — state is more reliable than postcode)
  * @param {Date} [now] - optional date override (for testing)
  * @returns {{ season, region, heading, summary, treatments } | null}
  */
-export function getSeasonalRecommendation(zip, now = new Date()) {
-  const region = getClimateRegion(zip);
+export function getSeasonalRecommendation(input, now = (() => {
+  // Dev override: set localStorage.nplawn_date_override = 'YYYY-MM-DD' in the browser console
+  // to simulate any time of year. Ignored in production if not set.
+  const override = localStorage.getItem('nplawn_date_override');
+  return override ? new Date(override) : new Date();
+})()) {
+  const region = typeof input === 'string'
+    ? getClimateRegion(input)
+    : getClimateRegionFromAddress(input);
+
   if (!region) return null;
 
   const month = now.getMonth() + 1; // 1-12

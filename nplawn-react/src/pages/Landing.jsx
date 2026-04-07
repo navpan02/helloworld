@@ -1,5 +1,9 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import heroImg from '../assets/mylawn.jpeg';
+import SeasonalBanner from '../components/SeasonalBanner';
+
+const STORAGE_KEY = 'nplawn_zip';
 
 const SERVICES = [
   {
@@ -75,6 +79,17 @@ const WHY_US = [
 ];
 
 export default function Landing() {
+  const [zip, setZip] = useState('');
+  const [savedZip, setSavedZip] = useState(() => localStorage.getItem(STORAGE_KEY) || '');
+
+  function handleZipSubmit(e) {
+    e.preventDefault();
+    const trimmed = zip.trim();
+    if (!/^\d{5}$/.test(trimmed)) return;
+    localStorage.setItem(STORAGE_KEY, trimmed);
+    setSavedZip(trimmed);
+  }
+
   return (
     <>
       {/* HERO */}
@@ -117,6 +132,29 @@ export default function Landing() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* SEASONAL INTELLIGENCE */}
+      <section className="px-[8%] pt-8 pb-2 bg-np-surface">
+        {savedZip ? (
+          <SeasonalBanner zipCode={savedZip} />
+        ) : (
+          <form onSubmit={handleZipSubmit} className="zip-prompt">
+            <svg viewBox="0 0 24 24" className="w-4 h-4 stroke-np-muted fill-none stroke-2 flex-shrink-0">
+              <path d="M12 22V12M12 12C12 7 7 3 2 4c0 5 4 9 10 8zM12 12c0-5 5-9 10-8-1 5-5 9-10 8z"/>
+            </svg>
+            <input
+              className="zip-prompt-input"
+              type="text"
+              inputMode="numeric"
+              maxLength={5}
+              placeholder="Enter your zip for seasonal lawn tips"
+              value={zip}
+              onChange={e => setZip(e.target.value.replace(/\D/g, ''))}
+            />
+            <button type="submit" className="zip-prompt-btn">Go</button>
+          </form>
+        )}
       </section>
 
       {/* SERVICES */}

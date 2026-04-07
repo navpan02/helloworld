@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { validateName, validateEmail, validatePhone } from '../utils/validate';
+import SeasonalBanner from '../components/SeasonalBanner';
 
 const SERVICES = [
   'Lawn Mowing',
@@ -193,6 +194,8 @@ export default function GetQuote() {
           ))}
         </div>
 
+        <SeasonalBanner zipCode={/^\d{5}$/.test(form.zip) ? form.zip : undefined} />
+
         <div className="bg-white rounded-2xl border border-np-border shadow-np p-8">
           {error && (
             <div className="mb-5 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">{error}</div>
@@ -229,7 +232,10 @@ export default function GetQuote() {
                 <Field label="State" id="state" type="text" value={form.state} errors={fieldErrors}
                   onChange={e => set('state', e.target.value)} placeholder="IL" />
                 <Field label="ZIP" id="zip" type="text" value={form.zip} errors={fieldErrors}
-                  onChange={e => set('zip', e.target.value)} placeholder="60601" />
+                  onChange={e => {
+                    set('zip', e.target.value);
+                    if (/^\d{5}$/.test(e.target.value)) localStorage.setItem('nplawn_zip', e.target.value);
+                  }} placeholder="60601" />
               </div>
             </div>
           )}

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { validateName, validateEmail, validatePhone } from '../utils/validate';
+import SeasonalBanner from '../components/SeasonalBanner';
 
 // Map LawnCare plan keys → BuyNow plan keys
 const PLAN_KEY_MAP = { basic: 'Basic', pro: 'Standard', natural: 'Premium' };
@@ -274,6 +275,11 @@ export default function BuyNow() {
     setSelectedPlace(place);
     setSuggestions([]);
     setShowDropdown(false);
+    // Extract and persist zip code from Nominatim address details (Phase 1 — Seasonal Intelligence)
+    const zip = place.address?.postcode?.split('-')[0];
+    if (zip && /^\d{5}$/.test(zip)) {
+      localStorage.setItem('nplawn_zip', zip);
+    }
   }
 
   async function placeOrder() {
@@ -519,6 +525,7 @@ export default function BuyNow() {
         {/* ── STEP 1: MAP & LAWN SIZE ─────────────────────────────────────── */}
         {step === 1 && (
           <div>
+            <SeasonalBanner zipCode={selectedPlace?.address?.postcode?.split('-')[0]} />
             <h2 className="text-np-dark text-2xl font-bold mb-2">Your Property on the Map</h2>
             <p className="text-np-muted text-sm mb-6">
               We've located your property and estimated your lawn area using OpenStreetMap data. Adjust the size below if needed.

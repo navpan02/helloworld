@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { validateName, validateEmail, validatePhone } from '../utils/validate';
+import SeasonalBanner from '../components/SeasonalBanner';
 
 const PLANS = {
   Basic: {
@@ -212,6 +213,7 @@ export default function Order() {
         {/* STEP 1: CUSTOMER DETAILS */}
         {step === 1 && (
           <div>
+            <SeasonalBanner zipCode={/^\d{5}$/.test(form.zip) ? form.zip : undefined} />
             <h2 className="text-np-dark text-2xl font-bold mb-6">Your Information</h2>
             <div className="grid md:grid-cols-2 gap-6 max-w-2xl">
               <div className="form-group">
@@ -246,7 +248,12 @@ export default function Order() {
               </div>
               <div className="form-group">
                 <label className="form-label">ZIP Code *</label>
-                <input className="form-input" type="text" required value={form.zip} onChange={e => set('zip', e.target.value)} placeholder="60540" />
+                <input className="form-input" type="text" required value={form.zip}
+                  onChange={e => {
+                    set('zip', e.target.value);
+                    if (/^\d{5}$/.test(e.target.value)) localStorage.setItem('nplawn_zip', e.target.value);
+                  }}
+                  placeholder="60540" maxLength={5} inputMode="numeric" />
               </div>
               <div className="form-group md:col-span-2">
                 <label className="form-label">Notes (optional)</label>

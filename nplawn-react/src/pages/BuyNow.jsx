@@ -525,7 +525,7 @@ export default function BuyNow() {
         {/* ── STEP 1: MAP & LAWN SIZE ─────────────────────────────────────── */}
         {step === 1 && (
           <div>
-            <SeasonalBanner zipCode={selectedPlace?.address?.postcode?.split('-')[0]} />
+            <SeasonalBanner zipCode={selectedPlace?.address?.postcode?.split('-')[0] ?? ''} />
             <h2 className="text-np-dark text-2xl font-bold mb-2">Your Property on the Map</h2>
             <p className="text-np-muted text-sm mb-6">
               We've located your property and estimated your lawn area using OpenStreetMap data. Adjust the size below if needed.

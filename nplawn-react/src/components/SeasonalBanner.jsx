@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getSeasonalRecommendation } from '../utils/seasonalRecs';
 
 const STORAGE_KEY = 'nplawn_zip';
-const DISMISS_KEY = 'nplawn_banner_dismissed';
 
 const SEASON_ICONS = {
   Spring: (
@@ -30,36 +29,25 @@ const SEASON_ICONS = {
 };
 
 /**
- * SeasonalBanner — shows a seasonal lawn care recommendation based on zip code.
+ * SeasonalBanner — permanent, non-dismissible seasonal lawn care recommendation.
  *
  * Props:
- *   zipCode {string} — optional override (e.g. from a form already on the page).
- *                      Falls back to localStorage if not provided.
+ *   zipCode {string|undefined}
+ *     - undefined → falls back to localStorage (Landing, Order, GetQuote)
+ *     - explicit string → uses only that value; empty string = no banner
+ *       (used in BuyNow so only the entered address drives the recommendation)
  */
 export default function SeasonalBanner({ zipCode }) {
   const [rec, setRec] = useState(null);
-  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    // Check session-level dismiss
-    if (sessionStorage.getItem(DISMISS_KEY)) {
-      setDismissed(true);
-      return;
-    }
-
-    const zip = zipCode || localStorage.getItem(STORAGE_KEY);
-    if (!zip) return;
-
-    const result = getSeasonalRecommendation(zip);
-    setRec(result);
+    // If zipCode prop is provided (even empty string), use it exclusively.
+    // If undefined, fall back to any zip previously stored by another page.
+    const zip = zipCode !== undefined ? zipCode : localStorage.getItem(STORAGE_KEY);
+    setRec(zip ? getSeasonalRecommendation(zip) : null);
   }, [zipCode]);
 
-  if (!rec || dismissed) return null;
-
-  function handleDismiss() {
-    sessionStorage.setItem(DISMISS_KEY, '1');
-    setDismissed(true);
-  }
+  if (!rec) return null;
 
   return (
     <div className="seasonal-banner">
@@ -80,15 +68,6 @@ export default function SeasonalBanner({ zipCode }) {
             ))}
           </div>
         </div>
-        <button
-          onClick={handleDismiss}
-          className="seasonal-banner-close"
-          aria-label="Dismiss recommendation"
-        >
-          <svg viewBox="0 0 24 24" className="w-4 h-4 stroke-current fill-none stroke-2">
-            <path d="M18 6L6 18M6 6l12 12"/>
-          </svg>
-        </button>
       </div>
     </div>
   );

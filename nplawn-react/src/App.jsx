@@ -24,6 +24,7 @@ import GetQuote         from './pages/GetQuote';
 import QuoteThanks      from './pages/QuoteThanks';
 import GrassGuide       from './pages/GrassGuide';
 import HowItWorks       from './pages/HowItWorks';
+import LawnDiagnosis    from './pages/LawnDiagnosis';
 import ProviderLanding    from './pages/ProviderLanding';
 import ServiceDiscovery  from './pages/ServiceDiscovery';
 import ProviderProfile   from './pages/ProviderProfile';
@@ -141,6 +142,9 @@ function AppRoutes() {
       <Route path="/blog/family-outdoor-space"          element={<Layout><FamilyOutdoorSpace/></Layout>} />
       <Route path="/blog/cleanlawn-marketplace-guide"   element={<Layout><CleanLawnMarketplaceGuide/></Layout>} />
       <Route path="/blog/spring-care-guide"              element={<Layout><SpringCareGuide/></Layout>} />
+
+      {/* AI Lawn Diagnosis */}
+      <Route path="/lawn-diagnosis" element={<Layout><LawnDiagnosis/></Layout>} />
 
       {/* Quote lead form */}
       <Route path="/quote"       element={<Layout><GetQuote/></Layout>} />

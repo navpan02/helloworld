@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { validateName, validateEmail, validatePhone } from '../utils/validate';
 import SeasonalBanner from '../components/SeasonalBanner';
+import LawnDiagnosisWidget from '../components/LawnDiagnosisWidget';
 
 // Map LawnCare plan keys → BuyNow plan keys
 const PLAN_KEY_MAP = { basic: 'Basic', pro: 'Standard', natural: 'Premium' };
@@ -598,6 +599,7 @@ export default function BuyNow() {
               Select the plan that fits your yard and budget.
             </p>
 
+            <LawnDiagnosisWidget back="buynow" />
             <SeasonalBanner nominatimAddress={selectedPlace?.address ?? null} />
 
             <div className="grid lg:grid-cols-3 gap-5 mb-8">

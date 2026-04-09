@@ -129,21 +129,33 @@ function CheckIcon({ className = 'w-4 h-4' }) {
 export default function BuyNow() {
   const [searchParams] = useSearchParams();
   const initialPlan = PLAN_KEY_MAP[searchParams.get('plan')] || 'Standard';
-  const [step, setStep] = useState(0);
+
+  // When returning from /lawn-diagnosis with ?plan=, restore sqft + address from
+  // sessionStorage so the user lands on Step 2 (Select Plan) instead of Step 0.
+  const _returningWithPlan = !!searchParams.get('plan');
+  const _savedSqft    = _returningWithPlan ? sessionStorage.getItem('nplawn_buynow_sqft')    : null;
+  const _savedAddress = _returningWithPlan ? sessionStorage.getItem('nplawn_buynow_address') : null;
+  const _savedPlace   = _savedAddress ? (() => { try { return JSON.parse(_savedAddress); } catch { return null; } })() : null;
+
+  const [step, setStep] = useState(_savedSqft ? 2 : 0);
 
   // Step 0
-  const [addressInput, setAddressInput] = useState('');
+  const [addressInput, setAddressInput] = useState(_savedPlace?.display_name || '');
   const [suggestions, setSuggestions] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState(null);
+  const [selectedPlace, setSelectedPlace] = useState(_savedPlace);
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [step1Error, setStep1Error] = useState('');
   const [fieldErrors0, setFieldErrors0] = useState({ phone: '', email: '' });
 
-  // Step 1
-  const [sqft, setSqft] = useState('');
-  const [sqftSource, setSqftSource] = useState('');
+  // Step 1 — setSqft is wrapped to also persist to sessionStorage for diagnosis back-navigation
+  const [sqft, _setSqft] = useState(_savedSqft || '');
+  const [sqftSource, setSqftSource] = useState(_savedSqft ? 'Restored from previous session' : '');
+  function setSqft(val) {
+    _setSqft(val);
+    sessionStorage.setItem('nplawn_buynow_sqft', val);
+  }
   const [mapLoading, setMapLoading] = useState(false);
   const [mapError, setMapError] = useState('');
   const mapDivRef = useRef(null);
@@ -276,6 +288,8 @@ export default function BuyNow() {
     setSelectedPlace(place);
     setSuggestions([]);
     setShowDropdown(false);
+    // Persist address so diagnosis back-navigation can restore Step 2
+    sessionStorage.setItem('nplawn_buynow_address', JSON.stringify(place));
     // Extract and persist zip code from Nominatim address details (Phase 1 — Seasonal Intelligence)
     const zip = place.address?.postcode?.split('-')[0];
     if (zip && /^\d{5}$/.test(zip)) {

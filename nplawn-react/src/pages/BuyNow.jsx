@@ -693,19 +693,21 @@ export default function BuyNow() {
                 Select the plan that fits your yard and budget.
               </p>
 
-              {/* Mode tab toggle */}
-              <div className="flex gap-1 p-1 bg-np-surface rounded-xl border border-np-border mb-5">
-                {[['choose', 'Choose a Plan'], ['budget', 'Name Your Price']].map(([mode, label]) => (
-                  <button key={mode} type="button"
-                    onClick={() => setPlanMode(mode)}
-                    className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${
-                      planMode === mode
-                        ? 'bg-white text-np-dark shadow-sm border border-np-border'
-                        : 'text-np-muted hover:text-np-dark'
-                    }`}>
-                    {label}
-                  </button>
-                ))}
+              {/* Mode tab toggle — sticky below navbar */}
+              <div className="sticky top-16 z-40 -mx-[5%] px-[5%] pt-3 pb-3 bg-np-surface border-b border-np-border shadow-sm mb-5">
+                <div className="flex gap-1 p-1 bg-white rounded-xl border border-np-border">
+                  {[['choose', 'Choose a Plan'], ['budget', 'Name Your Price']].map(([mode, label]) => (
+                    <button key={mode} type="button"
+                      onClick={() => setPlanMode(mode)}
+                      className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${
+                        planMode === mode
+                          ? 'bg-np-accent/15 text-np-dark shadow-sm border border-np-accent/30'
+                          : 'text-np-muted hover:text-np-dark'
+                      }`}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* ── CHOOSE A PLAN mode ── */}

@@ -89,11 +89,6 @@ function validateRows(rawRows) {
   return { rows, errors };
 }
 
-// ── Supabase edge function URL ────────────────────────────────────────────────
-
-const SUPABASE_URL = 'https://gbxnofjprjqqbseivhe.supabase.co';
-const EDGE_FN_URL = `${SUPABASE_URL}/functions/v1/route-optimize`;
-
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function RoutePlanner() {
@@ -202,10 +197,6 @@ export default function RoutePlanner() {
 
       if (planErr) throw new Error(`Could not create plan: ${planErr.message}`);
 
-      // Get Supabase session token for auth header
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
-
       const payload = {
         addresses: csvData,
         agents: activeAgents.map(a => ({
@@ -219,22 +210,12 @@ export default function RoutePlanner() {
         plan_id: plan.id,
       };
 
-      const res = await fetch(EDGE_FN_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdieFuAbmZqcHJqcXFic2VpdmhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4OTQ0NTUsImV4cCI6MjA4ODQ3MDQ1NX0.GL4r_T2JEcNrCBWyl4HWiuzrki7-BeeCc3-OKbMCb_A',
-        },
-        body: JSON.stringify(payload),
+      // Use supabase.functions.invoke so the URL + auth are handled by the client
+      const { data, error: fnError } = await supabase.functions.invoke('route-optimize', {
+        body: payload,
       });
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error ?? `Edge function returned ${res.status}`);
-      }
-
-      const data = await res.json();
+      if (fnError) throw new Error(fnError.message ?? 'Edge function error');
       setResult(data);
       setStatus('done');
       setProgress('');

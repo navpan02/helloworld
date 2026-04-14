@@ -23,9 +23,15 @@ export default function LoginPage() {
   // Navigate after login — honour ?next= param set by RequireAuth
   useEffect(() => {
     if (!user) return;
+    const isAdmin = user.role === 'admin' ||
+      ['admin@admin.com', 'navpan@gmail.com'].includes(user.email?.toLowerCase());
     const next = params.get('next');
-    if (next) { navigate(decodeURIComponent(next), { replace: true }); return; }
-    const isAdmin = user.role === 'admin' || user.email === 'admin@admin.com';
+    const nextDecoded = next ? decodeURIComponent(next) : null;
+    // Honour ?next= only for non-trivial paths; admins always land on /admin
+    if (nextDecoded && nextDecoded !== '/') {
+      navigate(isAdmin && nextDecoded === '/admin' ? '/admin' : nextDecoded, { replace: true });
+      return;
+    }
     if (isAdmin)                       navigate('/admin');
     else if (user.role === 'provider') navigate('/CleanLawn/provider');
     else                               navigate('/');

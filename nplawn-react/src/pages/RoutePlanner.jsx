@@ -120,6 +120,7 @@ export default function RoutePlanner() {
   const [result, setResult] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [activeTab, setActiveTab] = useState('map'); // map | list
+  const [colourMode, setColourMode] = useState('agent'); // agent | type (WI #31)
 
   // ── Filter state (initialised when result arrives) ───────────────────────────
   const [filterAgentIds, setFilterAgentIds] = useState(null);
@@ -736,6 +737,33 @@ export default function RoutePlanner() {
                   </button>
                 ))}
               </div>
+
+              {/* Colour-by toggle — only shown in Map View (WI #31) */}
+              {activeTab === 'map' && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-np-muted font-medium whitespace-nowrap">Colour by:</span>
+                  <div className="flex gap-0.5 bg-white rounded-lg border border-np-border p-0.5">
+                    {[
+                      { key: 'agent', label: 'Agent' },
+                      { key: 'type',  label: 'Address Type' },
+                    ].map(opt => (
+                      <button
+                        key={opt.key}
+                        type="button"
+                        onClick={() => setColourMode(opt.key)}
+                        className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                          colourMode === opt.key
+                            ? 'bg-np-dark text-white shadow-sm'
+                            : 'text-np-muted hover:text-np-dark'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="ml-auto flex items-center gap-3 flex-wrap">
                 {/* Pending changes badge */}
                 {pendingChanges > 0 && (
@@ -806,7 +834,7 @@ export default function RoutePlanner() {
                 </div>
               }>
                 <div className="rounded-2xl overflow-hidden border border-np-border shadow-np">
-                  <RouteMap routes={filteredResult.routes} unassigned={filteredResult.unassigned} />
+                  <RouteMap routes={filteredResult.routes} unassigned={filteredResult.unassigned} colourMode={colourMode} />
                 </div>
               </Suspense>
             )}

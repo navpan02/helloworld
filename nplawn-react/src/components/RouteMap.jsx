@@ -25,18 +25,19 @@ const AGENT_COLOURS = [
   '#9333ea', // violet
 ];
 
-// Address type marker colours
+// Address type marker colours (WI #31)
 const TYPE_COLOURS = {
-  homeowner: '#16a34a',
-  new_construction: '#2563eb',
-  renter: '#f59e0b',
-  multi_family: '#8b5cf6',
-  commercial: '#64748b',
-  vacant: '#94a3b8',
+  homeowner:        '#16a34a', // green
+  new_construction: '#2563eb', // blue
+  renter:           '#f59e0b', // yellow
+  multi_family:     '#8b5cf6', // purple
+  commercial:       '#ea580c', // orange
+  vacant:           '#94a3b8', // grey
 };
+const UNKNOWN_TYPE_COLOUR = '#475569'; // dark grey for unmapped types
 
 function typeColour(type) {
-  return TYPE_COLOURS[type] ?? '#64748b';
+  return TYPE_COLOURS[type] ?? UNKNOWN_TYPE_COLOUR;
 }
 
 function createPinIcon(colour, label) {
@@ -80,7 +81,7 @@ function convexHull(points) {
   return [...lower, ...upper];
 }
 
-/** Auto-fit map bounds to all stops */
+/** Auto-fit map bounds to all stops (only on first mount) */
 function FitBounds({ routes }) {
   const map = useMap();
   useEffect(() => {
@@ -89,11 +90,73 @@ function FitBounds({ routes }) {
     if (allStops.length === 0) return;
     const bounds = L.latLngBounds(allStops.map(s => [s.lat, s.lng]));
     if (bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40] });
-  }, [routes, map]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally empty — only fit on first mount, not on colourMode change
   return null;
 }
 
-export default function RouteMap({ routes, unassigned = [] }) {
+const LEGEND_STYLE = `
+  background:rgba(255,255,255,0.95);
+  padding:8px 12px;
+  border-radius:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.18);
+  font-size:11px;
+  line-height:1.7;
+  min-width:140px;
+`;
+
+const DOT_STYLE = 'width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0;';
+const ROW_STYLE = 'display:flex;align-items:center;gap:6px;';
+
+/** Leaflet legend control — bottom-left, updates when colourMode changes */
+function MapLegend({ colourMode, routes }) {
+  const map = useMap();
+
+  useEffect(() => {
+    const control = L.control({ position: 'bottomleft' });
+
+    control.onAdd = () => {
+      const div = L.DomUtil.create('div');
+      div.setAttribute('style', LEGEND_STYLE);
+      L.DomEvent.disableClickPropagation(div);
+      L.DomEvent.disableScrollPropagation(div);
+
+      if (colourMode === 'type') {
+        const entries = [
+          ...Object.entries(TYPE_COLOURS),
+          ['unknown', UNKNOWN_TYPE_COLOUR],
+        ];
+        div.innerHTML =
+          `<strong style="display:block;margin-bottom:4px;font-size:12px;">Address Type</strong>` +
+          entries.map(([type, colour]) =>
+            `<div style="${ROW_STYLE}">
+              <span style="${DOT_STYLE}background:${colour};"></span>
+              <span>${type.replace(/_/g, '\u00A0').replace(/\b\w/g, c => c.toUpperCase())}</span>
+            </div>`
+          ).join('');
+      } else {
+        // Agent mode
+        div.innerHTML =
+          `<strong style="display:block;margin-bottom:4px;font-size:12px;">Agent</strong>` +
+          routes.map((r, i) =>
+            `<div style="${ROW_STYLE}">
+              <span style="${DOT_STYLE}background:${AGENT_COLOURS[i % AGENT_COLOURS.length]};"></span>
+              <span>${r.agent_name}</span>
+            </div>`
+          ).join('');
+      }
+
+      return div;
+    };
+
+    control.addTo(map);
+    return () => control.remove();
+  }, [colourMode, routes, map]);
+
+  return null;
+}
+
+export default function RouteMap({ routes, unassigned = [], colourMode = 'agent' }) {
   if (!routes || routes.length === 0) {
     return (
       <div className="route-map-empty">
@@ -113,13 +176,14 @@ export default function RouteMap({ routes, unassigned = [] }) {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <FitBounds routes={routes} />
+      <MapLegend colourMode={colourMode} routes={routes} />
 
       {routes.map((route, agentIdx) => {
         const agentColour = AGENT_COLOURS[agentIdx % AGENT_COLOURS.length];
 
         return (
           <span key={route.agent_id ?? agentIdx}>
-            {/* Drive route — dashed polyline between cluster centroids */}
+            {/* Drive route — dashed polyline between cluster centroids (always agent-coloured) */}
             {route.clusters.length > 1 && (
               <Polyline
                 positions={route.clusters.map(c => [c.center.lat, c.center.lng])}
@@ -133,7 +197,7 @@ export default function RouteMap({ routes, unassigned = [] }) {
 
               return (
                 <span key={cluster.id}>
-                  {/* Cluster convex hull polygon */}
+                  {/* Cluster convex hull polygon — always agent-coloured per AC */}
                   {hullPts.length >= 3 && (
                     <Polygon
                       positions={hullPts}
@@ -146,7 +210,7 @@ export default function RouteMap({ routes, unassigned = [] }) {
                     />
                   )}
 
-                  {/* Walk route — solid polyline within cluster */}
+                  {/* Walk route — solid polyline within cluster (always agent-coloured) */}
                   {walkPath.length > 1 && (
                     <Polyline
                       positions={walkPath}
@@ -154,24 +218,33 @@ export default function RouteMap({ routes, unassigned = [] }) {
                     />
                   )}
 
-                  {/* Stop pins */}
-                  {cluster.stops.map(stop => (
-                    <Marker
-                      key={stop.unique_id}
-                      position={[stop.lat, stop.lng]}
-                      icon={createPinIcon(typeColour(stop.address_type), stop.stop_order ?? '?')}
-                    >
-                      <Popup>
-                        <div className="route-map-popup">
-                          <strong>#{stop.stop_order}</strong> — {stop.address_type}
-                          <br />
-                          {stop.address}, {stop.city}, {stop.state} {stop.zip}
-                          <br />
-                          <small>Cluster: {stop.cluster_id} · Agent: {route.agent_name}</small>
-                        </div>
-                      </Popup>
-                    </Marker>
-                  ))}
+                  {/* Stop pins — colour depends on colourMode */}
+                  {cluster.stops.map(stop => {
+                    const pinColour = colourMode === 'type'
+                      ? typeColour(stop.address_type)
+                      : agentColour;
+                    return (
+                      <Marker
+                        key={stop.unique_id}
+                        position={[stop.lat, stop.lng]}
+                        icon={createPinIcon(pinColour, stop.stop_order ?? '?')}
+                      >
+                        <Popup>
+                          <div className="route-map-popup">
+                            <strong>#{stop.stop_order}</strong>
+                            {' '}—{' '}
+                            <span style={{ color: typeColour(stop.address_type), fontWeight: 600 }}>
+                              {(stop.address_type ?? 'unknown').replace(/_/g, '\u00A0')}
+                            </span>
+                            <br />
+                            {stop.address}, {stop.city}, {stop.state} {stop.zip}
+                            <br />
+                            <small>Cluster: {stop.cluster_id} · Agent: {route.agent_name}</small>
+                          </div>
+                        </Popup>
+                      </Marker>
+                    );
+                  })}
                 </span>
               );
             })}
@@ -193,7 +266,9 @@ export default function RouteMap({ routes, unassigned = [] }) {
                 <br />
                 {stop.address}, {stop.city}, {stop.state} {stop.zip}
                 <br />
-                <small>{stop.address_type}</small>
+                <small style={{ color: typeColour(stop.address_type) }}>
+                  {(stop.address_type ?? 'unknown').replace(/_/g, '\u00A0')}
+                </small>
               </div>
             </Popup>
           </Marker>

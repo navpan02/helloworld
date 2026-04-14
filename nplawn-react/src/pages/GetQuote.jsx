@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { validateName, validateEmail, validatePhone } from '../utils/validate';
 import SeasonalBanner from '../components/SeasonalBanner';
+import LawnDiagnosisWidget from '../components/LawnDiagnosisWidget';
 
 const SERVICES = [
   'Lawn Mowing',
@@ -194,6 +195,7 @@ export default function GetQuote() {
           ))}
         </div>
 
+        <LawnDiagnosisWidget back="quote" />
         <SeasonalBanner zipCode={/^\d{5}$/.test(form.zip) ? form.zip : undefined} />
 
         <div className="bg-white rounded-2xl border border-np-border shadow-np p-8">

@@ -32,6 +32,7 @@ const COMPANY = [
   { to: '/newsroom',         label: 'Newsroom' },
   { to: '/lawn-care#plans',  label: 'View Plans' },
   { to: '/order',            label: 'Order Online' },
+  { to: '/route-planner',    label: 'Route Planner' },
 ];
 
 export default function Footer() {

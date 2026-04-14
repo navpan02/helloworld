@@ -1,6 +1,9 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+// All emails that should always be treated as admin regardless of DB role
+const ADMIN_EMAILS = ['admin@admin.com', 'navpan@gmail.com'];
+
 /**
  * Wraps a route so only authenticated admins can access it.
  * - Not logged in  → redirect to /login
@@ -14,9 +17,8 @@ export default function AdminRoute({ children }) {
 
   if (!user) return <Navigate to="/login" replace />;
 
-  // Accept role set via Supabase app_metadata OR the known admin email as fallback
-  // (covers accounts created before app_metadata.role was set in the Supabase dashboard).
-  const isAdmin = user.role === 'admin' || user.email === 'admin@admin.com';
+  // Accept role set in public.users table OR any known admin email
+  const isAdmin = user.role === 'admin' || ADMIN_EMAILS.includes(user.email?.toLowerCase());
   if (!isAdmin) return <Navigate to="/" replace />;
 
   return children;

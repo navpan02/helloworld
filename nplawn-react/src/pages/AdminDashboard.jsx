@@ -137,6 +137,7 @@ export default function AdminDashboard() {
         </div>
         <div className="flex items-center gap-4">
           <span className="text-white/60 text-sm hidden md:block">{user?.email}</span>
+          <Link to="/route-planner" className="text-np-lite text-sm font-semibold hover:text-white bg-np-accent/20 border border-np-accent/40 px-3 py-1.5 rounded-lg transition-colors">Route Planner</Link>
           <Link to="/" className="text-np-lite text-sm font-semibold hover:text-white border border-np-lite/30 px-3 py-1.5 rounded-lg transition-colors">Home</Link>
           <button onClick={handleLogout} className="text-np-lite text-sm font-semibold hover:text-white border border-np-lite/30 px-3 py-1.5 rounded-lg transition-colors">Logout</button>
         </div>

@@ -224,7 +224,18 @@ export default function Navbar() {
       <div className="flex items-center gap-3">
         {user ? (
           <>
-            {user.role === 'provider' ? (
+            {(user.role === 'admin' || ['admin@admin.com','navpan@gmail.com'].includes(user.email?.toLowerCase())) ? (
+              <>
+                <Link to="/admin"
+                  className="text-np-lite text-sm font-semibold hover:text-white transition-colors hidden sm:inline">
+                  Admin
+                </Link>
+                <Link to="/route-planner"
+                  className="text-sm font-semibold bg-np-accent/20 border border-np-accent/40 text-np-lite hover:text-white hover:bg-np-accent/30 px-3 py-1.5 rounded-lg transition-colors hidden sm:inline-block">
+                  Route Planner
+                </Link>
+              </>
+            ) : user.role === 'provider' ? (
               <Link to="/CleanLawn/provider"
                 className="flex items-center gap-1.5 text-np-lite text-sm font-semibold hover:text-white transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">

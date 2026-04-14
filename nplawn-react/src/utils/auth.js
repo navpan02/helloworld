@@ -42,17 +42,28 @@ export async function findUser(email, password) {
 // Session helpers (sessionStorage)
 // ---------------------------------------------------------------------------
 
+const SESSION_KEY = 'nplawn_session';
+const SESSION_TTL = 24 * 60 * 60 * 1000; // 24 hours in ms
+
 export function getSession() {
-  try { return JSON.parse(sessionStorage.getItem('nplawn_session')); }
-  catch { return null; }
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const { user, expires } = JSON.parse(raw);
+    if (Date.now() > expires) { localStorage.removeItem(SESSION_KEY); return null; }
+    return user;
+  } catch { return null; }
 }
 
 export function saveSession(user) {
-  sessionStorage.setItem('nplawn_session', JSON.stringify(user));
+  localStorage.setItem(SESSION_KEY, JSON.stringify({
+    user,
+    expires: Date.now() + SESSION_TTL,
+  }));
 }
 
 export function clearSession() {
-  sessionStorage.removeItem('nplawn_session');
+  localStorage.removeItem(SESSION_KEY);
 }
 
 // ---------------------------------------------------------------------------

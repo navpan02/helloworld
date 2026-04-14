@@ -5,7 +5,8 @@ import { supabase } from '../lib/supabase';
 import ConstraintPanel, { DEFAULT_CONSTRAINTS } from '../components/ConstraintPanel';
 import RouteListView from '../components/RouteListView';
 import FilterBar from '../components/FilterBar';
-import { exportAllCSV } from '../utils/routeExport';
+import SwapRoutesModal from '../components/SwapRoutesModal';
+import { exportAllCSV, buildGoogleMapsUrls } from '../utils/routeExport';
 
 // Lazy-load map to avoid SSR/bundle issues with Leaflet
 const RouteMap = lazy(() => import('../components/RouteMap'));
@@ -123,6 +124,12 @@ export default function RoutePlanner() {
   // ── Filter state (initialised when result arrives) ───────────────────────────
   const [filterAgentIds, setFilterAgentIds] = useState(null);
   const [filterTypes, setFilterTypes] = useState(null);
+
+  // ── Swap / undo / republish state ────────────────────────────────────────────
+  const [pendingChanges, setPendingChanges] = useState(0);
+  const [undoStack, setUndoStack] = useState([]); // up to 10 previous result states
+  const [showSwapModal, setShowSwapModal] = useState(false);
+  const [isRepublishing, setIsRepublishing] = useState(false);
 
   const fileRef = useRef();
 
@@ -304,6 +311,100 @@ export default function RoutePlanner() {
       setProgress('');
     }
   };
+
+  // ── Swap routes ─────────────────────────────────────────────────────────────
+
+  const handleSwap = useCallback((agentIdA, agentIdB) => {
+    setResult(prev => {
+      if (!prev) return prev;
+      const routes = [...prev.routes];
+      const idxA = routes.findIndex(r => r.agent_id === agentIdA);
+      const idxB = routes.findIndex(r => r.agent_id === agentIdB);
+      if (idxA === -1 || idxB === -1) return prev;
+      const a = routes[idxA];
+      const b = routes[idxB];
+      routes[idxA] = {
+        ...a,
+        clusters: b.clusters,
+        stop_sequence: b.stop_sequence,
+        total_stops: b.total_stops,
+        total_miles: b.total_miles,
+        est_hours: b.est_hours,
+        google_maps_urls: b.google_maps_urls,
+      };
+      routes[idxB] = {
+        ...b,
+        clusters: a.clusters,
+        stop_sequence: a.stop_sequence,
+        total_stops: a.total_stops,
+        total_miles: a.total_miles,
+        est_hours: a.est_hours,
+        google_maps_urls: a.google_maps_urls,
+      };
+      // Push current state onto undo stack (max 10 entries)
+      setUndoStack(stack => [...stack.slice(-9), prev]);
+      setPendingChanges(n => n + 1);
+      return { ...prev, routes };
+    });
+    setShowSwapModal(false);
+  }, []);
+
+  // ── Undo ─────────────────────────────────────────────────────────────────────
+
+  const handleUndo = useCallback(() => {
+    setUndoStack(stack => {
+      if (stack.length === 0) return stack;
+      setResult(stack[stack.length - 1]);
+      setPendingChanges(n => Math.max(0, n - 1));
+      return stack.slice(0, -1);
+    });
+  }, []);
+
+  // Keyboard shortcut Ctrl+Z / Cmd+Z
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [handleUndo]);
+
+  // ── Republish ────────────────────────────────────────────────────────────────
+
+  const handleRepublish = useCallback(async () => {
+    if (!result || pendingChanges === 0 || isRepublishing) return;
+    setIsRepublishing(true);
+    try {
+      const updatedRoutes = await Promise.all(
+        result.routes.map(async (route) => {
+          const newUrls = buildGoogleMapsUrls(route.stop_sequence ?? []);
+          const { error } = await supabase
+            .from('route_assignments')
+            .update({
+              stop_sequence: route.stop_sequence,
+              cluster_sequence: route.clusters?.map(c => c.id) ?? [],
+              total_stops: route.total_stops,
+              total_miles: route.total_miles,
+              est_hours: route.est_hours,
+              google_maps_urls: newUrls,
+            })
+            .eq('id', route.assignment_id);
+          if (error) throw new Error(`Failed to update ${route.agent_name}: ${error.message}`);
+          return { ...route, google_maps_urls: newUrls };
+        }),
+      );
+      setResult(prev => ({ ...prev, routes: updatedRoutes }));
+      setPendingChanges(0);
+      setUndoStack([]);
+    } catch (e) {
+      setErrorMsg(e.message ?? 'Republish failed');
+    } finally {
+      setIsRepublishing(false);
+    }
+  }, [result, pendingChanges, isRepublishing]);
 
   // ── Section wrapper ─────────────────────────────────────────────────────────
 
@@ -581,7 +682,7 @@ export default function RoutePlanner() {
                   <button
                     type="button"
                     className="text-np-lite text-sm font-semibold hover:text-white border border-np-lite/30 px-4 py-1.5 rounded-xl transition-colors"
-                    onClick={() => { setStatus('idle'); setResult(null); }}
+                    onClick={() => { setStatus('idle'); setResult(null); setPendingChanges(0); setUndoStack([]); }}
                   >
                     ← Start Over
                   </button>
@@ -635,7 +736,56 @@ export default function RoutePlanner() {
                   </button>
                 ))}
               </div>
-              <div className="ml-auto flex gap-3">
+              <div className="ml-auto flex items-center gap-3 flex-wrap">
+                {/* Pending changes badge */}
+                {pendingChanges > 0 && (
+                  <span className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-xl">
+                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                    Pending changes ({pendingChanges})
+                  </span>
+                )}
+
+                {/* Republish */}
+                {pendingChanges > 0 && (
+                  <button
+                    type="button"
+                    disabled={isRepublishing}
+                    className={`inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-xl transition-all ${
+                      isRepublishing
+                        ? 'bg-np-muted/20 text-np-muted cursor-not-allowed'
+                        : 'bg-np-dark text-white hover:bg-np-mid shadow-np'
+                    }`}
+                    onClick={handleRepublish}
+                  >
+                    {isRepublishing ? (
+                      <>
+                        <svg className="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        Republishing…
+                      </>
+                    ) : (
+                      'Republish'
+                    )}
+                  </button>
+                )}
+
+                {/* Swap Routes */}
+                {result.routes.length >= 2 && (
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-2 border border-np-border text-np-text text-sm font-semibold px-4 py-2 rounded-xl hover:border-np-dark hover:text-np-dark transition-colors bg-white"
+                    onClick={() => setShowSwapModal(true)}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" />
+                    </svg>
+                    Swap Routes
+                  </button>
+                )}
+
+                {/* Export All CSV */}
                 <button
                   type="button"
                   className="inline-flex items-center gap-2 border border-np-border text-np-text text-sm font-semibold px-4 py-2 rounded-xl hover:border-np-dark hover:text-np-dark transition-colors bg-white"
@@ -666,6 +816,15 @@ export default function RoutePlanner() {
             )}
           </div>
         </div>
+      )}
+
+      {/* Swap Routes modal */}
+      {showSwapModal && result && (
+        <SwapRoutesModal
+          routes={result.routes}
+          onConfirm={handleSwap}
+          onClose={() => setShowSwapModal(false)}
+        />
       )}
     </div>
   );

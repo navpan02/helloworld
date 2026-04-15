@@ -156,7 +156,20 @@ function MapLegend({ colourMode, routes }) {
   return null;
 }
 
-export default function RouteMap({ routes, unassigned = [], colourMode = 'agent' }) {
+/** Find the agent whose nearest cluster centroid is closest to a given latlng */
+function nearestAgentForDrop(latlng, routes) {
+  let minDist = Infinity;
+  let best = routes[0]?.agent_id ?? null;
+  for (const route of routes) {
+    for (const cluster of (route.clusters ?? [])) {
+      const d = (latlng.lat - cluster.center.lat) ** 2 + (latlng.lng - cluster.center.lng) ** 2;
+      if (d < minDist) { minDist = d; best = route.agent_id; }
+    }
+  }
+  return best;
+}
+
+export default function RouteMap({ routes, unassigned = [], colourMode = 'agent', onUnassignedClick, onUnassignedDrop }) {
   if (!routes || routes.length === 0) {
     return (
       <div className="route-map-empty">
@@ -252,22 +265,35 @@ export default function RouteMap({ routes, unassigned = [], colourMode = 'agent'
         );
       })}
 
-      {/* Unassigned stops in grey */}
+      {/* Unassigned stops — red, draggable, click/drop to assign */}
       {unassigned.map(stop => (
         stop.lat && stop.lng ? (
           <Marker
             key={stop.unique_id}
             position={[stop.lat, stop.lng]}
-            icon={createPinIcon('#94a3b8', '?')}
+            icon={createPinIcon('#ef4444', '!')}
+            draggable={!!onUnassignedDrop}
+            eventHandlers={{
+              click: () => onUnassignedClick?.(stop),
+              dragend: (e) => {
+                const latlng = e.target.getLatLng();
+                const agentId = nearestAgentForDrop(latlng, routes);
+                if (agentId) onUnassignedDrop?.(stop, agentId);
+              },
+            }}
           >
             <Popup>
               <div className="route-map-popup">
-                <strong>UNASSIGNED</strong>
+                <strong style={{ color: '#ef4444' }}>UNASSIGNED</strong>
                 <br />
                 {stop.address}, {stop.city}, {stop.state} {stop.zip}
                 <br />
                 <small style={{ color: typeColour(stop.address_type) }}>
                   {(stop.address_type ?? 'unknown').replace(/_/g, '\u00A0')}
+                </small>
+                <br />
+                <small style={{ color: '#94a3b8' }}>
+                  Click pin or drag onto a route to assign
                 </small>
               </div>
             </Popup>

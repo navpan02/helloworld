@@ -1,201 +1,201 @@
-address,city,state,zip,address_type
-1440 N Western Ave,Chicago,IL,60622,multi_family
-1468 N Western Ave,Chicago,IL,60622,multi_family
-1596 N Damen Ave,Chicago,IL,60622,commercial
-1652 N Damen Ave,Chicago,IL,60622,multi_family
-1670 N Damen Ave,Chicago,IL,60622,homeowner
-1684 N Damen Ave,Chicago,IL,60622,vacant
-1708 N Damen Ave,Chicago,IL,60622,renter
-1720 N Western Ave,Chicago,IL,60622,multi_family
-1730 N Western Ave,Chicago,IL,60622,new_construction
-1838 N Damen Ave,Chicago,IL,60622,multi_family
-1922 N Western Ave,Chicago,IL,60622,homeowner
-1978 N Damen Ave,Chicago,IL,60622,new_construction
-1990 N Damen Ave,Chicago,IL,60622,new_construction
-2020 N Damen Ave,Chicago,IL,60622,multi_family
-2134 N Damen Ave,Chicago,IL,60622,renter
-2152 N Damen Ave,Chicago,IL,60622,new_construction
-2166 N Western Ave,Chicago,IL,60622,homeowner
-2186 N Western Ave,Chicago,IL,60622,homeowner
-2200 W Ohio St,Chicago,IL,60622,renter
-2288 W Ohio St,Chicago,IL,60622,multi_family
-2300 W Ohio St,Chicago,IL,60622,homeowner
-2326 W Ohio St,Chicago,IL,60622,renter
-2358 W Ohio St,Chicago,IL,60622,renter
-2368 W Ohio St,Chicago,IL,60622,renter
-2402 W Ohio St,Chicago,IL,60622,commercial
-2424 W Ohio St,Chicago,IL,60622,multi_family
-2434 W Ohio St,Chicago,IL,60622,multi_family
-2506 W Ohio St,Chicago,IL,60622,multi_family
-2538 W Ohio St,Chicago,IL,60622,homeowner
-2750 W Ohio St,Chicago,IL,60622,renter
-2876 W Ohio St,Chicago,IL,60622,commercial
-2902 W Ohio St,Chicago,IL,60622,commercial
-2984 W Ohio St,Chicago,IL,60622,homeowner
-2060 N Milwaukee Ave,Chicago,IL,60647,homeowner
-2100 N Milwaukee Ave,Chicago,IL,60647,homeowner
-2114 N Milwaukee Ave,Chicago,IL,60647,homeowner
-2132 N Sacramento Ave,Chicago,IL,60647,renter
-2146 N Sacramento Ave,Chicago,IL,60647,multi_family
-2148 N Sacramento Ave,Chicago,IL,60647,homeowner
-2150 N Kedzie Ave,Chicago,IL,60647,multi_family
-2158 N Spaulding Ave,Chicago,IL,60647,new_construction
-2174 N Albany Ave,Chicago,IL,60647,new_construction
-2176 N Albany Ave,Chicago,IL,60647,commercial
-2202 W North Ave,Chicago,IL,60647,new_construction
-2204 N Sawyer Ave,Chicago,IL,60647,multi_family
-2208 N Albany Ave,Chicago,IL,60647,commercial
-2210 N Spaulding Ave,Chicago,IL,60647,renter
-2214 N California Ave,Chicago,IL,60647,renter
-2236 N Albany Ave,Chicago,IL,60647,renter
-2242 W Armitage Ave,Chicago,IL,60647,multi_family
-2264 W North Ave,Chicago,IL,60647,homeowner
-2270 N Milwaukee Ave,Chicago,IL,60647,new_construction
-2290 N Sacramento Ave,Chicago,IL,60647,homeowner
-2304 N Milwaukee Ave,Chicago,IL,60647,multi_family
-2306 N Milwaukee Ave,Chicago,IL,60647,new_construction
-2314 W Armitage Ave,Chicago,IL,60647,homeowner
-2322 N Sacramento Ave,Chicago,IL,60647,homeowner
-2330 W North Ave,Chicago,IL,60647,renter
-2338 N Sacramento Ave,Chicago,IL,60647,homeowner
-2340 N Sacramento Ave,Chicago,IL,60647,multi_family
-2342 N Sacramento Ave,Chicago,IL,60647,homeowner
-2348 W Armitage Ave,Chicago,IL,60647,homeowner
-2350 N Kedzie Ave,Chicago,IL,60647,new_construction
-2354 N Albany Ave,Chicago,IL,60647,homeowner
-2366 N Albany Ave,Chicago,IL,60647,homeowner
-2372 N Milwaukee Ave,Chicago,IL,60647,homeowner
-2384 N Sacramento Ave,Chicago,IL,60647,renter
-2398 W Diversey Ave,Chicago,IL,60647,renter
-2400 N Albany Ave,Chicago,IL,60647,renter
-2406 N Albany Ave,Chicago,IL,60647,new_construction
-2408 W Armitage Ave,Chicago,IL,60647,homeowner
-2414 N Kedzie Ave,Chicago,IL,60647,renter
-2422 N Kedzie Ave,Chicago,IL,60647,renter
-2440 N Spaulding Ave,Chicago,IL,60647,vacant
-2456 N Sawyer Ave,Chicago,IL,60647,homeowner
-2466 N Kedzie Ave,Chicago,IL,60647,homeowner
-2466 W Armitage Ave,Chicago,IL,60647,multi_family
-2468 W Diversey Ave,Chicago,IL,60647,multi_family
-2482 N Sawyer Ave,Chicago,IL,60647,vacant
-2488 N Spaulding Ave,Chicago,IL,60647,homeowner
-2520 N Milwaukee Ave,Chicago,IL,60647,renter
-2522 N Spaulding Ave,Chicago,IL,60647,homeowner
-2528 N Sacramento Ave,Chicago,IL,60647,multi_family
-2532 N Sawyer Ave,Chicago,IL,60647,homeowner
-2532 N Spaulding Ave,Chicago,IL,60647,renter
-2540 N Milwaukee Ave,Chicago,IL,60647,homeowner
-2540 N Sawyer Ave,Chicago,IL,60647,homeowner
-2548 N Spaulding Ave,Chicago,IL,60647,new_construction
-2552 N Milwaukee Ave,Chicago,IL,60647,homeowner
-2552 N Sacramento Ave,Chicago,IL,60647,vacant
-2556 W Diversey Ave,Chicago,IL,60647,multi_family
-2564 N Spaulding Ave,Chicago,IL,60647,homeowner
-2580 N Kedzie Ave,Chicago,IL,60647,homeowner
-2588 W North Ave,Chicago,IL,60647,homeowner
-2596 N Sacramento Ave,Chicago,IL,60647,homeowner
-2616 W Armitage Ave,Chicago,IL,60647,multi_family
-2618 N Spaulding Ave,Chicago,IL,60647,homeowner
-2620 N Sawyer Ave,Chicago,IL,60647,new_construction
-2626 N Sacramento Ave,Chicago,IL,60647,homeowner
-2632 N Milwaukee Ave,Chicago,IL,60647,renter
-2632 W North Ave,Chicago,IL,60647,new_construction
-2634 N Milwaukee Ave,Chicago,IL,60647,renter
-2646 N Spaulding Ave,Chicago,IL,60647,commercial
-2650 W North Ave,Chicago,IL,60647,new_construction
-2652 N Spaulding Ave,Chicago,IL,60647,vacant
-2658 N Sawyer Ave,Chicago,IL,60647,homeowner
-2664 N Sacramento Ave,Chicago,IL,60647,renter
-2688 W Armitage Ave,Chicago,IL,60647,renter
-2708 W North Ave,Chicago,IL,60647,renter
-2710 N Albany Ave,Chicago,IL,60647,renter
-2718 N Milwaukee Ave,Chicago,IL,60647,new_construction
-2722 N Sacramento Ave,Chicago,IL,60647,multi_family
-2734 W Armitage Ave,Chicago,IL,60647,homeowner
-2740 W Fullerton Ave,Chicago,IL,60647,vacant
-2742 N Sawyer Ave,Chicago,IL,60647,homeowner
-2742 W Diversey Ave,Chicago,IL,60647,vacant
-2748 N Sacramento Ave,Chicago,IL,60647,renter
-2752 W Diversey Ave,Chicago,IL,60647,multi_family
-2768 W Diversey Ave,Chicago,IL,60647,new_construction
-2774 N Albany Ave,Chicago,IL,60647,renter
-2774 N California Ave,Chicago,IL,60647,homeowner
-2774 N Sawyer Ave,Chicago,IL,60647,new_construction
-2774 N Spaulding Ave,Chicago,IL,60647,homeowner
-2780 N Sacramento Ave,Chicago,IL,60647,renter
-2788 N Kedzie Ave,Chicago,IL,60647,multi_family
-2798 N Albany Ave,Chicago,IL,60647,new_construction
-2842 W Fullerton Ave,Chicago,IL,60647,renter
-2846 N Kedzie Ave,Chicago,IL,60647,new_construction
-2864 N Kedzie Ave,Chicago,IL,60647,renter
-2872 W Diversey Ave,Chicago,IL,60647,renter
-2876 N California Ave,Chicago,IL,60647,vacant
-2894 W Diversey Ave,Chicago,IL,60647,vacant
-2926 W Fullerton Ave,Chicago,IL,60647,homeowner
-2940 W Diversey Ave,Chicago,IL,60647,homeowner
-2964 W Diversey Ave,Chicago,IL,60647,new_construction
-3024 W Armitage Ave,Chicago,IL,60647,commercial
-3066 W Fullerton Ave,Chicago,IL,60647,renter
-3138 W Diversey Ave,Chicago,IL,60647,homeowner
-3152 W Armitage Ave,Chicago,IL,60647,new_construction
-3158 W Diversey Ave,Chicago,IL,60647,new_construction
-3194 W North Ave,Chicago,IL,60647,new_construction
-3346 W Fullerton Ave,Chicago,IL,60647,renter
-3348 W North Ave,Chicago,IL,60647,homeowner
-3380 W Diversey Ave,Chicago,IL,60647,homeowner
-3392 W Fullerton Ave,Chicago,IL,60647,new_construction
-1106 N St Louis Ave,Chicago,IL,60651,homeowner
-1144 N Central Park Ave,Chicago,IL,60651,homeowner
-1166 N Central Park Ave,Chicago,IL,60651,homeowner
-1242 N Central Park Ave,Chicago,IL,60651,homeowner
-1250 N Humboldt Blvd,Chicago,IL,60651,homeowner
-1258 N Central Park Ave,Chicago,IL,60651,homeowner
-1264 N Central Park Ave,Chicago,IL,60651,commercial
-1266 N St Louis Ave,Chicago,IL,60651,new_construction
-1314 N Hamlin Ave,Chicago,IL,60651,renter
-1322 N Hamlin Ave,Chicago,IL,60651,homeowner
-1330 N Hamlin Ave,Chicago,IL,60651,vacant
-1330 N St Louis Ave,Chicago,IL,60651,homeowner
-1332 N Hamlin Ave,Chicago,IL,60651,homeowner
-1344 N Hamlin Ave,Chicago,IL,60651,homeowner
-1350 N Central Park Ave,Chicago,IL,60651,homeowner
-1472 N Humboldt Blvd,Chicago,IL,60651,renter
-1478 N St Louis Ave,Chicago,IL,60651,renter
-1510 N Humboldt Blvd,Chicago,IL,60651,homeowner
-1512 N St Louis Ave,Chicago,IL,60651,homeowner
-1530 N Humboldt Blvd,Chicago,IL,60651,multi_family
-1570 N Humboldt Blvd,Chicago,IL,60651,renter
-1572 N Central Park Ave,Chicago,IL,60651,homeowner
-1584 N St Louis Ave,Chicago,IL,60651,vacant
-1612 N Central Park Ave,Chicago,IL,60651,vacant
-1618 N Humboldt Blvd,Chicago,IL,60651,renter
-1626 N Hamlin Ave,Chicago,IL,60651,multi_family
-1648 N Humboldt Blvd,Chicago,IL,60651,new_construction
-1652 N Humboldt Blvd,Chicago,IL,60651,homeowner
-1666 N Central Park Ave,Chicago,IL,60651,homeowner
-1666 N Hamlin Ave,Chicago,IL,60651,homeowner
-1680 N St Louis Ave,Chicago,IL,60651,homeowner
-1718 N Hamlin Ave,Chicago,IL,60651,homeowner
-1726 N Hamlin Ave,Chicago,IL,60651,vacant
-1756 N Central Park Ave,Chicago,IL,60651,renter
-1770 N Humboldt Blvd,Chicago,IL,60651,new_construction
-1782 N Hamlin Ave,Chicago,IL,60651,renter
-1782 N St Louis Ave,Chicago,IL,60651,homeowner
-1784 N Central Park Ave,Chicago,IL,60651,new_construction
-1798 N Central Park Ave,Chicago,IL,60651,multi_family
-1830 N Humboldt Blvd,Chicago,IL,60651,renter
-1890 N St Louis Ave,Chicago,IL,60651,renter
-2358 W Chicago Ave,Chicago,IL,60651,homeowner
-2456 W Chicago Ave,Chicago,IL,60651,homeowner
-2492 W Division St,Chicago,IL,60651,renter
-2662 W Augusta Blvd,Chicago,IL,60651,homeowner
-2684 W Augusta Blvd,Chicago,IL,60651,vacant
-2714 W Chicago Ave,Chicago,IL,60651,new_construction
-2764 W Division St,Chicago,IL,60651,commercial
-2816 W Augusta Blvd,Chicago,IL,60651,homeowner
-2822 W Augusta Blvd,Chicago,IL,60651,homeowner
-2836 W Division St,Chicago,IL,60651,multi_family
-2890 W Division St,Chicago,IL,60651,homeowner
-3084 W Division St,Chicago,IL,60651,commercial
-3092 W Augusta Blvd,Chicago,IL,60651,multi_family
-3140 W Augusta Blvd,Chicago,IL,60651,homeowner
+address,city,state,zip,address_type,lat,lng
+1440 N Western Ave,Chicago,IL,60622,multi_family,41.907808,-87.683015
+1468 N Western Ave,Chicago,IL,60622,multi_family,41.90813,-87.682896
+1596 N Damen Ave,Chicago,IL,60622,commercial,41.910666,-87.673469
+1652 N Damen Ave,Chicago,IL,60622,multi_family,41.911753,-87.673823
+1670 N Damen Ave,Chicago,IL,60622,homeowner,41.911842,-87.673857
+1684 N Damen Ave,Chicago,IL,60622,vacant,41.911992,-87.673572
+1708 N Damen Ave,Chicago,IL,60622,renter,41.912329,-87.673756
+1720 N Western Ave,Chicago,IL,60622,multi_family,41.912856,-87.682703
+1730 N Western Ave,Chicago,IL,60622,new_construction,41.912822,-87.682676
+1838 N Damen Ave,Chicago,IL,60622,multi_family,41.915062,-87.673871
+1922 N Western Ave,Chicago,IL,60622,homeowner,41.916573,-87.682611
+1978 N Damen Ave,Chicago,IL,60622,new_construction,41.917349,-87.673782
+1990 N Damen Ave,Chicago,IL,60622,new_construction,41.917873,-87.673673
+2020 N Damen Ave,Chicago,IL,60622,multi_family,41.917982,-87.673817
+2134 N Damen Ave,Chicago,IL,60622,renter,41.920412,-87.673513
+2152 N Damen Ave,Chicago,IL,60622,new_construction,41.920716,-87.673437
+2166 N Western Ave,Chicago,IL,60622,homeowner,41.920833,-87.682446
+2186 N Western Ave,Chicago,IL,60622,homeowner,41.921115,-87.682699
+2200 W Ohio St,Chicago,IL,60622,renter,41.892772,-87.678081
+2288 W Ohio St,Chicago,IL,60622,multi_family,41.892788,-87.68012
+2300 W Ohio St,Chicago,IL,60622,homeowner,41.89271,-87.680714
+2326 W Ohio St,Chicago,IL,60622,renter,41.892471,-87.681163
+2358 W Ohio St,Chicago,IL,60622,renter,41.892397,-87.681929
+2368 W Ohio St,Chicago,IL,60622,renter,41.892408,-87.682131
+2402 W Ohio St,Chicago,IL,60622,commercial,41.892675,-87.682857
+2424 W Ohio St,Chicago,IL,60622,multi_family,41.892543,-87.683454
+2434 W Ohio St,Chicago,IL,60622,multi_family,41.892491,-87.683246
+2506 W Ohio St,Chicago,IL,60622,multi_family,41.892682,-87.685091
+2538 W Ohio St,Chicago,IL,60622,homeowner,41.892443,-87.685751
+2750 W Ohio St,Chicago,IL,60622,renter,41.892439,-87.690813
+2876 W Ohio St,Chicago,IL,60622,commercial,41.892852,-87.69354
+2902 W Ohio St,Chicago,IL,60622,commercial,41.892636,-87.694109
+2984 W Ohio St,Chicago,IL,60622,homeowner,41.892779,-87.695931
+2060 N Milwaukee Ave,Chicago,IL,60647,homeowner,41.91877,-87.692166
+2100 N Milwaukee Ave,Chicago,IL,60647,homeowner,41.919534,-87.692024
+2114 N Milwaukee Ave,Chicago,IL,60647,homeowner,41.919734,-87.691619
+2132 N Sacramento Ave,Chicago,IL,60647,renter,41.920391,-87.696574
+2146 N Sacramento Ave,Chicago,IL,60647,multi_family,41.920533,-87.696525
+2148 N Sacramento Ave,Chicago,IL,60647,homeowner,41.920698,-87.696487
+2150 N Kedzie Ave,Chicago,IL,60647,multi_family,41.920409,-87.710347
+2158 N Spaulding Ave,Chicago,IL,60647,new_construction,41.920702,-87.703471
+2174 N Albany Ave,Chicago,IL,60647,new_construction,41.921001,-87.698513
+2176 N Albany Ave,Chicago,IL,60647,commercial,41.920945,-87.69892
+2202 W North Ave,Chicago,IL,60647,new_construction,41.910869,-87.678193
+2204 N Sawyer Ave,Chicago,IL,60647,multi_family,41.921295,-87.701312
+2208 N Albany Ave,Chicago,IL,60647,commercial,41.921376,-87.698675
+2210 N Spaulding Ave,Chicago,IL,60647,renter,41.921754,-87.703375
+2214 N California Ave,Chicago,IL,60647,renter,41.921461,-87.691956
+2236 N Albany Ave,Chicago,IL,60647,renter,41.922324,-87.698734
+2242 W Armitage Ave,Chicago,IL,60647,multi_family,41.918061,-87.678897
+2264 W North Ave,Chicago,IL,60647,homeowner,41.910376,-87.679485
+2270 N Milwaukee Ave,Chicago,IL,60647,new_construction,41.922779,-87.691863
+2290 N Sacramento Ave,Chicago,IL,60647,homeowner,41.922932,-87.696378
+2304 N Milwaukee Ave,Chicago,IL,60647,multi_family,41.923107,-87.691924
+2306 N Milwaukee Ave,Chicago,IL,60647,new_construction,41.923314,-87.691613
+2314 W Armitage Ave,Chicago,IL,60647,homeowner,41.918013,-87.680904
+2322 N Sacramento Ave,Chicago,IL,60647,homeowner,41.923625,-87.696655
+2330 W North Ave,Chicago,IL,60647,renter,41.910826,-87.680906
+2338 N Sacramento Ave,Chicago,IL,60647,homeowner,41.923812,-87.696379
+2340 N Sacramento Ave,Chicago,IL,60647,multi_family,41.924004,-87.696671
+2342 N Sacramento Ave,Chicago,IL,60647,homeowner,41.924117,-87.696439
+2348 W Armitage Ave,Chicago,IL,60647,homeowner,41.917964,-87.681522
+2350 N Kedzie Ave,Chicago,IL,60647,new_construction,41.92388,-87.710301
+2354 N Albany Ave,Chicago,IL,60647,homeowner,41.923961,-87.698494
+2366 N Albany Ave,Chicago,IL,60647,homeowner,41.924607,-87.698552
+2372 N Milwaukee Ave,Chicago,IL,60647,homeowner,41.924429,-87.69215
+2384 N Sacramento Ave,Chicago,IL,60647,renter,41.924931,-87.696194
+2398 W Diversey Ave,Chicago,IL,60647,renter,41.932028,-87.682693
+2400 N Albany Ave,Chicago,IL,60647,renter,41.924815,-87.698595
+2406 N Albany Ave,Chicago,IL,60647,new_construction,41.925271,-87.698974
+2408 W Armitage Ave,Chicago,IL,60647,homeowner,41.917813,-87.682883
+2414 N Kedzie Ave,Chicago,IL,60647,renter,41.925165,-87.709972
+2422 N Kedzie Ave,Chicago,IL,60647,renter,41.925388,-87.710368
+2440 N Spaulding Ave,Chicago,IL,60647,vacant,41.92577,-87.703191
+2456 N Sawyer Ave,Chicago,IL,60647,homeowner,41.925889,-87.701153
+2466 N Kedzie Ave,Chicago,IL,60647,homeowner,41.926466,-87.710105
+2466 W Armitage Ave,Chicago,IL,60647,multi_family,41.917794,-87.68423
+2468 W Diversey Ave,Chicago,IL,60647,multi_family,41.932046,-87.684452
+2482 N Sawyer Ave,Chicago,IL,60647,vacant,41.926426,-87.700987
+2488 N Spaulding Ave,Chicago,IL,60647,homeowner,41.92648,-87.703497
+2520 N Milwaukee Ave,Chicago,IL,60647,renter,41.926977,-87.691806
+2522 N Spaulding Ave,Chicago,IL,60647,homeowner,41.927092,-87.703085
+2528 N Sacramento Ave,Chicago,IL,60647,multi_family,41.927515,-87.69672
+2532 N Sawyer Ave,Chicago,IL,60647,homeowner,41.927277,-87.700939
+2532 N Spaulding Ave,Chicago,IL,60647,renter,41.927265,-87.703549
+2540 N Milwaukee Ave,Chicago,IL,60647,homeowner,41.92777,-87.691842
+2540 N Sawyer Ave,Chicago,IL,60647,homeowner,41.927538,-87.700869
+2548 N Spaulding Ave,Chicago,IL,60647,new_construction,41.92785,-87.703515
+2552 N Milwaukee Ave,Chicago,IL,60647,homeowner,41.927566,-87.691926
+2552 N Sacramento Ave,Chicago,IL,60647,vacant,41.92773,-87.696482
+2556 W Diversey Ave,Chicago,IL,60647,multi_family,41.93235,-87.686196
+2564 N Spaulding Ave,Chicago,IL,60647,homeowner,41.928226,-87.70357
+2580 N Kedzie Ave,Chicago,IL,60647,homeowner,41.928224,-87.710291
+2588 W North Ave,Chicago,IL,60647,homeowner,41.910801,-87.687184
+2596 N Sacramento Ave,Chicago,IL,60647,homeowner,41.928406,-87.696493
+2616 W Armitage Ave,Chicago,IL,60647,multi_family,41.917786,-87.687807
+2618 N Spaulding Ave,Chicago,IL,60647,homeowner,41.928832,-87.703075
+2620 N Sawyer Ave,Chicago,IL,60647,new_construction,41.928964,-87.700823
+2626 N Sacramento Ave,Chicago,IL,60647,homeowner,41.929126,-87.696732
+2632 N Milwaukee Ave,Chicago,IL,60647,renter,41.929459,-87.691683
+2632 W North Ave,Chicago,IL,60647,new_construction,41.910854,-87.687784
+2634 N Milwaukee Ave,Chicago,IL,60647,renter,41.929419,-87.692085
+2646 N Spaulding Ave,Chicago,IL,60647,commercial,41.929454,-87.703501
+2650 W North Ave,Chicago,IL,60647,new_construction,41.910571,-87.688717
+2652 N Spaulding Ave,Chicago,IL,60647,vacant,41.929509,-87.703038
+2658 N Sawyer Ave,Chicago,IL,60647,homeowner,41.92956,-87.70087
+2664 N Sacramento Ave,Chicago,IL,60647,renter,41.929763,-87.696509
+2688 W Armitage Ave,Chicago,IL,60647,renter,41.918054,-87.689024
+2708 W North Ave,Chicago,IL,60647,renter,41.910648,-87.689648
+2710 N Albany Ave,Chicago,IL,60647,renter,41.930441,-87.698873
+2718 N Milwaukee Ave,Chicago,IL,60647,new_construction,41.930992,-87.691837
+2722 N Sacramento Ave,Chicago,IL,60647,multi_family,41.930851,-87.696314
+2734 W Armitage Ave,Chicago,IL,60647,homeowner,41.917604,-87.690324
+2740 W Fullerton Ave,Chicago,IL,60647,vacant,41.925031,-87.6903
+2742 N Sawyer Ave,Chicago,IL,60647,homeowner,41.931019,-87.700764
+2742 W Diversey Ave,Chicago,IL,60647,vacant,41.932025,-87.690746
+2748 N Sacramento Ave,Chicago,IL,60647,renter,41.931346,-87.696357
+2752 W Diversey Ave,Chicago,IL,60647,multi_family,41.932103,-87.691014
+2768 W Diversey Ave,Chicago,IL,60647,new_construction,41.93243,-87.691305
+2774 N Albany Ave,Chicago,IL,60647,renter,41.931814,-87.69868
+2774 N California Ave,Chicago,IL,60647,homeowner,41.931726,-87.691835
+2774 N Sawyer Ave,Chicago,IL,60647,new_construction,41.931778,-87.700779
+2774 N Spaulding Ave,Chicago,IL,60647,homeowner,41.931619,-87.703199
+2780 N Sacramento Ave,Chicago,IL,60647,renter,41.931744,-87.696525
+2788 N Kedzie Ave,Chicago,IL,60647,multi_family,41.932105,-87.710315
+2798 N Albany Ave,Chicago,IL,60647,new_construction,41.932107,-87.6986
+2842 W Fullerton Ave,Chicago,IL,60647,renter,41.924816,-87.692871
+2846 N Kedzie Ave,Chicago,IL,60647,new_construction,41.933313,-87.709897
+2864 N Kedzie Ave,Chicago,IL,60647,renter,41.933174,-87.710367
+2872 W Diversey Ave,Chicago,IL,60647,renter,41.932118,-87.693273
+2876 N California Ave,Chicago,IL,60647,vacant,41.933794,-87.691657
+2894 W Diversey Ave,Chicago,IL,60647,vacant,41.93217,-87.694242
+2926 W Fullerton Ave,Chicago,IL,60647,homeowner,41.925197,-87.694647
+2940 W Diversey Ave,Chicago,IL,60647,homeowner,41.932291,-87.694797
+2964 W Diversey Ave,Chicago,IL,60647,new_construction,41.932312,-87.695934
+3024 W Armitage Ave,Chicago,IL,60647,commercial,41.917984,-87.697132
+3066 W Fullerton Ave,Chicago,IL,60647,renter,41.925112,-87.69771
+3138 W Diversey Ave,Chicago,IL,60647,homeowner,41.932052,-87.699852
+3152 W Armitage Ave,Chicago,IL,60647,new_construction,41.917629,-87.699909
+3158 W Diversey Ave,Chicago,IL,60647,new_construction,41.932121,-87.700016
+3194 W North Ave,Chicago,IL,60647,new_construction,41.910729,-87.701081
+3346 W Fullerton Ave,Chicago,IL,60647,renter,41.925097,-87.704523
+3348 W North Ave,Chicago,IL,60647,homeowner,41.910614,-87.704184
+3380 W Diversey Ave,Chicago,IL,60647,homeowner,41.932408,-87.705404
+3392 W Fullerton Ave,Chicago,IL,60647,new_construction,41.924992,-87.705568
+1106 N St Louis Ave,Chicago,IL,60651,homeowner,41.901474,-87.716899
+1144 N Central Park Ave,Chicago,IL,60651,homeowner,41.902475,-87.719493
+1166 N Central Park Ave,Chicago,IL,60651,homeowner,41.902923,-87.719319
+1242 N Central Park Ave,Chicago,IL,60651,homeowner,41.904135,-87.719644
+1250 N Humboldt Blvd,Chicago,IL,60651,homeowner,41.904103,-87.714543
+1258 N Central Park Ave,Chicago,IL,60651,homeowner,41.904662,-87.719323
+1264 N Central Park Ave,Chicago,IL,60651,commercial,41.904735,-87.7193
+1266 N St Louis Ave,Chicago,IL,60651,new_construction,41.904428,-87.717285
+1314 N Hamlin Ave,Chicago,IL,60651,renter,41.905373,-87.721399
+1322 N Hamlin Ave,Chicago,IL,60651,homeowner,41.905761,-87.721422
+1330 N Hamlin Ave,Chicago,IL,60651,vacant,41.905956,-87.721813
+1330 N St Louis Ave,Chicago,IL,60651,homeowner,41.905631,-87.7173
+1332 N Hamlin Ave,Chicago,IL,60651,homeowner,41.905933,-87.721408
+1344 N Hamlin Ave,Chicago,IL,60651,homeowner,41.905962,-87.721566
+1350 N Central Park Ave,Chicago,IL,60651,homeowner,41.905944,-87.719092
+1472 N Humboldt Blvd,Chicago,IL,60651,renter,41.908497,-87.714487
+1478 N St Louis Ave,Chicago,IL,60651,renter,41.908578,-87.716832
+1510 N Humboldt Blvd,Chicago,IL,60651,homeowner,41.908761,-87.714631
+1512 N St Louis Ave,Chicago,IL,60651,homeowner,41.908951,-87.716803
+1530 N Humboldt Blvd,Chicago,IL,60651,multi_family,41.90951,-87.714554
+1570 N Humboldt Blvd,Chicago,IL,60651,renter,41.910235,-87.714912
+1572 N Central Park Ave,Chicago,IL,60651,homeowner,41.910259,-87.719585
+1584 N St Louis Ave,Chicago,IL,60651,vacant,41.910518,-87.716846
+1612 N Central Park Ave,Chicago,IL,60651,vacant,41.910697,-87.71916
+1618 N Humboldt Blvd,Chicago,IL,60651,renter,41.910924,-87.714889
+1626 N Hamlin Ave,Chicago,IL,60651,multi_family,41.911236,-87.721802
+1648 N Humboldt Blvd,Chicago,IL,60651,new_construction,41.911246,-87.714957
+1652 N Humboldt Blvd,Chicago,IL,60651,homeowner,41.911471,-87.714554
+1666 N Central Park Ave,Chicago,IL,60651,homeowner,41.912042,-87.719483
+1666 N Hamlin Ave,Chicago,IL,60651,homeowner,41.91188,-87.721699
+1680 N St Louis Ave,Chicago,IL,60651,homeowner,41.912302,-87.71704
+1718 N Hamlin Ave,Chicago,IL,60651,homeowner,41.912965,-87.72187
+1726 N Hamlin Ave,Chicago,IL,60651,vacant,41.913125,-87.721832
+1756 N Central Park Ave,Chicago,IL,60651,renter,41.913661,-87.719491
+1770 N Humboldt Blvd,Chicago,IL,60651,new_construction,41.913486,-87.714812
+1782 N Hamlin Ave,Chicago,IL,60651,renter,41.914013,-87.721751
+1782 N St Louis Ave,Chicago,IL,60651,homeowner,41.913951,-87.717054
+1784 N Central Park Ave,Chicago,IL,60651,new_construction,41.913877,-87.719304
+1798 N Central Park Ave,Chicago,IL,60651,multi_family,41.914064,-87.719225
+1830 N Humboldt Blvd,Chicago,IL,60651,renter,41.914514,-87.714517
+1890 N St Louis Ave,Chicago,IL,60651,renter,41.915863,-87.71693
+2358 W Chicago Ave,Chicago,IL,60651,homeowner,41.896331,-87.681666
+2456 W Chicago Ave,Chicago,IL,60651,homeowner,41.896142,-87.68427
+2492 W Division St,Chicago,IL,60651,renter,41.903497,-87.684938
+2662 W Augusta Blvd,Chicago,IL,60651,homeowner,41.897918,-87.688518
+2684 W Augusta Blvd,Chicago,IL,60651,vacant,41.898121,-87.68935
+2714 W Chicago Ave,Chicago,IL,60651,new_construction,41.896115,-87.689972
+2764 W Division St,Chicago,IL,60651,commercial,41.903366,-87.691184
+2816 W Augusta Blvd,Chicago,IL,60651,homeowner,41.897825,-87.692299
+2822 W Augusta Blvd,Chicago,IL,60651,homeowner,41.898231,-87.692282
+2836 W Division St,Chicago,IL,60651,multi_family,41.903616,-87.69264
+2890 W Division St,Chicago,IL,60651,homeowner,41.903315,-87.693916
+3084 W Division St,Chicago,IL,60651,commercial,41.903165,-87.698513
+3092 W Augusta Blvd,Chicago,IL,60651,multi_family,41.897976,-87.69852
+3140 W Augusta Blvd,Chicago,IL,60651,homeowner,41.898089,-87.699688

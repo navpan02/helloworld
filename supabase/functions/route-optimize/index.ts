@@ -419,6 +419,63 @@ function hdbscan(
   return labels;
 }
 
+// ─── Voronoi territory clustering ────────────────────────────────────────────
+// Assigns each stop to nearest agent start position, then runs DBSCAN within
+// each territory. Returns labels map plus a territory→agentId pre-assignment.
+
+function voronoiCluster(
+  points: Stop[],
+  agentPositions: { agentIdx: number; lat: number; lng: number }[],
+  epsKm: number,
+  minPts: number,
+): { labels: Map<number, string>; agentPreassignment: Map<string, number> } {
+  if (agentPositions.length === 0 || points.length === 0) {
+    return { labels: new Map(), agentPreassignment: new Map() };
+  }
+
+  // 1. Assign each stop to nearest agent (Voronoi cell)
+  const territoryMap = new Map<number, number[]>(); // agentIdx → point indices
+  for (let i = 0; i < points.length; i++) {
+    let bestAgent = 0;
+    let bestDist = Infinity;
+    for (let a = 0; a < agentPositions.length; a++) {
+      const d = haversineKm(points[i].lat, points[i].lng, agentPositions[a].lat, agentPositions[a].lng);
+      if (d < bestDist) { bestDist = d; bestAgent = a; }
+    }
+    if (!territoryMap.has(bestAgent)) territoryMap.set(bestAgent, []);
+    territoryMap.get(bestAgent)!.push(i);
+  }
+
+  // 2. Run DBSCAN independently within each territory
+  const globalLabels = new Map<number, string>();
+  const agentPreassignment = new Map<string, number>(); // clusterLabel → agentIdx
+  let clusterCounter = 0;
+
+  for (const [agentIdx, indices] of territoryMap.entries()) {
+    const subPoints = indices.map(i => points[i]);
+    const subLabels = dbscan(subPoints, epsKm, minPts);
+
+    // Re-map sub-cluster IDs to globally unique IDs
+    const subIdToGlobal = new Map<string, string>();
+    for (const [j, subCid] of subLabels.entries()) {
+      let globalCid: string;
+      if (subCid === 'noise') {
+        globalCid = 'noise';
+      } else {
+        if (!subIdToGlobal.has(subCid)) {
+          globalCid = `C${clusterCounter++}`;
+          subIdToGlobal.set(subCid, globalCid);
+          agentPreassignment.set(globalCid, agentIdx);
+        }
+        globalCid = subIdToGlobal.get(subCid)!;
+      }
+      globalLabels.set(indices[j], globalCid);
+    }
+  }
+
+  return { labels: globalLabels, agentPreassignment };
+}
+
 // ─── 2-opt walk-path improvement ─────────────────────────────────────────────
 
 function twoOpt(stops: Stop[]): Stop[] {

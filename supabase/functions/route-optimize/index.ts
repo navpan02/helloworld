@@ -309,6 +309,116 @@ function buildClustersFromLabels(
   return clusters;
 }
 
+// ─── HDBSCAN clustering ───────────────────────────────────────────────────────
+// Simplified HDBSCAN: mutual reachability distances + Prim's MST + gap-based cut
+
+function hdbscan(
+  points: Stop[],
+  minPts: number,
+): Map<number, string> {
+  const n = points.length;
+  if (n === 0) return new Map();
+
+  // 1. Core distances: distance to k-th nearest neighbour (k = minPts)
+  const coreDist: number[] = new Array(n).fill(Infinity);
+  for (let i = 0; i < n; i++) {
+    const dists: number[] = [];
+    for (let j = 0; j < n; j++) {
+      if (i !== j) dists.push(haversineKm(points[i].lat, points[i].lng, points[j].lat, points[j].lng));
+    }
+    dists.sort((a, b) => a - b);
+    coreDist[i] = dists[Math.min(minPts - 1, dists.length - 1)];
+  }
+
+  // 2. Mutual reachability distance: max(core(i), core(j), dist(i,j))
+  const mrd = (i: number, j: number) =>
+    Math.max(coreDist[i], coreDist[j], haversineKm(points[i].lat, points[i].lng, points[j].lat, points[j].lng));
+
+  // 3. Prim's MST on mutual reachability graph
+  const inMST = new Array(n).fill(false);
+  const cheapest = new Array(n).fill(Infinity);
+  const cheapestFrom = new Array(n).fill(-1);
+  const edges: { u: number; v: number; w: number }[] = [];
+  cheapest[0] = 0;
+
+  for (let iter = 0; iter < n; iter++) {
+    // Pick minimum cheapest not yet in MST
+    let u = -1;
+    for (let i = 0; i < n; i++) {
+      if (!inMST[i] && (u === -1 || cheapest[i] < cheapest[u])) u = i;
+    }
+    inMST[u] = true;
+    if (cheapestFrom[u] !== -1) edges.push({ u: cheapestFrom[u], v: u, w: cheapest[u] });
+    // Update neighbours
+    for (let v = 0; v < n; v++) {
+      if (!inMST[v]) {
+        const d = mrd(u, v);
+        if (d < cheapest[v]) { cheapest[v] = d; cheapestFrom[v] = u; }
+      }
+    }
+  }
+
+  // 4. Sort MST edges by weight descending; find the largest gap to auto-cut
+  const sorted = [...edges].sort((a, b) => b.w - a.w);
+  // Find gap: largest jump in edge weight
+  let cutThreshold = sorted[0]?.w ?? 1;
+  if (sorted.length > 1) {
+    let maxGap = 0;
+    let cutIdx = 0;
+    for (let i = 0; i < sorted.length - 1; i++) {
+      const gap = sorted[i].w - sorted[i + 1].w;
+      if (gap > maxGap) { maxGap = gap; cutIdx = i; }
+    }
+    cutThreshold = sorted[cutIdx].w;
+  }
+
+  // 5. Build clusters: UnionFind over edges with weight < cutThreshold
+  const uf = new UnionFind(n);
+  for (const e of edges) {
+    if (e.w < cutThreshold) uf.union(e.u, e.v);
+  }
+
+  // 6. Map root → cluster label; singletons become noise
+  const rootCount = new Map<number, number>();
+  for (let i = 0; i < n; i++) {
+    const r = uf.find(i);
+    rootCount.set(r, (rootCount.get(r) ?? 0) + 1);
+  }
+
+  let cidCounter = 0;
+  const rootToLabel = new Map<number, string>();
+  for (const [root, count] of rootCount.entries()) {
+    rootToLabel.set(root, count >= minPts ? `C${cidCounter++}` : 'noise');
+  }
+
+  const labels = new Map<number, string>();
+  for (let i = 0; i < n; i++) {
+    labels.set(i, rootToLabel.get(uf.find(i))!);
+  }
+
+  // 7. Merge noise into nearest cluster (same 1km rule as DBSCAN)
+  const clusterPoints = new Map<string, Stop[]>();
+  for (const [i, cid] of labels.entries()) {
+    if (cid !== 'noise') {
+      if (!clusterPoints.has(cid)) clusterPoints.set(cid, []);
+      clusterPoints.get(cid)!.push(points[i]);
+    }
+  }
+  for (const [i, cid] of labels.entries()) {
+    if (cid !== 'noise') continue;
+    let bestCluster = 'noise';
+    let bestDist = 1.0;
+    for (const [clId, cPoints] of clusterPoints.entries()) {
+      const center = clusterCenter(cPoints);
+      const d = haversineKm(points[i].lat, points[i].lng, center.lat, center.lng);
+      if (d < bestDist) { bestDist = d; bestCluster = clId; }
+    }
+    labels.set(i, bestCluster);
+  }
+
+  return labels;
+}
+
 // ─── 2-opt walk-path improvement ─────────────────────────────────────────────
 
 function twoOpt(stops: Stop[]): Stop[] {

@@ -6,6 +6,7 @@ import ConstraintPanel, { DEFAULT_CONSTRAINTS } from '../components/ConstraintPa
 import RouteListView from '../components/RouteListView';
 import FilterBar from '../components/FilterBar';
 import SwapRoutesModal from '../components/SwapRoutesModal';
+import UnassignedPanel from '../components/UnassignedPanel';
 import { exportAllCSV, buildGoogleMapsUrls } from '../utils/routeExport';
 
 // Lazy-load map to avoid SSR/bundle issues with Leaflet
@@ -132,6 +133,10 @@ export default function RoutePlanner() {
   const [showSwapModal, setShowSwapModal] = useState(false);
   const [isRepublishing, setIsRepublishing] = useState(false);
 
+  // ── Unassigned panel state ────────────────────────────────────────────────────
+  const [showUnassignedPanel, setShowUnassignedPanel] = useState(false);
+  const [selectedUnassigned, setSelectedUnassigned] = useState(null); // stop object or null
+
   const fileRef = useRef();
 
   // Load agents from DB on mount
@@ -148,6 +153,13 @@ export default function RoutePlanner() {
         }
       });
   }, []);
+
+  // ── Selected agents that received no route from the optimizer ────────────────
+  const agentlessAgents = useMemo(() => {
+    if (!result) return [];
+    const routeAgentIds = new Set(result.routes.map(r => r.agent_id));
+    return agents.filter(a => selectedAgentIds.has(a.id) && !routeAgentIds.has(a.id));
+  }, [result, agents, selectedAgentIds]);
 
   // ── All unique address types in the current result ────────────────────────────
   const allResultTypes = useMemo(() => {
@@ -291,6 +303,7 @@ export default function RoutePlanner() {
       setResult(data);
       setStatus('done');
       setProgress('');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
 
       // Update plan totals
       await supabase.from('route_plans').update({
@@ -350,6 +363,66 @@ export default function RoutePlanner() {
     setShowSwapModal(false);
   }, []);
 
+  // ── Assign an unassigned stop to an agent ────────────────────────────────────
+
+  const handleAssignStop = useCallback((stop, agentId) => {
+    setResult(prev => {
+      if (!prev) return prev;
+      const newUnassigned = prev.unassigned.filter(s => s.unique_id !== stop.unique_id);
+
+      let routes;
+      if (prev.routes.some(r => r.agent_id === agentId)) {
+        // Add stop to an existing agent route
+        routes = prev.routes.map(r => {
+          if (r.agent_id !== agentId) return r;
+
+          let nearestIdx = 0, minD = Infinity;
+          (r.clusters ?? []).forEach((c, i) => {
+            const d = Math.abs(c.center.lat - (stop.lat ?? 0)) + Math.abs(c.center.lng - (stop.lng ?? 0));
+            if (d < minD) { minD = d; nearestIdx = i; }
+          });
+
+          const newStop = { ...stop, stop_order: (r.total_stops ?? 0) + 1 };
+          const newClusters = r.clusters?.length
+            ? r.clusters.map((c, i) =>
+                i === nearestIdx
+                  ? { ...c, stops: [...c.stops, newStop], size: (c.size ?? c.stops.length) + 1 }
+                  : c)
+            : [{ id: 'manual', center: { lat: stop.lat ?? 0, lng: stop.lng ?? 0 }, size: 1, stops: [newStop] }];
+
+          return {
+            ...r,
+            clusters: newClusters,
+            stop_sequence: [...(r.stop_sequence ?? []), newStop],
+            total_stops: (r.total_stops ?? 0) + 1,
+          };
+        });
+      } else {
+        // Agent has no route yet — create one from scratch
+        const agentInfo = agents.find(a => a.id === agentId);
+        const newStop = { ...stop, stop_order: 1 };
+        const newRoute = {
+          agent_id: agentId,
+          agent_name: agentInfo?.name ?? agentId,
+          assignment_id: null, // not persisted until Republish
+          clusters: [{ id: 'manual-1', center: { lat: stop.lat ?? 0, lng: stop.lng ?? 0 }, size: 1, stops: [newStop] }],
+          stop_sequence: [newStop],
+          total_stops: 1,
+          total_miles: 0,
+          est_hours: 0,
+          google_maps_urls: [],
+          view_token: null,
+        };
+        routes = [...prev.routes, newRoute];
+      }
+
+      setUndoStack(stack => [...stack.slice(-9), prev]);
+      setPendingChanges(n => n + 1);
+      return { ...prev, routes, unassigned: newUnassigned };
+    });
+    setSelectedUnassigned(null);
+  }, [agents]);
+
   // ── Undo ─────────────────────────────────────────────────────────────────────
 
   const handleUndo = useCallback(() => {
@@ -382,6 +455,8 @@ export default function RoutePlanner() {
       const updatedRoutes = await Promise.all(
         result.routes.map(async (route) => {
           const newUrls = buildGoogleMapsUrls(route.stop_sequence ?? []);
+          // Manually-created routes (agentless agents) have no DB record yet — skip
+          if (!route.assignment_id) return { ...route, google_maps_urls: newUrls };
           const { error } = await supabase
             .from('route_assignments')
             .update({
@@ -683,7 +758,7 @@ export default function RoutePlanner() {
                   <button
                     type="button"
                     className="text-np-lite text-sm font-semibold hover:text-white border border-np-lite/30 px-4 py-1.5 rounded-xl transition-colors"
-                    onClick={() => { setStatus('idle'); setResult(null); setPendingChanges(0); setUndoStack([]); }}
+                    onClick={() => { setStatus('idle'); setResult(null); setPendingChanges(0); setUndoStack([]); setShowUnassignedPanel(false); setSelectedUnassigned(null); }}
                   >
                     ← Start Over
                   </button>
@@ -691,8 +766,8 @@ export default function RoutePlanner() {
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <StatCard label="Agents" value={result.routes.length} />
-                <StatCard label="Stops Assigned" value={result.stats.assigned.toLocaleString()} accent />
-                <StatCard label="Unassigned" value={result.stats.unassigned.toLocaleString()} />
+                <StatCard label="Stops Assigned" value={result.routes.reduce((s, r) => s + (r.total_stops ?? 0), 0).toLocaleString()} accent />
+                <StatCard label="Unassigned" value={(result.unassigned?.length ?? result.stats.unassigned).toLocaleString()} />
                 {result.stats.excluded > 0
                   ? <StatCard label="Excluded (ZIP)" value={result.stats.excluded.toLocaleString()} />
                   : <StatCard label="Total Input" value={result.stats.total_input?.toLocaleString() ?? '—'} />
@@ -799,12 +874,31 @@ export default function RoutePlanner() {
                   </button>
                 )}
 
+                {/* Unassigned panel toggle — only in Map View when there are unassigned stops */}
+                {activeTab === 'map' && result.unassigned?.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowUnassignedPanel(v => !v);
+                      setShowSwapModal(false);
+                    }}
+                    className={`inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-xl transition-all border ${
+                      showUnassignedPanel
+                        ? 'bg-red-600 text-white border-red-600'
+                        : 'border-red-200 text-red-700 bg-red-50 hover:bg-red-100'
+                    }`}
+                  >
+                    <span className={`w-2 h-2 rounded-full ${showUnassignedPanel ? 'bg-red-200' : 'bg-red-400 animate-pulse'}`} />
+                    {result.unassigned.length} Unassigned
+                  </button>
+                )}
+
                 {/* Swap Routes */}
                 {result.routes.length >= 2 && (
                   <button
                     type="button"
                     className="inline-flex items-center gap-2 border border-np-border text-np-text text-sm font-semibold px-4 py-2 rounded-xl hover:border-np-dark hover:text-np-dark transition-colors bg-white"
-                    onClick={() => setShowSwapModal(true)}
+                    onClick={() => { setShowSwapModal(true); setShowUnassignedPanel(false); }}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" />
@@ -835,16 +929,41 @@ export default function RoutePlanner() {
                   </div>
                 }>
                   <div className="flex-1 min-w-0 rounded-2xl overflow-hidden border border-np-border shadow-np">
-                    <RouteMap routes={filteredResult.routes} unassigned={filteredResult.unassigned} colourMode={colourMode} />
+                    <RouteMap
+                      routes={filteredResult.routes}
+                      unassigned={filteredResult.unassigned}
+                      colourMode={colourMode}
+                      selectedUnassignedId={selectedUnassigned?.unique_id ?? null}
+                      onUnassignedClick={(stop) => {
+                        setSelectedUnassigned(stop);
+                        setShowUnassignedPanel(true);
+                        setShowSwapModal(false);
+                      }}
+                      onUnassignedDrop={handleAssignStop}
+                    />
                   </div>
                 </Suspense>
 
-                {/* Swap panel — rendered inline to the right of the map (avoids Leaflet z-index conflicts) */}
+                {/* Swap panel — inline, avoids Leaflet z-index conflicts */}
                 {showSwapModal && result && (
                   <SwapRoutesModal
                     routes={result.routes}
                     onConfirm={handleSwap}
                     onClose={() => setShowSwapModal(false)}
+                  />
+                )}
+
+                {/* Unassigned panel — inline side panel */}
+                {showUnassignedPanel && result && (
+                  <UnassignedPanel
+                    stops={result.unassigned ?? []}
+                    routes={result.routes}
+                    agentlessAgents={agentlessAgents}
+                    maxStops={constraints.max_stops}
+                    selectedId={selectedUnassigned?.unique_id ?? null}
+                    onSelect={setSelectedUnassigned}
+                    onAssign={handleAssignStop}
+                    onClose={() => { setShowUnassignedPanel(false); setSelectedUnassigned(null); }}
                   />
                 )}
               </div>

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Polyline, Polygon, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -56,6 +56,38 @@ function createPinIcon(colour, label) {
     iconSize: [28, 28],
     iconAnchor: [14, 28],
     popupAnchor: [0, -28],
+  });
+}
+
+/** Larger, highlighted icon for the currently-selected unassigned stop */
+function createHighlightedPinIcon(colour) {
+  return L.divIcon({
+    className: '',
+    html: `<div style="position:relative;width:36px;height:36px">
+      <div style="
+        position:absolute;
+        width:54px;height:54px;
+        border-radius:50%;
+        border:2.5px solid ${colour};
+        opacity:0.35;
+        top:-9px;left:-9px;
+        pointer-events:none;
+      "></div>
+      <div style="
+        background:${colour};
+        color:#fff;
+        border-radius:50% 50% 50% 0;
+        transform:rotate(-45deg);
+        width:36px;height:36px;
+        display:flex;align-items:center;justify-content:center;
+        border:3px solid rgba(255,255,255,0.9);
+        font-size:13px;font-weight:700;
+        box-shadow:0 4px 16px rgba(239,68,68,0.55);
+      "><span style="transform:rotate(45deg)">!</span></div>
+    </div>`,
+    iconSize: [36, 36],
+    iconAnchor: [18, 36],
+    popupAnchor: [0, -40],
   });
 }
 
@@ -156,7 +188,69 @@ function MapLegend({ colourMode, routes }) {
   return null;
 }
 
-export default function RouteMap({ routes, unassigned = [], colourMode = 'agent' }) {
+/**
+ * Renders the currently-selected unassigned pin with a highlighted icon.
+ * Flies the map to the stop and auto-opens its popup.
+ */
+function SelectedUnassignedMarker({ stop, routes, onUnassignedClick, onUnassignedDrop }) {
+  const markerRef = useRef(null);
+  const map = useMap();
+
+  useEffect(() => {
+    // Fly to the stop (preserve zoom if already zoomed in)
+    map.flyTo([stop.lat, stop.lng], Math.max(map.getZoom(), 15), { animate: true, duration: 0.7 });
+    // Open popup after the fly animation settles
+    const t = setTimeout(() => { markerRef.current?.openPopup(); }, 800);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stop.unique_id]);
+
+  return (
+    <Marker
+      ref={markerRef}
+      position={[stop.lat, stop.lng]}
+      icon={createHighlightedPinIcon('#ef4444')}
+      draggable={!!onUnassignedDrop}
+      eventHandlers={{
+        click: () => onUnassignedClick?.(stop),
+        dragend: (e) => {
+          const latlng = e.target.getLatLng();
+          const agentId = nearestAgentForDrop(latlng, routes);
+          if (agentId) onUnassignedDrop?.(stop, agentId);
+        },
+      }}
+    >
+      <Popup>
+        <div className="route-map-popup">
+          <strong style={{ color: '#ef4444' }}>UNASSIGNED — SELECTED</strong>
+          <br />
+          {stop.address}, {stop.city}, {stop.state} {stop.zip}
+          <br />
+          <small style={{ color: typeColour(stop.address_type) }}>
+            {(stop.address_type ?? 'unknown').replace(/_/g, '\u00A0')}
+          </small>
+          <br />
+          <small style={{ color: '#94a3b8' }}>Drag onto a route, or use the panel to assign</small>
+        </div>
+      </Popup>
+    </Marker>
+  );
+}
+
+/** Find the agent whose nearest cluster centroid is closest to a given latlng */
+function nearestAgentForDrop(latlng, routes) {
+  let minDist = Infinity;
+  let best = routes[0]?.agent_id ?? null;
+  for (const route of routes) {
+    for (const cluster of (route.clusters ?? [])) {
+      const d = (latlng.lat - cluster.center.lat) ** 2 + (latlng.lng - cluster.center.lng) ** 2;
+      if (d < minDist) { minDist = d; best = route.agent_id; }
+    }
+  }
+  return best;
+}
+
+export default function RouteMap({ routes, unassigned = [], colourMode = 'agent', selectedUnassignedId, onUnassignedClick, onUnassignedDrop }) {
   if (!routes || routes.length === 0) {
     return (
       <div className="route-map-empty">
@@ -252,28 +346,54 @@ export default function RouteMap({ routes, unassigned = [], colourMode = 'agent'
         );
       })}
 
-      {/* Unassigned stops in grey */}
-      {unassigned.map(stop => (
-        stop.lat && stop.lng ? (
+      {/* Unassigned stops — red, draggable, click/drop to assign */}
+      {unassigned.map(stop => {
+        if (!stop.lat || !stop.lng) return null;
+
+        // Selected stop gets the highlighted icon + fly-to + auto-popup
+        if (stop.unique_id === selectedUnassignedId) {
+          return (
+            <SelectedUnassignedMarker
+              key={stop.unique_id}
+              stop={stop}
+              routes={routes}
+              onUnassignedClick={onUnassignedClick}
+              onUnassignedDrop={onUnassignedDrop}
+            />
+          );
+        }
+
+        return (
           <Marker
             key={stop.unique_id}
             position={[stop.lat, stop.lng]}
-            icon={createPinIcon('#94a3b8', '?')}
+            icon={createPinIcon('#ef4444', '!')}
+            draggable={!!onUnassignedDrop}
+            eventHandlers={{
+              click: () => onUnassignedClick?.(stop),
+              dragend: (e) => {
+                const latlng = e.target.getLatLng();
+                const agentId = nearestAgentForDrop(latlng, routes);
+                if (agentId) onUnassignedDrop?.(stop, agentId);
+              },
+            }}
           >
             <Popup>
               <div className="route-map-popup">
-                <strong>UNASSIGNED</strong>
+                <strong style={{ color: '#ef4444' }}>UNASSIGNED</strong>
                 <br />
                 {stop.address}, {stop.city}, {stop.state} {stop.zip}
                 <br />
                 <small style={{ color: typeColour(stop.address_type) }}>
                   {(stop.address_type ?? 'unknown').replace(/_/g, '\u00A0')}
                 </small>
+                <br />
+                <small style={{ color: '#94a3b8' }}>Click pin or drag onto a route to assign</small>
               </div>
             </Popup>
           </Marker>
-        ) : null
-      ))}
+        );
+      })}
     </MapContainer>
   );
 }

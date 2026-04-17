@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Polyline, Polygon, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import '@geoman-io/leaflet-geoman-free';
+import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 
 // Fix Leaflet's default icon paths broken by bundlers
 delete L.Icon.Default.prototype._getIconUrl;
@@ -250,55 +252,56 @@ function nearestAgentForDrop(latlng, routes) {
   return best;
 }
 
-// ── Draw-mode controller (uses leaflet-geoman if available) ──────────────────
+// ── Draw-mode controller ──────────────────────────────────────────────────────
 function DrawController({ onShapeComplete }) {
   const map = useMap();
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    import('@geoman-io/leaflet-geoman-free').then(({ default: _ }) => {
-      // geoman attaches itself to L and map via side-effect import
-      if (!map.pm) return;
-      map.pm.addControls({ position: 'topleft', drawCircle: true, drawPolygon: true, drawMarker: false, drawPolyline: false, drawRectangle: false, drawText: false, editMode: true, dragMode: false, cutPolygon: false, removalMode: false });
+    if (!map.pm) return;
 
-      let currentLayer = null;
-
-      const handleCreate = (e) => {
-        if (currentLayer) map.removeLayer(currentLayer);
-        currentLayer = e.layer;
-        const type = e.shape?.toLowerCase();
-        if (type === 'circle') {
-          const c = e.layer.getLatLng();
-          onShapeComplete({ type: 'circle', center: { lat: c.lat, lng: c.lng }, radiusM: e.layer.getRadius() });
-        } else {
-          const ring = e.layer.getLatLngs()[0].map(ll => ({ lat: ll.lat, lng: ll.lng }));
-          onShapeComplete({ type: 'polygon', ring });
-        }
-      };
-
-      const handleEdit = (e) => {
-        const layer = e.layer;
-        if (layer.getRadius) {
-          const c = layer.getLatLng();
-          onShapeComplete({ type: 'circle', center: { lat: c.lat, lng: c.lng }, radiusM: layer.getRadius() });
-        } else {
-          const ring = layer.getLatLngs()[0].map(ll => ({ lat: ll.lat, lng: ll.lng }));
-          onShapeComplete({ type: 'polygon', ring });
-        }
-      };
-
-      map.on('pm:create', handleCreate);
-      map.on('pm:edit', handleEdit);
-
-      return () => {
-        map.pm.removeControls();
-        map.off('pm:create', handleCreate);
-        map.off('pm:edit', handleEdit);
-        if (currentLayer) map.removeLayer(currentLayer);
-      };
-    }).catch(() => {
-      // geoman not installed — draw mode silently unavailable
+    map.pm.addControls({
+      position: 'topleft',
+      drawCircle: true, drawPolygon: true,
+      drawMarker: false, drawPolyline: false, drawRectangle: false,
+      drawText: false, editMode: true, dragMode: false,
+      cutPolygon: false, removalMode: false,
     });
+
+    let currentLayer = null;
+
+    const handleCreate = (e) => {
+      if (currentLayer) map.removeLayer(currentLayer);
+      currentLayer = e.layer;
+      const type = e.shape?.toLowerCase();
+      if (type === 'circle') {
+        const c = e.layer.getLatLng();
+        onShapeComplete({ type: 'circle', center: { lat: c.lat, lng: c.lng }, radiusM: e.layer.getRadius() });
+      } else {
+        const ring = e.layer.getLatLngs()[0].map(ll => ({ lat: ll.lat, lng: ll.lng }));
+        onShapeComplete({ type: 'polygon', ring });
+      }
+    };
+
+    const handleEdit = (e) => {
+      const layer = e.layer;
+      if (layer.getRadius) {
+        const c = layer.getLatLng();
+        onShapeComplete({ type: 'circle', center: { lat: c.lat, lng: c.lng }, radiusM: layer.getRadius() });
+      } else {
+        const ring = layer.getLatLngs()[0].map(ll => ({ lat: ll.lat, lng: ll.lng }));
+        onShapeComplete({ type: 'polygon', ring });
+      }
+    };
+
+    map.on('pm:create', handleCreate);
+    map.on('pm:edit', handleEdit);
+
+    return () => {
+      map.pm.removeControls();
+      map.off('pm:create', handleCreate);
+      map.off('pm:edit', handleEdit);
+      if (currentLayer) map.removeLayer(currentLayer);
+    };
   }, [map, onShapeComplete]);
 
   return null;

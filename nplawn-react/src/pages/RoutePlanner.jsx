@@ -312,6 +312,27 @@ export default function RoutePlanner() {
         status: 'active',
       }).eq('id', plan.id);
 
+      // Populate route_addresses so the manager portal can see the full address pool
+      try {
+        const addressRows = [];
+        for (const route of data.routes ?? []) {
+          for (const stop of route.stop_sequence ?? []) {
+            addressRows.push({ id: stop.unique_id, plan_id: plan.id, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat, lng: stop.lng, status: 'assigned', assignment_id: route.assignment_id });
+          }
+        }
+        for (const stop of data.unassigned ?? []) {
+          addressRows.push({ id: stop.unique_id, plan_id: plan.id, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat, lng: stop.lng, status: 'unassigned', assignment_id: null });
+        }
+        for (const stop of data.excluded ?? []) {
+          addressRows.push({ id: stop.unique_id, plan_id: plan.id, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat, lng: stop.lng, status: 'excluded', assignment_id: null });
+        }
+        for (let i = 0; i < addressRows.length; i += 500) {
+          await supabase.from('route_addresses').upsert(addressRows.slice(i, i + 500), { onConflict: 'id' });
+        }
+      } catch {
+        // non-fatal — manager portal address pool may be incomplete
+      }
+
     } catch (e) {
       let msg = e.message ?? 'Unknown error';
       if (msg === 'Failed to fetch' || msg.includes('NetworkError') || msg.includes('fetch')) {

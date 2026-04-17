@@ -8,6 +8,14 @@ const RouteMap = lazy(() => import('../../../components/RouteMap'));
 
 const DNK_TYPE = 'do_not_knock';
 
+// Rejects if the promise doesn't settle within ms milliseconds
+function withTimeout(promise, ms = 15000) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(`Request timed out after ${ms / 1000}s — check your Supabase connection`)), ms)),
+  ]);
+}
+
 export default function DrawRouteTab({ session }) {
   const today = new Date().toISOString().slice(0, 10);
 
@@ -131,27 +139,29 @@ export default function DrawRouteTab({ session }) {
 
       // Get or create today's plan for this branch
       let planId;
-      const { data: existingPlan, error: planErr } = await supabase
-        .from('route_plans').select('id').eq('branch_id', session.branchId)
-        .eq('plan_date', today).order('created_at', { ascending: false }).limit(1);
-
+      const { data: existingPlan, error: planErr } = await withTimeout(
+        supabase.from('route_plans').select('id').eq('branch_id', session.branchId)
+          .eq('plan_date', today).order('created_at', { ascending: false }).limit(1)
+      );
       if (planErr) throw new Error(`Could not load plan: ${planErr.message}`);
 
       if (existingPlan?.length) {
         planId = existingPlan[0].id;
       } else {
-        const { data: newPlan, error: newPlanErr } = await supabase
-          .from('route_plans')
-          .insert({ plan_date: today, constraints, branch_id: session.branchId, created_by: session.username })
-          .select('id').single();
+        const { data: newPlan, error: newPlanErr } = await withTimeout(
+          supabase.from('route_plans')
+            .insert({ plan_date: today, constraints, branch_id: session.branchId, created_by: session.username })
+            .select('id').single()
+        );
         if (newPlanErr) throw new Error(`Could not create plan: ${newPlanErr.message}`);
         planId = newPlan.id;
       }
 
       // Check for existing assignment for this agent today
-      const { data: existingAssign } = await supabase
-        .from('route_assignments').select('id, stop_sequence, total_stops')
-        .eq('plan_id', planId).eq('agent_id', selectedAgent).maybeSingle();
+      const { data: existingAssign } = await withTimeout(
+        supabase.from('route_assignments').select('id, stop_sequence, total_stops')
+          .eq('plan_id', planId).eq('agent_id', selectedAgent).maybeSingle()
+      );
 
       if (existingAssign && !conflict) {
         setConflict(existingAssign); setSaveStatus('idle'); return;
@@ -175,19 +185,24 @@ export default function DrawRouteTab({ session }) {
       };
 
       if (existingAssign) {
-        const { error: upErr } = await supabase.from('route_assignments').update(payload).eq('id', existingAssign.id);
+        const { error: upErr } = await withTimeout(
+          supabase.from('route_assignments').update(payload).eq('id', existingAssign.id)
+        );
         if (upErr) throw new Error(`Could not update assignment: ${upErr.message}`);
       } else {
-        const { data: newAssign, error: insErr } = await supabase
-          .from('route_assignments').insert(payload).select('id').single();
+        const { data: newAssign, error: insErr } = await withTimeout(
+          supabase.from('route_assignments').insert(payload).select('id').single()
+        );
         if (insErr) throw new Error(`Could not save assignment: ${insErr.message}`);
         assignId = newAssign.id;
       }
 
       if (filtered.length) {
-        await supabase.from('route_addresses')
-          .update({ status: 'assigned', assignment_id: assignId })
-          .in('id', filtered.map(a => a.id));
+        await withTimeout(
+          supabase.from('route_addresses')
+            .update({ status: 'assigned', assignment_id: assignId })
+            .in('id', filtered.map(a => a.id))
+        );
       }
 
       setSaveStatus('saved');

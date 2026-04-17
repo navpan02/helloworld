@@ -129,6 +129,36 @@ function FitBounds({ routes }) {
   return null;
 }
 
+/** Reset-zoom button — fits all visible points into view */
+function ResetZoomControl({ routes, allAddresses, drawMode }) {
+  const map = useMap();
+  const handleReset = () => {
+    const points = drawMode
+      ? allAddresses.filter(a => a.lat != null && a.lng != null).map(a => [a.lat, a.lng])
+      : routes.flatMap(r => r.stop_sequence).filter(s => s.lat && s.lng).map(s => [s.lat, s.lng]);
+    if (!points.length) return;
+    const bounds = L.latLngBounds(points);
+    if (bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40] });
+  };
+  return (
+    <div className="leaflet-top leaflet-right" style={{ marginTop: 10, marginRight: 10 }}>
+      <div className="leaflet-control">
+        <button
+          onClick={handleReset}
+          title="Reset zoom to fit all stops"
+          style={{
+            background: '#fff', border: '2px solid rgba(0,0,0,0.2)', borderRadius: 4,
+            padding: '4px 8px', cursor: 'pointer', fontSize: 12, fontWeight: 600,
+            color: '#333', boxShadow: '0 1px 5px rgba(0,0,0,0.15)', whiteSpace: 'nowrap',
+          }}
+        >
+          ⤢ Fit All
+        </button>
+      </div>
+    </div>
+  );
+}
+
 const LEGEND_STYLE = `
   background:rgba(255,255,255,0.95);
   padding:8px 12px;
@@ -350,6 +380,7 @@ export default function RouteMap({
       />
       {!drawMode && <FitBounds routes={routes} />}
       {drawMode && onShapeComplete && <DrawController onShapeComplete={onShapeComplete} />}
+      <ResetZoomControl routes={routes} allAddresses={allAddresses} drawMode={drawMode} />
 
       {/* In draw mode: render all addresses as background pins, shape-selected highlighted */}
       {drawMode && allAddresses.map(addr => {

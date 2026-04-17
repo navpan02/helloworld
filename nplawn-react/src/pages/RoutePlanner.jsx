@@ -106,7 +106,7 @@ function StatCard({ label, value, accent }) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function RoutePlanner() {
+export default function RoutePlanner({ portalSession } = {}) {
   const today = new Date().toISOString().slice(0, 10);
 
   const [planDate, setPlanDate] = useState(today);
@@ -276,6 +276,7 @@ export default function RoutePlanner() {
           total_agents: activeAgents.length,
           status: 'draft',
           created_by: 'admin',
+          branch_id: portalSession?.branchId ?? null,
         })
         .select('id')
         .single();
@@ -317,14 +318,14 @@ export default function RoutePlanner() {
         const addressRows = [];
         for (const route of data.routes ?? []) {
           for (const stop of route.stop_sequence ?? []) {
-            addressRows.push({ id: stop.unique_id, plan_id: plan.id, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat, lng: stop.lng, status: 'assigned', assignment_id: route.assignment_id });
+            addressRows.push({ id: stop.unique_id, plan_id: plan.id, branch_id: portalSession?.branchId ?? null, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat, lng: stop.lng, status: 'assigned', assignment_id: route.assignment_id });
           }
         }
         for (const stop of data.unassigned ?? []) {
-          addressRows.push({ id: stop.unique_id, plan_id: plan.id, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat, lng: stop.lng, status: 'unassigned', assignment_id: null });
+          addressRows.push({ id: stop.unique_id, plan_id: plan.id, branch_id: portalSession?.branchId ?? null, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat, lng: stop.lng, status: 'unassigned', assignment_id: null });
         }
         for (const stop of data.excluded ?? []) {
-          addressRows.push({ id: stop.unique_id, plan_id: plan.id, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat, lng: stop.lng, status: 'excluded', assignment_id: null });
+          addressRows.push({ id: stop.unique_id, plan_id: plan.id, branch_id: portalSession?.branchId ?? null, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat, lng: stop.lng, status: 'excluded', assignment_id: null });
         }
         for (let i = 0; i < addressRows.length; i += 500) {
           await supabase.from('route_addresses').upsert(addressRows.slice(i, i + 500), { onConflict: 'id' });

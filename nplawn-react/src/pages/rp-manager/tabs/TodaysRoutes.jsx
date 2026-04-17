@@ -44,10 +44,16 @@ export default function TodaysRoutes({ session }) {
     const p = plans[0];
     setPlan(p);
 
-    const { data: assignments } = await supabase
-      .from('route_assignments')
-      .select('*')
-      .eq('plan_id', p.id);
+    const [{ data: assignments }, { data: unassignedAddrs }] = await Promise.all([
+      supabase.from('route_assignments').select('*').eq('plan_id', p.id),
+      supabase.from('route_addresses')
+        .select('id,address,city,state,zip,address_type,lat,lng')
+        .eq('plan_id', p.id)
+        .eq('status', 'unassigned')
+        .neq('address_type', 'do_not_knock'),
+    ]);
+
+    const unassigned = (unassignedAddrs ?? []).map(a => ({ ...a, unique_id: a.id }));
 
     if (assignments?.length) {
       setResult({
@@ -66,7 +72,7 @@ export default function TodaysRoutes({ session }) {
             view_token:       a.view_token,
           };
         }),
-        unassigned: [],
+        unassigned,
         stats: { total_input: p.total_stops, assigned: p.total_stops - p.unassigned_ct, excluded: 0, unassigned: p.unassigned_ct },
       });
     }

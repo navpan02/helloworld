@@ -350,22 +350,27 @@ export default function RouteMap({
       {/* In draw mode: render all addresses as background pins, shape-selected highlighted */}
       {drawMode && allAddresses.map(addr => {
         if (!addr.lat || !addr.lng) return null;
-        const inShape = shapeAddresses.some(s => s.id === addr.id);
-        const isDnk   = addr.address_type === 'do_not_knock';
-        const colour  = isDnk ? '#94a3b8' : inShape ? '#16a34a' : '#cbd5e1';
-        const opacity = isDnk ? 0.4 : inShape ? 1 : 0.5;
+        const inShape  = shapeAddresses.some(s => s.id === addr.id);
+        const isDnk    = addr.address_type === 'do_not_knock';
+        const isAssigned = addr.status === 'assigned';
+        let colour, opacity, label;
+        if (isDnk)        { colour = '#94a3b8'; opacity = 0.4;  label = '✕'; }
+        else if (inShape) { colour = '#16a34a'; opacity = 1;    label = ''; }
+        else if (isAssigned) { colour = '#0891b2'; opacity = 0.7; label = '✓'; }
+        else              { colour = '#f97316'; opacity = 0.75; label = ''; }
         return (
           <Marker
             key={addr.id}
             position={[addr.lat, addr.lng]}
-            icon={createPinIcon(colour, '')}
+            icon={createPinIcon(colour, label)}
             opacity={opacity}
           >
             <Popup>
               <div style={{ fontSize: 12 }}>
                 <strong>{addr.address}</strong><br />
                 <span style={{ color: '#6b7280' }}>{addr.address_type?.replace(/_/g,' ')}</span>
-                {isDnk && <div style={{ color: '#ef4444', marginTop: 4 }}>⛔ Do Not Knock</div>}
+                {isDnk     && <div style={{ color: '#94a3b8', marginTop: 4 }}>⛔ Do Not Knock</div>}
+                {isAssigned && !isDnk && <div style={{ color: '#0891b2', marginTop: 4 }}>✓ Already assigned</div>}
               </div>
             </Popup>
           </Marker>

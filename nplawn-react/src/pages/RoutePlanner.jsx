@@ -318,24 +318,26 @@ export default function RoutePlanner({ portalSession } = {}) {
       }).eq('id', plan.id);
 
       // Populate route_addresses so the manager portal can see the full address pool
+      // Use delete+insert (no explicit id) to avoid UUID type errors from non-UUID unique_id values
       try {
         const addressRows = [];
         for (const route of data.routes ?? []) {
           for (const stop of route.stop_sequence ?? []) {
-            addressRows.push({ id: stop.unique_id, plan_id: plan.id, branch_id: portalSession?.branchId ?? null, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat, lng: stop.lng, status: 'assigned', assignment_id: route.assignment_id });
+            addressRows.push({ plan_id: plan.id, branch_id: portalSession?.branchId ?? null, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat, lng: stop.lng, status: 'assigned', assignment_id: route.assignment_id });
           }
         }
         for (const stop of data.unassigned ?? []) {
-          addressRows.push({ id: stop.unique_id, plan_id: plan.id, branch_id: portalSession?.branchId ?? null, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat, lng: stop.lng, status: 'unassigned', assignment_id: null });
+          addressRows.push({ plan_id: plan.id, branch_id: portalSession?.branchId ?? null, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat, lng: stop.lng, status: 'unassigned', assignment_id: null });
         }
         for (const stop of data.excluded ?? []) {
-          addressRows.push({ id: stop.unique_id, plan_id: plan.id, branch_id: portalSession?.branchId ?? null, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat, lng: stop.lng, status: 'excluded', assignment_id: null });
+          addressRows.push({ plan_id: plan.id, branch_id: portalSession?.branchId ?? null, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat, lng: stop.lng, status: 'excluded', assignment_id: null });
         }
+        await supabase.from('route_addresses').delete().eq('plan_id', plan.id);
         for (let i = 0; i < addressRows.length; i += 500) {
-          await supabase.from('route_addresses').upsert(addressRows.slice(i, i + 500), { onConflict: 'id' });
+          await supabase.from('route_addresses').insert(addressRows.slice(i, i + 500));
         }
       } catch {
-        // non-fatal — manager portal address pool may be incomplete
+        // non-fatal — edge function handles this server-side when deployed
       }
 
     } catch (e) {

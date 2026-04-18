@@ -20,24 +20,24 @@ const RouteMap      = lazy(() => import('../../../components/RouteMap'));
 const RouteListView = lazy(() => import('../../../components/RouteListView'));
 
 export default function TodaysRoutes({ session }) {
-  const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD in local time
-  const [plan, setPlan]     = useState(null);
-  const [result, setResult] = useState(null);
+  const [plan, setPlan]       = useState(null);
+  const [result, setResult]   = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
-  const [view, setView]     = useState('map'); // map | list
+  const [view, setView]       = useState('map');
 
   useEffect(() => {
     loadTodaysPlan();
-  }, [session.branchId]);
+  }, []);
 
   const loadTodaysPlan = async () => {
     setLoading(true);
     setLoadError('');
+    // Fetch the most recent active plan (no date filter — avoids UTC/local mismatch)
     const { data: plans, error: planErr } = await supabase
       .from('route_plans')
       .select('*')
-      .eq('plan_date', today)
+      .eq('status', 'active')
       .order('created_at', { ascending: false })
       .limit(1);
 
@@ -115,7 +115,7 @@ export default function TodaysRoutes({ session }) {
         )}
         <div className="ml-auto flex items-center gap-2">
           <button
-            onClick={() => exportAllCSV(result.routes, result.unassigned ?? [], today)}
+            onClick={() => exportAllCSV(result.routes, result.unassigned ?? [], plan?.plan_date)}
             className="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
           >
             Export All CSV

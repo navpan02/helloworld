@@ -857,6 +857,45 @@ Deno.serve(async (req: Request) => {
       }
     }
 
+    // Populate route_addresses from the edge function (service-role key bypasses RLS)
+    try {
+      const addrRows: Array<Record<string, unknown>> = [];
+      for (const route of routes) {
+        for (const stop of route.stop_sequence) {
+          addrRows.push({
+            id: stop.unique_id, plan_id,
+            address: stop.address, city: stop.city ?? '', state: stop.state ?? '',
+            zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner',
+            lat: stop.lat, lng: stop.lng,
+            status: 'assigned', assignment_id: route.assignment_id,
+          });
+        }
+      }
+      for (const stop of unassigned) {
+        addrRows.push({
+          id: stop.unique_id, plan_id,
+          address: stop.address, city: stop.city ?? '', state: stop.state ?? '',
+          zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner',
+          lat: stop.lat, lng: stop.lng,
+          status: 'unassigned', assignment_id: null,
+        });
+      }
+      for (const stop of excluded) {
+        addrRows.push({
+          id: stop.unique_id, plan_id,
+          address: stop.address, city: stop.city ?? '', state: stop.state ?? '',
+          zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner',
+          lat: stop.lat, lng: stop.lng,
+          status: 'excluded', assignment_id: null,
+        });
+      }
+      for (let i = 0; i < addrRows.length; i += 500) {
+        await supabase.from('route_addresses').upsert(addrRows.slice(i, i + 500), { onConflict: 'id' });
+      }
+    } catch {
+      // non-fatal
+    }
+
     const stats = {
       total_input: addresses.length,
       assigned: routes.reduce((s, r) => s + r.total_stops, 0),

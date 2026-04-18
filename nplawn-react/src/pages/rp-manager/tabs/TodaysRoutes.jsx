@@ -1,6 +1,9 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { exportAgentCSV, exportAllCSV } from '../../../utils/routeExport';
+import FilterBar from '../../../components/FilterBar';
+import SwapRoutesModal from '../../../components/SwapRoutesModal';
+import UnassignedPanel from '../../../components/UnassignedPanel';
 
 function buildClusters(stops) {
   const map = new Map();
@@ -21,12 +24,24 @@ const RouteListView = lazy(() => import('../../../components/RouteListView'));
 
 export default function TodaysRoutes({ session }) {
   const localToday = new Date().toLocaleDateString('en-CA');
-  const [selectedDate, setSelectedDate] = useState('');   // '' = most recent
+
+  // ── Data state ───────────────────────────────────────────────────────────────
+  const [selectedDate, setSelectedDate] = useState('');
   const [plan, setPlan]       = useState(null);
   const [result, setResult]   = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
-  const [view, setView]       = useState('map');
+
+  // ── View / filter state ──────────────────────────────────────────────────────
+  const [activeTab, setActiveTab]     = useState('map');
+  const [colourMode, setColourMode]   = useState('agent');
+  const [filterAgentIds, setFilterAgentIds] = useState(null);
+  const [filterTypes, setFilterTypes]       = useState(null);
+
+  // ── Unassigned / swap state ──────────────────────────────────────────────────
+  const [showUnassignedPanel, setShowUnassignedPanel] = useState(false);
+  const [selectedUnassigned, setSelectedUnassigned]   = useState(null);
+  const [showSwapModal, setShowSwapModal] = useState(false);
 
   useEffect(() => { loadPlan(selectedDate); }, [selectedDate]);
 
@@ -35,6 +50,10 @@ export default function TodaysRoutes({ session }) {
     setLoadError('');
     setResult(null);
     setPlan(null);
+    setFilterAgentIds(null);
+    setFilterTypes(null);
+    setShowUnassignedPanel(false);
+    setShowSwapModal(false);
 
     let query = supabase
       .from('route_plans')
@@ -55,45 +74,113 @@ export default function TodaysRoutes({ session }) {
       supabase.from('route_assignments').select('*').eq('plan_id', p.id),
       supabase.from('route_addresses')
         .select('id,address,city,state,zip,address_type,lat,lng')
-        .eq('plan_id', p.id)
-        .eq('status', 'unassigned')
-        .neq('address_type', 'do_not_knock'),
+        .eq('plan_id', p.id).eq('status', 'unassigned').neq('address_type', 'do_not_knock'),
     ]);
     if (aErr) { setLoadError(`Assignments query failed: ${aErr.message}`); setLoading(false); return; }
 
     const unassigned = (unassignedAddrs ?? []).map(a => ({ ...a, unique_id: a.id }));
+    const routes = (assignments ?? []).map(a => {
+      const stopSeq = a.stop_sequence ?? [];
+      return {
+        agent_id: a.agent_id, agent_name: a.agent_name, assignment_id: a.id,
+        stop_sequence: stopSeq, clusters: buildClusters(stopSeq),
+        total_stops: a.total_stops, total_miles: a.total_miles, est_hours: a.est_hours,
+        google_maps_urls: a.google_maps_urls ?? [], view_token: a.view_token,
+      };
+    });
 
-    if (assignments?.length) {
-      setResult({
-        routes: assignments.map(a => {
-          const stopSeq = a.stop_sequence ?? [];
-          return {
-            agent_id:         a.agent_id,
-            agent_name:       a.agent_name,
-            assignment_id:    a.id,
-            stop_sequence:    stopSeq,
-            clusters:         buildClusters(stopSeq),
-            total_stops:      a.total_stops,
-            total_miles:      a.total_miles,
-            est_hours:        a.est_hours,
-            google_maps_urls: a.google_maps_urls ?? [],
-            view_token:       a.view_token,
-          };
-        }),
+    if (routes.length) {
+      const res = {
+        routes,
         unassigned,
         stats: { total_input: p.total_stops, assigned: p.total_stops - p.unassigned_ct, excluded: 0, unassigned: p.unassigned_ct },
-      });
+      };
+      setResult(res);
+      setFilterAgentIds(new Set(routes.map(r => r.agent_id)));
+      const types = new Set();
+      routes.forEach(r => r.stop_sequence?.forEach(s => s.address_type && types.add(s.address_type)));
+      unassigned.forEach(s => s.address_type && types.add(s.address_type));
+      setFilterTypes(types);
     }
     setLoading(false);
   };
 
+  // ── Derived: all address types in result ─────────────────────────────────────
+  const allResultTypes = useMemo(() => {
+    const types = new Set();
+    if (!result) return types;
+    result.routes.forEach(r => r.stop_sequence?.forEach(s => s.address_type && types.add(s.address_type)));
+    result.unassigned?.forEach(s => s.address_type && types.add(s.address_type));
+    return types;
+  }, [result]);
+
+  // ── Derived: filtered result ─────────────────────────────────────────────────
+  const filteredResult = useMemo(() => {
+    if (!result || !filterAgentIds || !filterTypes) return result;
+    return {
+      ...result,
+      routes: result.routes
+        .filter(r => filterAgentIds.has(r.agent_id))
+        .map(r => ({
+          ...r,
+          clusters: r.clusters.map(c => ({ ...c, stops: c.stops.filter(s => filterTypes.has(s.address_type)) })).filter(c => c.stops.length > 0),
+          stop_sequence: r.stop_sequence?.filter(s => filterTypes.has(s.address_type)) ?? [],
+        })),
+      unassigned: result.unassigned?.filter(s => filterTypes.has(s.address_type)) ?? [],
+    };
+  }, [result, filterAgentIds, filterTypes]);
+
+  const handleClearFilters = useCallback(() => {
+    if (!result) return;
+    setFilterAgentIds(new Set(result.routes.map(r => r.agent_id)));
+    setFilterTypes(new Set(allResultTypes));
+  }, [result, allResultTypes]);
+
+  // ── Swap routes ──────────────────────────────────────────────────────────────
+  const handleSwap = useCallback((agentA, agentB) => {
+    setResult(prev => {
+      if (!prev) return prev;
+      const routes = prev.routes.map(r => {
+        if (r.agent_id === agentA.id) return { ...r, agent_id: agentB.id, agent_name: agentB.name };
+        if (r.agent_id === agentB.id) return { ...r, agent_id: agentA.id, agent_name: agentA.name };
+        return r;
+      });
+      return { ...prev, routes };
+    });
+    setShowSwapModal(false);
+  }, []);
+
+  // ── Assign unassigned stop to agent ──────────────────────────────────────────
+  const handleAssignStop = useCallback((stop, agentId) => {
+    setResult(prev => {
+      if (!prev) return prev;
+      const newUnassigned = prev.unassigned.filter(s => s.unique_id !== stop.unique_id);
+      const routes = prev.routes.map(r => {
+        if (r.agent_id !== agentId) return r;
+        const newStop = { ...stop, stop_order: (r.total_stops ?? 0) + 1 };
+        return {
+          ...r,
+          stop_sequence: [...(r.stop_sequence ?? []), newStop],
+          clusters: r.clusters?.length
+            ? [...r.clusters.slice(0, -1), { ...r.clusters[r.clusters.length - 1], stops: [...r.clusters[r.clusters.length - 1].stops, newStop] }]
+            : [{ id: 'manual', center: { lat: stop.lat ?? 0, lng: stop.lng ?? 0 }, size: 1, stops: [newStop] }],
+          total_stops: (r.total_stops ?? 0) + 1,
+        };
+      });
+      return { ...prev, routes, unassigned: newUnassigned };
+    });
+    setSelectedUnassigned(null);
+  }, []);
+
   const planDate = plan?.plan_date ?? localToday;
 
+  // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col h-full">
+
       {/* Date picker toolbar */}
-      <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-3">
-        <label className="text-sm font-medium text-gray-600">Plan date</label>
+      <div className="bg-white border-b border-gray-200 px-6 py-2.5 flex items-center gap-3 flex-shrink-0">
+        <label className="text-sm font-medium text-gray-600 whitespace-nowrap">Plan date</label>
         <input
           type="date"
           value={selectedDate || localToday}
@@ -102,18 +189,11 @@ export default function TodaysRoutes({ session }) {
           className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
         />
         {selectedDate && (
-          <button
-            onClick={() => setSelectedDate('')}
-            className="text-xs text-gray-500 hover:text-gray-700 underline"
-          >
+          <button onClick={() => setSelectedDate('')} className="text-xs text-gray-500 hover:text-gray-700 underline">
             Show latest
           </button>
         )}
-        {plan && (
-          <span className="ml-2 text-xs text-gray-400">
-            Showing plan from {plan.plan_date}
-          </span>
-        )}
+        {plan && <span className="text-xs text-gray-400">Showing plan from {plan.plan_date}</span>}
       </div>
 
       {loading && <div className="p-8 text-center text-gray-400">Loading routes…</div>}
@@ -130,45 +210,122 @@ export default function TodaysRoutes({ session }) {
         <div className="p-8 text-center text-gray-400">
           <div className="text-4xl mb-3">📋</div>
           <p className="font-medium text-gray-600 mb-1">No routes found{selectedDate ? ` for ${selectedDate}` : ''}</p>
-          <p className="text-sm">Use the <strong>Route Planner</strong> tab to generate routes, or use <strong>Add/Edit Route</strong> to build one manually.</p>
+          <p className="text-sm">Ask admin to generate today's plan, or use <strong>Add/Edit Route</strong> to build one manually.</p>
         </div>
       )}
 
-      {!loading && !loadError && result && (
-        <>
+      {!loading && !loadError && result && filteredResult && (
+        <div className="flex flex-col flex-1 overflow-hidden">
+
           {/* Summary bar */}
-          <div className="bg-green-700 text-white px-6 py-3 flex flex-wrap items-center gap-6">
+          <div className="bg-green-700 text-white px-6 py-2.5 flex flex-wrap items-center gap-4 flex-shrink-0">
             <div className="text-sm"><span className="font-bold text-lg">{result.routes.length}</span> <span className="opacity-75">agents</span></div>
             <div className="text-sm"><span className="font-bold text-lg">{result.stats.assigned}</span> <span className="opacity-75">stops assigned</span></div>
-            {result.stats.unassigned > 0 && (
-              <div className="text-sm"><span className="font-bold text-lg text-yellow-300">{result.stats.unassigned}</span> <span className="opacity-75">unassigned</span></div>
+            {(result.unassigned?.length ?? 0) > 0 && (
+              <button
+                onClick={() => { setShowUnassignedPanel(v => !v); setShowSwapModal(false); }}
+                className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all ${showUnassignedPanel ? 'bg-red-600 border-red-600 text-white' : 'border-red-300 text-red-100 hover:bg-red-600'}`}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${showUnassignedPanel ? 'bg-red-200' : 'bg-red-300 animate-pulse'}`} />
+                {result.unassigned.length} Unassigned
+              </button>
             )}
             <div className="ml-auto flex items-center gap-2">
+              {/* Swap */}
+              <button
+                onClick={() => { setShowSwapModal(true); setShowUnassignedPanel(false); }}
+                className="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
+              >
+                ⇅ Swap Routes
+              </button>
+              {/* Export */}
               <button
                 onClick={() => exportAllCSV(result.routes, result.unassigned ?? [], planDate)}
                 className="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
               >
                 Export All CSV
               </button>
-              <button
-                onClick={() => setView(v => v === 'map' ? 'list' : 'map')}
-                className="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
-              >
-                {view === 'map' ? 'List View' : 'Map View'}
-              </button>
+              {/* Map / List toggle */}
+              <div className="flex rounded-lg overflow-hidden border border-white/30">
+                <button onClick={() => setActiveTab('map')} className={`text-xs font-semibold px-3 py-1.5 transition-colors ${activeTab === 'map' ? 'bg-white text-green-700' : 'text-white hover:bg-white/20'}`}>Map View</button>
+                <button onClick={() => setActiveTab('list')} className={`text-xs font-semibold px-3 py-1.5 transition-colors ${activeTab === 'list' ? 'bg-white text-green-700' : 'text-white hover:bg-white/20'}`}>List View</button>
+              </div>
             </div>
           </div>
 
-          {/* Map / list */}
-          <div className="flex-1 overflow-auto">
-            <Suspense fallback={<div className="p-8 text-center text-gray-400">Loading map…</div>}>
-              {view === 'map'
-                ? <RouteMap result={result} />
-                : <RouteListView result={result} planDate={planDate} onExportAgent={exportAgentCSV} />
-              }
-            </Suspense>
+          {/* Filter bar */}
+          {filterAgentIds && filterTypes && (
+            <div className="bg-white border-b border-gray-200 px-6 py-3 flex-shrink-0">
+              <FilterBar
+                result={result}
+                allTypes={allResultTypes}
+                filterAgentIds={filterAgentIds}
+                filterTypes={filterTypes}
+                onAgentChange={setFilterAgentIds}
+                onTypeChange={setFilterTypes}
+                onClear={handleClearFilters}
+              />
+              {activeTab === 'map' && (
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-xs text-gray-500 font-medium">Colour by:</span>
+                  <div className="flex gap-0.5 bg-gray-100 rounded-lg p-0.5">
+                    {[{ key: 'agent', label: 'Agent' }, { key: 'type', label: 'Address Type' }].map(opt => (
+                      <button
+                        key={opt.key}
+                        onClick={() => setColourMode(opt.key)}
+                        className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${colourMode === opt.key ? 'bg-gray-900 text-white shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Main content area */}
+          <div className="flex flex-1 overflow-hidden relative">
+            <div className="flex-1 overflow-auto">
+              <Suspense fallback={<div className="p-8 text-center text-gray-400">Loading…</div>}>
+                {activeTab === 'map'
+                  ? (
+                    <RouteMap
+                      result={filteredResult}
+                      colourMode={colourMode}
+                      selectedUnassignedId={selectedUnassigned?.unique_id ?? null}
+                      onUnassignedClick={(stop) => { setSelectedUnassigned(stop); setShowUnassignedPanel(true); setShowSwapModal(false); }}
+                      onUnassignedDrop={handleAssignStop}
+                    />
+                  )
+                  : <RouteListView result={filteredResult} planDate={planDate} onExportAgent={exportAgentCSV} />
+                }
+              </Suspense>
+            </div>
+
+            {/* Swap modal */}
+            {showSwapModal && (
+              <SwapRoutesModal
+                routes={result.routes}
+                onConfirm={handleSwap}
+                onClose={() => setShowSwapModal(false)}
+              />
+            )}
+
+            {/* Unassigned panel */}
+            {showUnassignedPanel && (
+              <UnassignedPanel
+                stops={result.unassigned ?? []}
+                routes={result.routes}
+                agentlessAgents={[]}
+                selectedId={selectedUnassigned?.unique_id ?? null}
+                onSelect={setSelectedUnassigned}
+                onAssign={handleAssignStop}
+                onClose={() => { setShowUnassignedPanel(false); setSelectedUnassigned(null); }}
+              />
+            )}
           </div>
-        </>
+        </div>
       )}
     </div>
   );

@@ -62,12 +62,14 @@ export default function DrawRouteTab({ session }) {
     return () => window.removeEventListener('keydown', handler);
   });
 
-  const loadAddresses = useCallback(() => {
+  const [reloadKey, setReloadKey] = useState(0);
+
+  useEffect(() => {
     setAddrLoading(true);
     setAddresses([]);
 
     supabase.from('agents').select('*').eq('branch_id', session.branchId).eq('active', true)
-      .then(({ data }) => { setAgents(data ?? []); if (data?.length) setAgent(prev => prev || data[0].id); });
+      .then(({ data }) => { setAgents(data ?? []); if (data?.length) setAgent(a => a || data[0].id); });
 
     supabase.from('route_plans')
       .select('id')
@@ -90,8 +92,7 @@ export default function DrawRouteTab({ session }) {
           return;
         }
 
-        // Fallback for plans generated before route_addresses was populated:
-        // derive assigned stops from route_assignments stop_sequences
+        // Fallback: derive from route_assignments stop_sequences
         const { data: assignments } = await supabase
           .from('route_assignments')
           .select('id,stop_sequence')
@@ -105,26 +106,19 @@ export default function DrawRouteTab({ session }) {
               if (!stop.unique_id || seen.has(stop.unique_id)) continue;
               seen.add(stop.unique_id);
               derived.push({
-                id: stop.unique_id,
-                address: stop.address,
-                city: stop.city ?? '',
-                state: stop.state ?? '',
-                zip: stop.zip ?? '',
+                id: stop.unique_id, address: stop.address,
+                city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '',
                 address_type: stop.address_type ?? 'homeowner',
-                lat: stop.lat,
-                lng: stop.lng,
-                status: 'assigned',
-                assignment_id: asgn.id,
+                lat: stop.lat, lng: stop.lng, status: 'assigned', assignment_id: asgn.id,
               });
             }
           }
           setAddresses(derived);
         }
         setAddrLoading(false);
-      });
-  }, [session.branchId]);
-
-  useEffect(() => { loadAddresses(); }, [loadAddresses]);
+      }).catch(() => setAddrLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reloadKey]);
 
   // Shape drawing — bulk-select addresses inside polygon/circle
   const handleShapeComplete = useCallback((shapeData) => {
@@ -299,7 +293,7 @@ export default function DrawRouteTab({ session }) {
             <h3 className="font-bold text-gray-900 text-sm">Add / Edit Route</h3>
             <div className="flex gap-1">
               <button
-                onClick={() => { setHistory([[]]); setHistoryIdx(0); setResult(null); loadAddresses(); }}
+                onClick={() => { setHistory([[]]); setHistoryIdx(0); setResult(null); setReloadKey(k => k + 1); }}
                 title="Reload address pool"
                 className="w-7 h-7 rounded flex items-center justify-center text-gray-400 hover:text-green-700 hover:bg-gray-100 text-sm"
               >↺</button>

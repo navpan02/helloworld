@@ -3,16 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import PortalHeader from '../../components/rp/PortalHeader';
 import PortalAuthGuard from '../../components/rp/PortalAuthGuard';
 
-const TodaysRoutes  = lazy(() => import('./tabs/TodaysRoutes'));
-const ConstraintsTab = lazy(() => import('./tabs/ConstraintsTab'));
-const AgentsTab     = lazy(() => import('./tabs/AgentsTab'));
-const DrawRouteTab  = lazy(() => import('./tabs/DrawRouteTab'));
+const TodaysRoutes    = lazy(() => import('./tabs/TodaysRoutes'));
+const ConstraintsTab  = lazy(() => import('./tabs/ConstraintsTab'));
+const AgentsTab       = lazy(() => import('./tabs/AgentsTab'));
+const DrawRouteTab    = lazy(() => import('./tabs/DrawRouteTab'));
+const RoutePlannerTab = lazy(() => import('./tabs/RoutePlannerTab'));
 
 const TABS = [
-  { id: 'routes',      label: "Today's Routes",  icon: '🗺' },
-  { id: 'draw',        label: 'Draw Route',       icon: '✏️' },
-  { id: 'agents',      label: 'Agents',           icon: '👤' },
-  { id: 'constraints', label: 'Constraints',      icon: '⚙️' },
+  { id: 'routes',   label: "Today's Routes",  icon: '🗺' },
+  { id: 'planner',  label: 'Route Planner',   icon: '📍' },
+  { id: 'draw',     label: 'Add/Edit Route',  icon: '✏️' },
+  { id: 'agents',   label: 'Agents',          icon: '👤' },
+  { id: 'constraints', label: 'Constraints',  icon: '⚙️' },
 ];
 
 export default function ManagerDashboard() {
@@ -53,10 +55,11 @@ export default function ManagerDashboard() {
           {/* Tab content */}
           <div className="flex-1 overflow-auto">
             <Suspense fallback={<div className="p-8 text-center text-gray-400">Loading…</div>}>
-              {activeTab === 'routes'      && <TodaysRoutes   session={session} />}
-              {activeTab === 'draw'        && <DrawRouteTab   session={session} />}
-              {activeTab === 'agents'      && <AgentsTab      session={session} />}
-              {activeTab === 'constraints' && <ConstraintsTab session={session} />}
+              {activeTab === 'routes'      && <TodaysRoutes    session={session} />}
+              {activeTab === 'planner'     && <RoutePlannerTab session={session} />}
+              {activeTab === 'draw'        && <DrawRouteTab    session={session} />}
+              {activeTab === 'agents'      && <AgentsTab       session={session} />}
+              {activeTab === 'constraints' && <ConstraintsTab  session={session} />}
             </Suspense>
           </div>
         </div>

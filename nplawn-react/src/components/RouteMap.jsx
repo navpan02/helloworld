@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Polyline, Polygon, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import '@geoman-io/leaflet-geoman-free';
+import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 
 // Fix Leaflet's default icon paths broken by bundlers
 delete L.Icon.Default.prototype._getIconUrl;
@@ -127,6 +129,36 @@ function FitBounds({ routes }) {
   return null;
 }
 
+/** Reset-zoom button — fits all visible points into view */
+function ResetZoomControl({ routes, allAddresses, drawMode }) {
+  const map = useMap();
+  const handleReset = () => {
+    const points = drawMode
+      ? allAddresses.filter(a => a.lat != null && a.lng != null).map(a => [a.lat, a.lng])
+      : routes.flatMap(r => r.stop_sequence).filter(s => s.lat && s.lng).map(s => [s.lat, s.lng]);
+    if (!points.length) return;
+    const bounds = L.latLngBounds(points);
+    if (bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40] });
+  };
+  return (
+    <div className="leaflet-top leaflet-right" style={{ marginTop: 10, marginRight: 10 }}>
+      <div className="leaflet-control">
+        <button
+          onClick={handleReset}
+          title="Reset zoom to fit all stops"
+          style={{
+            background: '#fff', border: '2px solid rgba(0,0,0,0.2)', borderRadius: 4,
+            padding: '4px 8px', cursor: 'pointer', fontSize: 12, fontWeight: 600,
+            color: '#333', boxShadow: '0 1px 5px rgba(0,0,0,0.15)', whiteSpace: 'nowrap',
+          }}
+        >
+          ⤢ Fit All
+        </button>
+      </div>
+    </div>
+  );
+}
+
 const LEGEND_STYLE = `
   background:rgba(255,255,255,0.95);
   padding:8px 12px;
@@ -250,55 +282,56 @@ function nearestAgentForDrop(latlng, routes) {
   return best;
 }
 
-// ── Draw-mode controller (uses leaflet-geoman if available) ──────────────────
+// ── Draw-mode controller ──────────────────────────────────────────────────────
 function DrawController({ onShapeComplete }) {
   const map = useMap();
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    import('@geoman-io/leaflet-geoman-free').then(({ default: _ }) => {
-      // geoman attaches itself to L and map via side-effect import
-      if (!map.pm) return;
-      map.pm.addControls({ position: 'topleft', drawCircle: true, drawPolygon: true, drawMarker: false, drawPolyline: false, drawRectangle: false, drawText: false, editMode: true, dragMode: false, cutPolygon: false, removalMode: false });
+    if (!map.pm) return;
 
-      let currentLayer = null;
-
-      const handleCreate = (e) => {
-        if (currentLayer) map.removeLayer(currentLayer);
-        currentLayer = e.layer;
-        const type = e.shape?.toLowerCase();
-        if (type === 'circle') {
-          const c = e.layer.getLatLng();
-          onShapeComplete({ type: 'circle', center: { lat: c.lat, lng: c.lng }, radiusM: e.layer.getRadius() });
-        } else {
-          const ring = e.layer.getLatLngs()[0].map(ll => ({ lat: ll.lat, lng: ll.lng }));
-          onShapeComplete({ type: 'polygon', ring });
-        }
-      };
-
-      const handleEdit = (e) => {
-        const layer = e.layer;
-        if (layer.getRadius) {
-          const c = layer.getLatLng();
-          onShapeComplete({ type: 'circle', center: { lat: c.lat, lng: c.lng }, radiusM: layer.getRadius() });
-        } else {
-          const ring = layer.getLatLngs()[0].map(ll => ({ lat: ll.lat, lng: ll.lng }));
-          onShapeComplete({ type: 'polygon', ring });
-        }
-      };
-
-      map.on('pm:create', handleCreate);
-      map.on('pm:edit', handleEdit);
-
-      return () => {
-        map.pm.removeControls();
-        map.off('pm:create', handleCreate);
-        map.off('pm:edit', handleEdit);
-        if (currentLayer) map.removeLayer(currentLayer);
-      };
-    }).catch(() => {
-      // geoman not installed — draw mode silently unavailable
+    map.pm.addControls({
+      position: 'topleft',
+      drawCircle: true, drawPolygon: true,
+      drawMarker: false, drawPolyline: false, drawRectangle: false,
+      drawText: false, editMode: true, dragMode: false,
+      cutPolygon: false, removalMode: false,
     });
+
+    let currentLayer = null;
+
+    const handleCreate = (e) => {
+      if (currentLayer) map.removeLayer(currentLayer);
+      currentLayer = e.layer;
+      const type = e.shape?.toLowerCase();
+      if (type === 'circle') {
+        const c = e.layer.getLatLng();
+        onShapeComplete({ type: 'circle', center: { lat: c.lat, lng: c.lng }, radiusM: e.layer.getRadius() });
+      } else {
+        const ring = e.layer.getLatLngs()[0].map(ll => ({ lat: ll.lat, lng: ll.lng }));
+        onShapeComplete({ type: 'polygon', ring });
+      }
+    };
+
+    const handleEdit = (e) => {
+      const layer = e.layer;
+      if (layer.getRadius) {
+        const c = layer.getLatLng();
+        onShapeComplete({ type: 'circle', center: { lat: c.lat, lng: c.lng }, radiusM: layer.getRadius() });
+      } else {
+        const ring = layer.getLatLngs()[0].map(ll => ({ lat: ll.lat, lng: ll.lng }));
+        onShapeComplete({ type: 'polygon', ring });
+      }
+    };
+
+    map.on('pm:create', handleCreate);
+    map.on('pm:edit', handleEdit);
+
+    return () => {
+      map.pm.removeControls();
+      map.off('pm:create', handleCreate);
+      map.off('pm:edit', handleEdit);
+      if (currentLayer) map.removeLayer(currentLayer);
+    };
   }, [map, onShapeComplete]);
 
   return null;
@@ -318,6 +351,7 @@ export default function RouteMap({
   allAddresses = [],
   shapeAddresses = [],
   onShapeComplete,
+  onAddressClick,
 }) {
   // Accept either result.routes or direct routes prop
   const routes = result?.routes ?? routesProp ?? [];
@@ -346,26 +380,34 @@ export default function RouteMap({
       />
       {!drawMode && <FitBounds routes={routes} />}
       {drawMode && onShapeComplete && <DrawController onShapeComplete={onShapeComplete} />}
+      <ResetZoomControl routes={routes} allAddresses={allAddresses} drawMode={drawMode} />
 
       {/* In draw mode: render all addresses as background pins, shape-selected highlighted */}
       {drawMode && allAddresses.map(addr => {
         if (!addr.lat || !addr.lng) return null;
-        const inShape = shapeAddresses.some(s => s.id === addr.id);
-        const isDnk   = addr.address_type === 'do_not_knock';
-        const colour  = isDnk ? '#94a3b8' : inShape ? '#16a34a' : '#cbd5e1';
-        const opacity = isDnk ? 0.4 : inShape ? 1 : 0.5;
+        const inShape  = shapeAddresses.some(s => s.id === addr.id);
+        const isDnk    = addr.address_type === 'do_not_knock';
+        const isAssigned = addr.status === 'assigned';
+        let colour, opacity, label;
+        if (isDnk)        { colour = '#94a3b8'; opacity = 0.4;  label = '✕'; }
+        else if (inShape) { colour = '#16a34a'; opacity = 1;    label = ''; }
+        else if (isAssigned) { colour = '#0891b2'; opacity = 0.7; label = '✓'; }
+        else              { colour = '#f97316'; opacity = 0.75; label = ''; }
         return (
           <Marker
             key={addr.id}
             position={[addr.lat, addr.lng]}
-            icon={createPinIcon(colour, '')}
+            icon={createPinIcon(colour, label)}
             opacity={opacity}
+            eventHandlers={{ click: () => !isDnk && onAddressClick?.(addr) }}
           >
             <Popup>
               <div style={{ fontSize: 12 }}>
                 <strong>{addr.address}</strong><br />
                 <span style={{ color: '#6b7280' }}>{addr.address_type?.replace(/_/g,' ')}</span>
-                {isDnk && <div style={{ color: '#ef4444', marginTop: 4 }}>⛔ Do Not Knock</div>}
+                {isDnk      && <div style={{ color: '#94a3b8', marginTop: 4 }}>⛔ Do Not Knock</div>}
+                {isAssigned && !isDnk && <div style={{ color: '#0891b2', marginTop: 4 }}>✓ Already assigned</div>}
+                {!isDnk && !isAssigned && <div style={{ color: '#6b7280', marginTop: 4 }}>{inShape ? 'Click to remove' : 'Click to add'}</div>}
               </div>
             </Popup>
           </Marker>
@@ -382,16 +424,17 @@ export default function RouteMap({
         return (
           <span key={route.agent_id ?? agentIdx}>
             {/* Drive route — dashed polyline between cluster centroids (always agent-coloured) */}
-            {route.clusters.length > 1 && (
+            {(route.clusters ?? []).length > 1 && (
               <Polyline
-                positions={route.clusters.map(c => [c.center.lat, c.center.lng])}
+                positions={(route.clusters ?? []).map(c => [c.center?.lat, c.center?.lng]).filter(p => p[0] != null)}
                 pathOptions={{ color: agentColour, weight: 2, dashArray: '6 4', opacity: 0.7 }}
               />
             )}
 
-            {route.clusters.map(cluster => {
-              const hullPts = convexHull(cluster.stops.map(s => [s.lat, s.lng]));
-              const walkPath = cluster.stops.map(s => [s.lat, s.lng]);
+            {(route.clusters ?? []).map(cluster => {
+              const stops = cluster.stops ?? [];
+              const hullPts = convexHull(stops.map(s => [s.lat, s.lng]));
+              const walkPath = stops.map(s => [s.lat, s.lng]);
 
               return (
                 <span key={cluster.id}>
@@ -417,7 +460,7 @@ export default function RouteMap({
                   )}
 
                   {/* Stop pins — colour depends on colourMode */}
-                  {cluster.stops.map(stop => {
+                  {stops.map(stop => {
                     const pinColour = colourMode === 'type'
                       ? typeColour(stop.address_type)
                       : agentColour;

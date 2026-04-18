@@ -858,12 +858,13 @@ Deno.serve(async (req: Request) => {
     }
 
     // Populate route_addresses from the edge function (service-role key bypasses RLS)
+    let addrSaveError: string | null = null;
     try {
       const addrRows: Array<Record<string, unknown>> = [];
       for (const route of routes) {
         for (const stop of route.stop_sequence) {
           addrRows.push({
-            id: stop.unique_id, plan_id,
+            plan_id,
             address: stop.address, city: stop.city ?? '', state: stop.state ?? '',
             zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner',
             lat: stop.lat, lng: stop.lng,
@@ -873,7 +874,7 @@ Deno.serve(async (req: Request) => {
       }
       for (const stop of unassigned) {
         addrRows.push({
-          id: stop.unique_id, plan_id,
+          plan_id,
           address: stop.address, city: stop.city ?? '', state: stop.state ?? '',
           zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner',
           lat: stop.lat, lng: stop.lng,
@@ -882,18 +883,23 @@ Deno.serve(async (req: Request) => {
       }
       for (const stop of excluded) {
         addrRows.push({
-          id: stop.unique_id, plan_id,
+          plan_id,
           address: stop.address, city: stop.city ?? '', state: stop.state ?? '',
           zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner',
           lat: stop.lat, lng: stop.lng,
           status: 'excluded', assignment_id: null,
         });
       }
+      // Delete existing rows for this plan then insert fresh — avoids UUID type conflicts
+      // from non-UUID unique_id values in the original CSV
+      const { error: delErr } = await supabase.from('route_addresses').delete().eq('plan_id', plan_id);
+      if (delErr) throw new Error(`delete: ${delErr.message}`);
       for (let i = 0; i < addrRows.length; i += 500) {
-        await supabase.from('route_addresses').upsert(addrRows.slice(i, i + 500), { onConflict: 'id' });
+        const { error: insErr } = await supabase.from('route_addresses').insert(addrRows.slice(i, i + 500));
+        if (insErr) throw new Error(`insert batch ${i}: ${insErr.message}`);
       }
-    } catch {
-      // non-fatal
+    } catch (e) {
+      addrSaveError = e instanceof Error ? e.message : String(e);
     }
 
     const stats = {
@@ -903,7 +909,7 @@ Deno.serve(async (req: Request) => {
       unassigned: unassigned.length,
     };
 
-    return new Response(JSON.stringify({ routes, unassigned, excluded, stats }), {
+    return new Response(JSON.stringify({ routes, unassigned, excluded, stats, addrSaveError }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (err) {

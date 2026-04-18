@@ -303,7 +303,11 @@ export default function RoutePlanner({ portalSession } = {}) {
       if (fnError) throw new Error(fnError.message ?? 'Edge function error');
       setResult(data);
       setStatus('done');
-      setProgress('');
+      if (data.addrSaveError) {
+        setProgress(`⚠️ Address pool save failed: ${data.addrSaveError}`);
+      } else {
+        setProgress('');
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
       // Update plan totals

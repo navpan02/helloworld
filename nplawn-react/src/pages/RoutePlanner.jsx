@@ -322,7 +322,7 @@ export default function RoutePlanner({ portalSession } = {}) {
         const addressRows = [];
         for (const route of data.routes ?? []) {
           for (const stop of route.stop_sequence ?? []) {
-            addressRows.push({ id: crypto.randomUUID(), plan_id: plan.id, branch_id: portalSession?.branchId ?? null, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat, lng: stop.lng, status: 'assigned', assignment_id: route.assignment_id });
+            addressRows.push({ id: crypto.randomUUID(), plan_id: plan.id, branch_id: portalSession?.branchId ?? null, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat, lng: stop.lng, status: 'assigned', assignment_id: null });
           }
         }
         for (const stop of data.unassigned ?? []) {

@@ -29,8 +29,12 @@ import LawnDiagnosis    from './pages/LawnDiagnosis';
 import ProviderLanding    from './pages/ProviderLanding';
 import ServiceDiscovery  from './pages/ServiceDiscovery';
 import ProviderProfile   from './pages/ProviderProfile';
-import RoutePlanner      from './pages/RoutePlanner';
-import RouteView         from './pages/RouteView';
+import RoutePlanner       from './pages/RoutePlanner';
+import RouteView          from './pages/RouteView';
+import AdminPortalLogin   from './pages/rp-admin/Login';
+import AdminPortal        from './pages/rp-admin/Dashboard';
+import ManagerPortalLogin from './pages/rp-manager/Login';
+import ManagerPortal      from './pages/rp-manager/Dashboard';
 
 // Service pages — NPLawn core
 import Mowing           from './pages/services/Mowing';
@@ -94,6 +98,12 @@ function AppRoutes() {
         <Route path="/signup"             element={<Signup />} />
         {/* Agent route view: token-gated, no login required */}
         <Route path="/route-view/:token"  element={<Layout noFooter><RouteView /></Layout>} />
+
+        {/* ── Route Planner portals (standalone, no site Layout/auth) ── */}
+        <Route path="/rp-admin/login"     element={<AdminPortalLogin />} />
+        <Route path="/rp-admin/*"         element={<AdminPortal />} />
+        <Route path="/rp-manager/login"   element={<ManagerPortalLogin />} />
+        <Route path="/rp-manager/*"       element={<ManagerPortal />} />
 
         {/* ── All other routes require authentication ── */}
         <Route element={<RequireAuth />}>

@@ -33,6 +33,7 @@ interface Constraints {
   priority_order: string[];
   cluster_radius_m: number;
   min_cluster_size: number;
+  clustering_algorithm: 'dbscan' | 'dbscan_2opt' | 'hdbscan' | 'voronoi';
 }
 
 interface Stop {
@@ -262,6 +263,251 @@ function dbscan(
   return labels;
 }
 
+// ─── UnionFind (for HDBSCAN) ──────────────────────────────────────────────────
+
+class UnionFind {
+  private parent: number[];
+  private rank: number[];
+  constructor(n: number) {
+    this.parent = Array.from({ length: n }, (_, i) => i);
+    this.rank = new Array(n).fill(0);
+  }
+  find(x: number): number {
+    if (this.parent[x] !== x) this.parent[x] = this.find(this.parent[x]);
+    return this.parent[x];
+  }
+  union(x: number, y: number): boolean {
+    const px = this.find(x), py = this.find(y);
+    if (px === py) return false;
+    if (this.rank[px] < this.rank[py]) { this.parent[px] = py; }
+    else if (this.rank[px] > this.rank[py]) { this.parent[py] = px; }
+    else { this.parent[py] = px; this.rank[px]++; }
+    return true;
+  }
+}
+
+// ─── Build Cluster[] from index→label map ─────────────────────────────────────
+
+function buildClustersFromLabels(
+  points: Stop[],
+  labels: Map<number, string>,
+  unassignedOut: Stop[],
+): Cluster[] {
+  const clusterMap = new Map<string, Stop[]>();
+  for (const [i, cid] of labels.entries()) {
+    if (cid === 'noise') { unassignedOut.push(points[i]); continue; }
+    if (!clusterMap.has(cid)) clusterMap.set(cid, []);
+    clusterMap.get(cid)!.push(points[i]);
+  }
+  const clusters: Cluster[] = [];
+  for (const [cid, stops] of clusterMap.entries()) {
+    const center = clusterCenter(stops);
+    const priority_score = stops.reduce((s, p) => s + p.priority_score, 0);
+    clusters.push({ id: cid, center, size: stops.length, stops, priority_score });
+  }
+  clusters.sort((a, b) => b.priority_score - a.priority_score);
+  return clusters;
+}
+
+// ─── HDBSCAN clustering ───────────────────────────────────────────────────────
+// Simplified HDBSCAN: mutual reachability distances + Prim's MST + gap-based cut
+
+function hdbscan(
+  points: Stop[],
+  minPts: number,
+): Map<number, string> {
+  const n = points.length;
+  if (n === 0) return new Map();
+
+  // 1. Core distances: distance to k-th nearest neighbour (k = minPts)
+  const coreDist: number[] = new Array(n).fill(Infinity);
+  for (let i = 0; i < n; i++) {
+    const dists: number[] = [];
+    for (let j = 0; j < n; j++) {
+      if (i !== j) dists.push(haversineKm(points[i].lat, points[i].lng, points[j].lat, points[j].lng));
+    }
+    dists.sort((a, b) => a - b);
+    coreDist[i] = dists[Math.min(minPts - 1, dists.length - 1)];
+  }
+
+  // 2. Mutual reachability distance: max(core(i), core(j), dist(i,j))
+  const mrd = (i: number, j: number) =>
+    Math.max(coreDist[i], coreDist[j], haversineKm(points[i].lat, points[i].lng, points[j].lat, points[j].lng));
+
+  // 3. Prim's MST on mutual reachability graph
+  const inMST = new Array(n).fill(false);
+  const cheapest = new Array(n).fill(Infinity);
+  const cheapestFrom = new Array(n).fill(-1);
+  const edges: { u: number; v: number; w: number }[] = [];
+  cheapest[0] = 0;
+
+  for (let iter = 0; iter < n; iter++) {
+    // Pick minimum cheapest not yet in MST
+    let u = -1;
+    for (let i = 0; i < n; i++) {
+      if (!inMST[i] && (u === -1 || cheapest[i] < cheapest[u])) u = i;
+    }
+    inMST[u] = true;
+    if (cheapestFrom[u] !== -1) edges.push({ u: cheapestFrom[u], v: u, w: cheapest[u] });
+    // Update neighbours
+    for (let v = 0; v < n; v++) {
+      if (!inMST[v]) {
+        const d = mrd(u, v);
+        if (d < cheapest[v]) { cheapest[v] = d; cheapestFrom[v] = u; }
+      }
+    }
+  }
+
+  // 4. Sort MST edges by weight descending; find the largest gap to auto-cut
+  const sorted = [...edges].sort((a, b) => b.w - a.w);
+  // Find gap: largest jump in edge weight
+  let cutThreshold = sorted[0]?.w ?? 1;
+  if (sorted.length > 1) {
+    let maxGap = 0;
+    let cutIdx = 0;
+    for (let i = 0; i < sorted.length - 1; i++) {
+      const gap = sorted[i].w - sorted[i + 1].w;
+      if (gap > maxGap) { maxGap = gap; cutIdx = i; }
+    }
+    cutThreshold = sorted[cutIdx].w;
+  }
+
+  // 5. Build clusters: UnionFind over edges with weight < cutThreshold
+  const uf = new UnionFind(n);
+  for (const e of edges) {
+    if (e.w < cutThreshold) uf.union(e.u, e.v);
+  }
+
+  // 6. Map root → cluster label; singletons become noise
+  const rootCount = new Map<number, number>();
+  for (let i = 0; i < n; i++) {
+    const r = uf.find(i);
+    rootCount.set(r, (rootCount.get(r) ?? 0) + 1);
+  }
+
+  let cidCounter = 0;
+  const rootToLabel = new Map<number, string>();
+  for (const [root, count] of rootCount.entries()) {
+    rootToLabel.set(root, count >= minPts ? `C${cidCounter++}` : 'noise');
+  }
+
+  const labels = new Map<number, string>();
+  for (let i = 0; i < n; i++) {
+    labels.set(i, rootToLabel.get(uf.find(i))!);
+  }
+
+  // 7. Merge noise into nearest cluster (same 1km rule as DBSCAN)
+  const clusterPoints = new Map<string, Stop[]>();
+  for (const [i, cid] of labels.entries()) {
+    if (cid !== 'noise') {
+      if (!clusterPoints.has(cid)) clusterPoints.set(cid, []);
+      clusterPoints.get(cid)!.push(points[i]);
+    }
+  }
+  for (const [i, cid] of labels.entries()) {
+    if (cid !== 'noise') continue;
+    let bestCluster = 'noise';
+    let bestDist = 1.0;
+    for (const [clId, cPoints] of clusterPoints.entries()) {
+      const center = clusterCenter(cPoints);
+      const d = haversineKm(points[i].lat, points[i].lng, center.lat, center.lng);
+      if (d < bestDist) { bestDist = d; bestCluster = clId; }
+    }
+    labels.set(i, bestCluster);
+  }
+
+  return labels;
+}
+
+// ─── Voronoi territory clustering ────────────────────────────────────────────
+// Assigns each stop to nearest agent start position, then runs DBSCAN within
+// each territory. Returns labels map plus a territory→agentId pre-assignment.
+
+function voronoiCluster(
+  points: Stop[],
+  agentPositions: { agentIdx: number; lat: number; lng: number }[],
+  epsKm: number,
+  minPts: number,
+): { labels: Map<number, string>; agentPreassignment: Map<string, number> } {
+  if (agentPositions.length === 0 || points.length === 0) {
+    return { labels: new Map(), agentPreassignment: new Map() };
+  }
+
+  // 1. Assign each stop to nearest agent (Voronoi cell)
+  const territoryMap = new Map<number, number[]>(); // agentIdx → point indices
+  for (let i = 0; i < points.length; i++) {
+    let bestAgent = 0;
+    let bestDist = Infinity;
+    for (let a = 0; a < agentPositions.length; a++) {
+      const d = haversineKm(points[i].lat, points[i].lng, agentPositions[a].lat, agentPositions[a].lng);
+      if (d < bestDist) { bestDist = d; bestAgent = a; }
+    }
+    if (!territoryMap.has(bestAgent)) territoryMap.set(bestAgent, []);
+    territoryMap.get(bestAgent)!.push(i);
+  }
+
+  // 2. Run DBSCAN independently within each territory
+  const globalLabels = new Map<number, string>();
+  const agentPreassignment = new Map<string, number>(); // clusterLabel → agentIdx
+  let clusterCounter = 0;
+
+  for (const [agentIdx, indices] of territoryMap.entries()) {
+    const subPoints = indices.map(i => points[i]);
+    const subLabels = dbscan(subPoints, epsKm, minPts);
+
+    // Re-map sub-cluster IDs to globally unique IDs
+    const subIdToGlobal = new Map<string, string>();
+    for (const [j, subCid] of subLabels.entries()) {
+      let globalCid: string;
+      if (subCid === 'noise') {
+        globalCid = 'noise';
+      } else {
+        if (!subIdToGlobal.has(subCid)) {
+          globalCid = `C${clusterCounter++}`;
+          subIdToGlobal.set(subCid, globalCid);
+          agentPreassignment.set(globalCid, agentIdx);
+        }
+        globalCid = subIdToGlobal.get(subCid)!;
+      }
+      globalLabels.set(indices[j], globalCid);
+    }
+  }
+
+  return { labels: globalLabels, agentPreassignment };
+}
+
+// ─── 2-opt walk-path improvement ─────────────────────────────────────────────
+
+function twoOpt(stops: Stop[]): Stop[] {
+  if (stops.length <= 3) return stops;
+  let best = [...stops];
+  let improved = true;
+  while (improved) {
+    improved = false;
+    for (let i = 0; i < best.length - 1; i++) {
+      for (let j = i + 2; j < best.length; j++) {
+        // Cost before: i→i+1 and j→j+1
+        const d1 = haversineKm(best[i].lat, best[i].lng, best[i + 1].lat, best[i + 1].lng) +
+          (j + 1 < best.length
+            ? haversineKm(best[j].lat, best[j].lng, best[j + 1].lat, best[j + 1].lng)
+            : 0);
+        // Cost after: i→j and i+1→j+1 (reverse segment i+1..j)
+        const d2 = haversineKm(best[i].lat, best[i].lng, best[j].lat, best[j].lng) +
+          (j + 1 < best.length
+            ? haversineKm(best[i + 1].lat, best[i + 1].lng, best[j + 1].lat, best[j + 1].lng)
+            : 0);
+        if (d2 < d1 - 1e-9) {
+          // Reverse the segment from i+1 to j
+          const seg = best.slice(i + 1, j + 1).reverse();
+          best = [...best.slice(0, i + 1), ...seg, ...best.slice(j + 1)];
+          improved = true;
+        }
+      }
+    }
+  }
+  return best;
+}
+
 // ─── Nearest-neighbour TSP ────────────────────────────────────────────────────
 
 function nearestNeighbourTSP(
@@ -378,6 +624,7 @@ Deno.serve(async (req: Request) => {
       ],
       cluster_radius_m: rawConstraints?.cluster_radius_m ?? 400,
       min_cluster_size: rawConstraints?.min_cluster_size ?? 5,
+      clustering_algorithm: rawConstraints?.clustering_algorithm ?? 'dbscan',
     };
 
     const supabase = createClient(
@@ -425,34 +672,12 @@ Deno.serve(async (req: Request) => {
       valid.push({ ...addr, lat: geo.lat, lng: geo.lng, priority_score });
     }
 
-    // ── Phase 2: DBSCAN clustering ──────────────────────────────────────────
+    // ── Phase 2: Clustering (algorithm dispatch) ─────────────────────────────
 
     const epsKm = constraints.cluster_radius_m / 1000;
-    const labelMap = dbscan(valid, epsKm, constraints.min_cluster_size);
+    const algo = constraints.clustering_algorithm;
 
-    const clusterMap = new Map<string, Stop[]>();
-    for (const [i, cid] of labelMap.entries()) {
-      if (cid === 'noise') {
-        unassigned.push(valid[i]);
-        continue;
-      }
-      if (!clusterMap.has(cid)) clusterMap.set(cid, []);
-      clusterMap.get(cid)!.push(valid[i]);
-    }
-
-    const clusters: Cluster[] = [];
-    for (const [cid, stops] of clusterMap.entries()) {
-      const center = clusterCenter(stops);
-      const priority_score = stops.reduce((s, p) => s + p.priority_score, 0);
-      clusters.push({ id: cid, center, size: stops.length, stops, priority_score });
-    }
-
-    // Sort clusters by total priority descending
-    clusters.sort((a, b) => b.priority_score - a.priority_score);
-
-    // ── Phase 3: Agent assignment ────────────────────────────────────────────
-
-    // Geocode agent start positions if needed
+    // Agent start positions — computed here (before Phase 2) so Voronoi can use them
     const agentStops: { agentIdx: number; lat: number; lng: number }[] = [];
     for (let i = 0; i < agents.length; i++) {
       const ag: Agent = agents[i];
@@ -462,11 +687,28 @@ Deno.serve(async (req: Request) => {
       ) {
         agentStops.push({ agentIdx: i, lat: ag.start_lat, lng: ag.start_lng });
       } else {
-        // Default to geographic centroid of all valid stops
         const centroid = clusterCenter(valid.length > 0 ? valid : [{ lat: 41.88, lng: -87.63, address: '', city: '', state: '', zip: '', address_type: '', unique_id: '', priority_score: 0 }]);
         agentStops.push({ agentIdx: i, lat: centroid.lat, lng: centroid.lng });
       }
     }
+
+    let clusters: Cluster[];
+    let voronoiPreassign: Map<string, number> | null = null;
+
+    if (algo === 'hdbscan') {
+      const labelMap = hdbscan(valid, constraints.min_cluster_size);
+      clusters = buildClustersFromLabels(valid, labelMap, unassigned);
+    } else if (algo === 'voronoi') {
+      const { labels, agentPreassignment } = voronoiCluster(valid, agentStops, epsKm, constraints.min_cluster_size);
+      clusters = buildClustersFromLabels(valid, labels, unassigned);
+      voronoiPreassign = agentPreassignment;
+    } else {
+      // 'dbscan' and 'dbscan_2opt' — same clustering, 2-opt applied later in Phase 4
+      const labelMap = dbscan(valid, epsKm, constraints.min_cluster_size);
+      clusters = buildClustersFromLabels(valid, labelMap, unassigned);
+    }
+
+    // ── Phase 3: Agent assignment ────────────────────────────────────────────
 
     const agentRunning = agents.map((ag: Agent, i: number) => ({
       agent: ag,
@@ -480,6 +722,28 @@ Deno.serve(async (req: Request) => {
 
     for (const cluster of clusters) {
       const walkMi = walkMilesInCluster(cluster.stops);
+
+      // Voronoi: honour territory pre-assignment when capacity allows
+      if (voronoiPreassign !== null) {
+        const preferredIdx = voronoiPreassign.get(cluster.id) ?? -1;
+        if (preferredIdx >= 0) {
+          const ag = agentRunning[preferredIdx];
+          const driveKm = haversineKm(ag.curLat, ag.curLng, cluster.center.lat, cluster.center.lng);
+          const newStops = ag.stops + cluster.stops.length;
+          const newMiles = ag.miles + driveKm * 0.621371 + walkMi;
+          if (newStops <= constraints.max_stops && newMiles <= constraints.max_miles) {
+            ag.miles += driveKm * 0.621371 + walkMi;
+            ag.stops += cluster.stops.length;
+            ag.assignedClusters.push(cluster);
+            ag.curLat = cluster.center.lat;
+            ag.curLng = cluster.center.lng;
+            continue;
+          }
+          // Territory agent over capacity — fall through to round-robin
+        }
+      }
+
+      // Round-robin balanced assignment (all algorithms + Voronoi overflow)
       let bestAgent = -1;
       let bestScore = Infinity;
 
@@ -491,7 +755,6 @@ Deno.serve(async (req: Request) => {
         const newMiles = ag.miles + driveMi + walkMi;
 
         if (newStops <= constraints.max_stops && newMiles <= constraints.max_miles) {
-          // Prefer agent with fewest stops (load balancing)
           if (ag.stops < bestScore) {
             bestScore = ag.stops;
             bestAgent = a;
@@ -539,13 +802,16 @@ Deno.serve(async (req: Request) => {
           sortedByPriority[0].lat,
           sortedByPriority[0].lng,
         );
-        const orderedStops = walkOrder.map(i => ({
-          ...sortedByPriority[i],
+        let orderedStops = walkOrder.map(i => sortedByPriority[i]);
+        // Apply 2-opt improvement for dbscan_2opt algorithm
+        if (algo === 'dbscan_2opt') orderedStops = twoOpt(orderedStops);
+        const numberedStops = orderedStops.map(s => ({
+          ...s,
           cluster_id: cluster.id,
           stop_order: stopOrder++,
         }));
-        stopSequence.push(...orderedStops);
-        return { ...cluster, stops: orderedStops };
+        stopSequence.push(...numberedStops);
+        return { ...cluster, stops: numberedStops };
       });
 
       const assignmentId = randomUUID();
@@ -591,6 +857,51 @@ Deno.serve(async (req: Request) => {
       }
     }
 
+    // Populate route_addresses from the edge function (service-role key bypasses RLS)
+    let addrSaveError: string | null = null;
+    try {
+      const addrRows: Array<Record<string, unknown>> = [];
+      for (const route of routes) {
+        for (const stop of route.stop_sequence) {
+          addrRows.push({
+            plan_id,
+            address: stop.address, city: stop.city ?? '', state: stop.state ?? '',
+            zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner',
+            lat: stop.lat, lng: stop.lng,
+            status: 'assigned', assignment_id: route.assignment_id,
+          });
+        }
+      }
+      for (const stop of unassigned) {
+        addrRows.push({
+          plan_id,
+          address: stop.address, city: stop.city ?? '', state: stop.state ?? '',
+          zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner',
+          lat: stop.lat, lng: stop.lng,
+          status: 'unassigned', assignment_id: null,
+        });
+      }
+      for (const stop of excluded) {
+        addrRows.push({
+          plan_id,
+          address: stop.address, city: stop.city ?? '', state: stop.state ?? '',
+          zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner',
+          lat: stop.lat, lng: stop.lng,
+          status: 'excluded', assignment_id: null,
+        });
+      }
+      // Delete existing rows for this plan then insert fresh — avoids UUID type conflicts
+      // from non-UUID unique_id values in the original CSV
+      const { error: delErr } = await supabase.from('route_addresses').delete().eq('plan_id', plan_id);
+      if (delErr) throw new Error(`delete: ${delErr.message}`);
+      for (let i = 0; i < addrRows.length; i += 500) {
+        const { error: insErr } = await supabase.from('route_addresses').insert(addrRows.slice(i, i + 500));
+        if (insErr) throw new Error(`insert batch ${i}: ${insErr.message}`);
+      }
+    } catch (e) {
+      addrSaveError = e instanceof Error ? e.message : String(e);
+    }
+
     const stats = {
       total_input: addresses.length,
       assigned: routes.reduce((s, r) => s + r.total_stops, 0),
@@ -598,7 +909,7 @@ Deno.serve(async (req: Request) => {
       unassigned: unassigned.length,
     };
 
-    return new Response(JSON.stringify({ routes, unassigned, excluded, stats }), {
+    return new Response(JSON.stringify({ routes, unassigned, excluded, stats, addrSaveError }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (err) {

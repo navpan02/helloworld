@@ -16,7 +16,47 @@ export const DEFAULT_CONSTRAINTS = {
   priority_order: DEFAULT_PRIORITY,
   cluster_radius_m: 400,
   min_cluster_size: 5,
+  clustering_algorithm: 'dbscan',
 };
+
+const ALGORITHMS = [
+  {
+    key: 'dbscan',
+    name: 'DBSCAN',
+    tag: 'Default',
+    tagColour: 'bg-np-accent/10 text-np-accent',
+    description: 'Density-based clustering using a fixed neighbourhood radius.',
+    pros: 'Fast, predictable, works well for uniform city grids',
+    cons: 'Single radius — may miss dense hotspots or over-split sparse areas',
+  },
+  {
+    key: 'dbscan_2opt',
+    name: 'DBSCAN + 2-opt',
+    tag: 'Better routes',
+    tagColour: 'bg-green-100 text-green-700',
+    description: 'Same density clustering as DBSCAN, but applies 2-opt post-processing to shorten walk paths within each cluster.',
+    pros: '10–25% shorter walk paths within clusters',
+    cons: 'Slightly slower than plain DBSCAN on large clusters',
+  },
+  {
+    key: 'hdbscan',
+    name: 'HDBSCAN',
+    tag: 'Adaptive',
+    tagColour: 'bg-purple-100 text-purple-700',
+    description: 'Hierarchical density clustering — automatically adapts to varying stop density without a fixed radius.',
+    pros: 'Fewer unassigned stops; no radius tuning required',
+    cons: 'Cluster boundaries less predictable; slower on large datasets',
+  },
+  {
+    key: 'voronoi',
+    name: 'Voronoi Territory',
+    tag: 'Agent-first',
+    tagColour: 'bg-blue-100 text-blue-700',
+    description: 'Assigns each stop to the nearest agent start location first, then clusters within each territory.',
+    pros: 'Guaranteed balanced agent workloads; no cross-territory routing',
+    cons: 'Requires accurate agent start addresses; may create uneven clusters',
+  },
+];
 
 /**
  * Stateless constraint controls panel.
@@ -66,6 +106,49 @@ export default function ConstraintPanel({ constraints, onChange }) {
 
   return (
     <div className="space-y-6">
+      {/* Clustering algorithm */}
+      <div>
+        <label className="text-sm font-semibold text-np-text block mb-1">Clustering algorithm</label>
+        <p className="text-xs text-np-muted mb-3">Choose how stops are grouped into walkable neighbourhood clusters</p>
+        <div className="grid grid-cols-1 gap-2">
+          {ALGORITHMS.map(alg => {
+            const isSelected = constraints.clustering_algorithm === alg.key;
+            return (
+              <button
+                key={alg.key}
+                type="button"
+                onClick={() => update('clustering_algorithm', alg.key)}
+                className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all ${
+                  isSelected
+                    ? 'border-np-accent bg-np-accent/5 shadow-np'
+                    : 'border-np-border bg-white hover:border-np-accent/40'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-bold text-np-dark">{alg.name}</span>
+                  <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${alg.tagColour}`}>
+                    {alg.tag}
+                  </span>
+                </div>
+                <p className="text-xs text-np-muted leading-snug">{alg.description}</p>
+                {isSelected && (
+                  <div className="mt-2 grid grid-cols-2 gap-2 pt-2 border-t border-np-border/50">
+                    <div className="text-[10px] text-green-700">
+                      <span className="font-bold block mb-0.5">Pros</span>
+                      {alg.pros}
+                    </div>
+                    <div className="text-[10px] text-amber-700">
+                      <span className="font-bold block mb-0.5">Cons</span>
+                      {alg.cons}
+                    </div>
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Max stops */}
       <div>
         <div className="flex items-center justify-between mb-2">

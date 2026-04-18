@@ -93,7 +93,7 @@ export default function TodaysRoutes({ session }) {
       const res = {
         routes,
         unassigned,
-        stats: { total_input: p.total_stops, assigned: p.total_stops - p.unassigned_ct, excluded: 0, unassigned: p.unassigned_ct },
+        stats: { total_input: p.total_stops + (p.unassigned_ct ?? 0), assigned: p.total_stops, excluded: 0, unassigned: p.unassigned_ct ?? 0 },
       };
       setResult(res);
       setFilterAgentIds(new Set(routes.map(r => r.agent_id)));

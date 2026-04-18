@@ -292,7 +292,10 @@ export default function DrawRouteTab({ session }) {
         {/* Header + undo/redo */}
         <div className="p-4 border-b border-gray-100">
           <div className="flex items-center justify-between mb-1">
-            <h3 className="font-bold text-gray-900 text-sm">Add / Edit Route</h3>
+            <h3 className="font-bold text-gray-900 text-sm">
+              Add / Edit Route
+              {!addrLoading && <span className="font-normal text-xs text-gray-400 ml-1">({addresses.length})</span>}
+            </h3>
             <div className="flex gap-1">
               <button
                 onClick={() => { setHistory([[]]); setHistoryIdx(0); setResult(null); setReloadKey(k => k + 1); }}

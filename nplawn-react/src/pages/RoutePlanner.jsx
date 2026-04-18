@@ -525,18 +525,22 @@ export default function RoutePlanner({ portalSession } = {}) {
       <div className="bg-np-dark text-white px-[5%] py-8">
         <div className="max-w-7xl mx-auto flex items-start justify-between flex-wrap gap-4">
           <div>
-            <div className="text-xs tracking-[2px] uppercase text-np-lite/60 mb-1">Admin Tool</div>
+            {!portalSession && (
+              <div className="text-xs tracking-[2px] uppercase text-np-lite/60 mb-1">Admin Tool</div>
+            )}
             <h1 className="text-3xl font-extrabold">Route Planner</h1>
             <p className="text-white/60 mt-1.5 text-sm max-w-lg">
               Generate optimised field sales routes — upload addresses, select agents, and let the system cluster and sequence stops automatically.
             </p>
           </div>
-          <Link
-            to="/admin"
-            className="text-np-lite text-sm font-semibold hover:text-white border border-np-lite/30 px-4 py-2 rounded-xl transition-colors self-start"
-          >
-            ← Back to Dashboard
-          </Link>
+          {!portalSession && (
+            <Link
+              to="/admin"
+              className="text-np-lite text-sm font-semibold hover:text-white border border-np-lite/30 px-4 py-2 rounded-xl transition-colors self-start"
+            >
+              ← Back to Dashboard
+            </Link>
+          )}
         </div>
       </div>
 

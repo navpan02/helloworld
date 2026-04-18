@@ -1,6 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { supabase } from '../../../lib/supabase';
-import { exportAgentCSV, exportAllCSV, buildGoogleMapsUrls } from '../../../utils/routeExport';
+import { exportAgentCSV, exportAllCSV } from '../../../utils/routeExport';
 
 function buildClusters(stops) {
   const map = new Map();
@@ -20,27 +20,32 @@ const RouteMap      = lazy(() => import('../../../components/RouteMap'));
 const RouteListView = lazy(() => import('../../../components/RouteListView'));
 
 export default function TodaysRoutes({ session }) {
+  const localToday = new Date().toLocaleDateString('en-CA');
+  const [selectedDate, setSelectedDate] = useState('');   // '' = most recent
   const [plan, setPlan]       = useState(null);
   const [result, setResult]   = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [view, setView]       = useState('map');
 
-  useEffect(() => {
-    loadTodaysPlan();
-  }, []);
+  useEffect(() => { loadPlan(selectedDate); }, [selectedDate]);
 
-  const loadTodaysPlan = async () => {
+  const loadPlan = async (date) => {
     setLoading(true);
     setLoadError('');
-    // Fetch the most recent active plan (no date filter — avoids UTC/local mismatch)
-    const { data: plans, error: planErr } = await supabase
+    setResult(null);
+    setPlan(null);
+
+    let query = supabase
       .from('route_plans')
       .select('*')
       .eq('status', 'active')
       .order('created_at', { ascending: false })
       .limit(1);
 
+    if (date) query = query.eq('plan_date', date);
+
+    const { data: plans, error: planErr } = await query;
     if (planErr) { setLoadError(`Plan query failed: ${planErr.message}`); setLoading(false); return; }
     if (!plans?.length) { setLoading(false); return; }
     const p = plans[0];
@@ -82,62 +87,89 @@ export default function TodaysRoutes({ session }) {
     setLoading(false);
   };
 
-  if (loading) return <div className="p-8 text-center text-gray-400">Loading today's routes…</div>;
-
-  if (loadError) {
-    return (
-      <div className="p-8 text-center text-red-500">
-        <p className="font-medium mb-1">Error loading routes</p>
-        <p className="text-sm font-mono">{loadError}</p>
-        <button onClick={loadTodaysPlan} className="mt-3 text-sm underline">Retry</button>
-      </div>
-    );
-  }
-
-  if (!result) {
-    return (
-      <div className="p-8 text-center text-gray-400">
-        <div className="text-4xl mb-3">📋</div>
-        <p className="font-medium text-gray-600 mb-1">No routes generated for today</p>
-        <p className="text-sm">Use the <strong>Route Planner</strong> tab to generate routes, or use <strong>Add/Edit Route</strong> to build one manually.</p>
-      </div>
-    );
-  }
+  const planDate = plan?.plan_date ?? localToday;
 
   return (
     <div className="flex flex-col h-full">
-      {/* Summary bar */}
-      <div className="bg-green-700 text-white px-6 py-3 flex flex-wrap items-center gap-6">
-        <div className="text-sm"><span className="font-bold text-lg">{result.routes.length}</span> <span className="opacity-75">agents</span></div>
-        <div className="text-sm"><span className="font-bold text-lg">{result.stats.assigned}</span> <span className="opacity-75">stops assigned</span></div>
-        {result.stats.unassigned > 0 && (
-          <div className="text-sm"><span className="font-bold text-lg text-yellow-300">{result.stats.unassigned}</span> <span className="opacity-75">unassigned</span></div>
+      {/* Date picker toolbar */}
+      <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-3">
+        <label className="text-sm font-medium text-gray-600">Plan date</label>
+        <input
+          type="date"
+          value={selectedDate || localToday}
+          max={localToday}
+          onChange={e => setSelectedDate(e.target.value === localToday ? '' : e.target.value)}
+          className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+        />
+        {selectedDate && (
+          <button
+            onClick={() => setSelectedDate('')}
+            className="text-xs text-gray-500 hover:text-gray-700 underline"
+          >
+            Show latest
+          </button>
         )}
-        <div className="ml-auto flex items-center gap-2">
-          <button
-            onClick={() => exportAllCSV(result.routes, result.unassigned ?? [], plan?.plan_date)}
-            className="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
-          >
-            Export All CSV
-          </button>
-          <button
-            onClick={() => setView(v => v === 'map' ? 'list' : 'map')}
-            className="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
-          >
-            {view === 'map' ? 'List View' : 'Map View'}
-          </button>
-        </div>
+        {plan && (
+          <span className="ml-2 text-xs text-gray-400">
+            Showing plan from {plan.plan_date}
+          </span>
+        )}
       </div>
 
-      {/* Map / list */}
-      <div className="flex-1 overflow-auto">
-        <Suspense fallback={<div className="p-8 text-center text-gray-400">Loading map…</div>}>
-          {view === 'map'
-            ? <RouteMap result={result} />
-            : <RouteListView result={result} planDate={today} onExportAgent={exportAgentCSV} />
-          }
-        </Suspense>
-      </div>
+      {loading && <div className="p-8 text-center text-gray-400">Loading routes…</div>}
+
+      {!loading && loadError && (
+        <div className="p-8 text-center text-red-500">
+          <p className="font-medium mb-1">Error loading routes</p>
+          <p className="text-sm font-mono">{loadError}</p>
+          <button onClick={() => loadPlan(selectedDate)} className="mt-3 text-sm underline">Retry</button>
+        </div>
+      )}
+
+      {!loading && !loadError && !result && (
+        <div className="p-8 text-center text-gray-400">
+          <div className="text-4xl mb-3">📋</div>
+          <p className="font-medium text-gray-600 mb-1">No routes found{selectedDate ? ` for ${selectedDate}` : ''}</p>
+          <p className="text-sm">Use the <strong>Route Planner</strong> tab to generate routes, or use <strong>Add/Edit Route</strong> to build one manually.</p>
+        </div>
+      )}
+
+      {!loading && !loadError && result && (
+        <>
+          {/* Summary bar */}
+          <div className="bg-green-700 text-white px-6 py-3 flex flex-wrap items-center gap-6">
+            <div className="text-sm"><span className="font-bold text-lg">{result.routes.length}</span> <span className="opacity-75">agents</span></div>
+            <div className="text-sm"><span className="font-bold text-lg">{result.stats.assigned}</span> <span className="opacity-75">stops assigned</span></div>
+            {result.stats.unassigned > 0 && (
+              <div className="text-sm"><span className="font-bold text-lg text-yellow-300">{result.stats.unassigned}</span> <span className="opacity-75">unassigned</span></div>
+            )}
+            <div className="ml-auto flex items-center gap-2">
+              <button
+                onClick={() => exportAllCSV(result.routes, result.unassigned ?? [], planDate)}
+                className="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
+              >
+                Export All CSV
+              </button>
+              <button
+                onClick={() => setView(v => v === 'map' ? 'list' : 'map')}
+                className="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
+              >
+                {view === 'map' ? 'List View' : 'Map View'}
+              </button>
+            </div>
+          </div>
+
+          {/* Map / list */}
+          <div className="flex-1 overflow-auto">
+            <Suspense fallback={<div className="p-8 text-center text-gray-400">Loading map…</div>}>
+              {view === 'map'
+                ? <RouteMap result={result} />
+                : <RouteListView result={result} planDate={planDate} onExportAgent={exportAgentCSV} />
+              }
+            </Suspense>
+          </div>
+        </>
+      )}
     </div>
   );
 }

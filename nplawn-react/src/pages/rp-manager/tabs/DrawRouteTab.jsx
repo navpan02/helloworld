@@ -62,9 +62,12 @@ export default function DrawRouteTab({ session }) {
     return () => window.removeEventListener('keydown', handler);
   });
 
-  useEffect(() => {
+  const loadAddresses = useCallback(() => {
+    setAddrLoading(true);
+    setAddresses([]);
+
     supabase.from('agents').select('*').eq('branch_id', session.branchId).eq('active', true)
-      .then(({ data }) => { setAgents(data ?? []); if (data?.length) setAgent(data[0].id); });
+      .then(({ data }) => { setAgents(data ?? []); if (data?.length) setAgent(prev => prev || data[0].id); });
 
     supabase.from('route_plans')
       .select('id')
@@ -119,7 +122,9 @@ export default function DrawRouteTab({ session }) {
         }
         setAddrLoading(false);
       });
-  }, []);
+  }, [session.branchId]);
+
+  useEffect(() => { loadAddresses(); }, [loadAddresses]);
 
   // Shape drawing — bulk-select addresses inside polygon/circle
   const handleShapeComplete = useCallback((shapeData) => {
@@ -293,6 +298,11 @@ export default function DrawRouteTab({ session }) {
           <div className="flex items-center justify-between mb-1">
             <h3 className="font-bold text-gray-900 text-sm">Add / Edit Route</h3>
             <div className="flex gap-1">
+              <button
+                onClick={() => { setHistory([[]]); setHistoryIdx(0); setResult(null); loadAddresses(); }}
+                title="Reload address pool"
+                className="w-7 h-7 rounded flex items-center justify-center text-gray-400 hover:text-green-700 hover:bg-gray-100 text-sm"
+              >↺</button>
               <button
                 onClick={undo} disabled={!canUndo} title="Undo (Ctrl+Z)"
                 className="w-7 h-7 rounded flex items-center justify-center text-gray-500 hover:bg-gray-100 disabled:opacity-30 text-xs font-bold"

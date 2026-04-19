@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
+import StatusBadge from '../../../components/rp/StatusBadge';
 
+const DEFAULT_BRANCH_ID = '00000000-0000-0000-0000-000000000001';
 const TIMEZONES = ['America/New_York','America/Chicago','America/Denver','America/Los_Angeles','America/Phoenix'];
 const EMPTY = { name: '', timezone: 'America/Chicago' };
 
@@ -11,7 +13,9 @@ export default function BranchesTab({ session }) {
   const [error, setError]       = useState('');
 
   useEffect(() => {
-    supabase.from('branches').select('*').order('name').then(({ data }) => setBranches(data ?? []));
+    supabase.from('branches').select('*').order('name')
+      .then(({ data }) => setBranches(data ?? []))
+      .catch(err => console.error('Failed to load branches:', err));
   }, []);
 
   const save = async (e) => {
@@ -29,7 +33,9 @@ export default function BranchesTab({ session }) {
   };
 
   const toggle = async (branch) => {
-    await supabase.from('branches').update({ active: !branch.active }).eq('id', branch.id);
+    const { error } = await supabase
+      .from('branches').update({ active: !branch.active }).eq('id', branch.id);
+    if (error) { console.error('Toggle failed:', error.message); return; }
     setBranches(prev => prev.map(b => b.id === branch.id ? { ...b, active: !b.active } : b));
   };
 
@@ -63,14 +69,10 @@ export default function BranchesTab({ session }) {
               <tr key={branch.id} className="border-t border-gray-100 hover:bg-gray-50">
                 <td className="px-4 py-3 font-medium text-gray-900">{branch.name}</td>
                 <td className="px-4 py-3 text-gray-500 hidden sm:table-cell">{branch.timezone}</td>
-                <td className="px-4 py-3">
-                  <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${branch.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                    {branch.active ? 'Active' : 'Inactive'}
-                  </span>
-                </td>
+                <td className="px-4 py-3"><StatusBadge active={branch.active} /></td>
                 <td className="px-4 py-3 text-right whitespace-nowrap">
                   <button onClick={() => setForm({ ...branch })} className="text-xs text-blue-600 hover:underline mr-3">Edit</button>
-                  {branch.id !== '00000000-0000-0000-0000-000000000001' && (
+                  {branch.id !== DEFAULT_BRANCH_ID && (
                     <button onClick={() => toggle(branch)} className="text-xs text-gray-500 hover:underline">
                       {branch.active ? 'Deactivate' : 'Activate'}
                     </button>

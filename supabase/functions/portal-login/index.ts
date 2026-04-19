@@ -1,11 +1,36 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+// Constant-time string comparison — prevents timing attacks on password checks
+function timingSafeEqual(a: string, b: string): boolean {
+  const enc = new TextEncoder();
+  const aBytes = enc.encode(a);
+  const bBytes = enc.encode(b);
+  const maxLen = Math.max(aBytes.length, bBytes.length);
+  const paddedA = new Uint8Array(maxLen);
+  const paddedB = new Uint8Array(maxLen);
+  paddedA.set(aBytes);
+  paddedB.set(bBytes);
+  // length mismatch seeds a non-zero result so we still scan all bytes
+  let result = aBytes.length === bBytes.length ? 0 : 1;
+  for (let i = 0; i < maxLen; i++) result |= paddedA[i] ^ paddedB[i];
+  return result === 0;
+}
+
+const ALLOWED_ORIGIN = Deno.env.get('PORTAL_ALLOWED_ORIGIN') ?? '';
+
+function corsHeaders(origin: string) {
+  const allowed = ALLOWED_ORIGIN
+    ? (origin === ALLOWED_ORIGIN ? origin : '')
+    : origin; // dev fallback: echo origin when env var not set
+  return {
+    'Access-Control-Allow-Origin': allowed || 'null',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  };
+}
 
 Deno.serve(async (req) => {
+  const origin = req.headers.get('origin') ?? '';
+  const CORS = corsHeaders(origin);
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
   try {
@@ -24,8 +49,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Constant-time password comparison to prevent timing attacks
-    if (password !== sharedPassword) {
+    if (!timingSafeEqual(password, sharedPassword)) {
       return new Response(JSON.stringify({ error: 'Invalid username or password' }), {
         status: 401, headers: { ...CORS, 'Content-Type': 'application/json' },
       });
@@ -96,6 +120,7 @@ Deno.serve(async (req) => {
     });
 
   } catch (err) {
+    console.error('Portal login error:', err instanceof Error ? err.message : String(err));
     return new Response(JSON.stringify({ error: 'Unexpected error' }), {
       status: 500, headers: { ...CORS, 'Content-Type': 'application/json' },
     });

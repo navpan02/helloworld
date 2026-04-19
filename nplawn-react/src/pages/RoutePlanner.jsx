@@ -120,6 +120,7 @@ export default function RoutePlanner({ portalSession } = {}) {
   const [progress, setProgress] = useState('');
   const [result, setResult] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
+  const [addrPoolMsg, setAddrPoolMsg] = useState(''); // persists in results view
   const [activeTab, setActiveTab] = useState('map'); // map | list
   const [colourMode, setColourMode] = useState('agent'); // agent | type (WI #31)
 
@@ -259,7 +260,7 @@ export default function RoutePlanner({ portalSession } = {}) {
     setErrorMsg('');
     setResult(null);
 
-    const geocodeNeeded = csvData.filter(r => r.lat === undefined).length;
+    const geocodeNeeded = csvData.filter(r => r.lat == null).length;
     if (geocodeNeeded > 0) {
       setProgress(
         `Geocoding ${geocodeNeeded.toLocaleString()} new address${geocodeNeeded > 1 ? 'es' : ''} via Nominatim — this may take a few minutes the first time…`,
@@ -301,14 +302,13 @@ export default function RoutePlanner({ portalSession } = {}) {
       });
 
       if (fnError) throw new Error(fnError.message ?? 'Edge function error');
-      setResult(data);
-      setStatus('done');
+
+      // Stay in 'loading' state while we write route_addresses so any errors remain visible
       if (data.addrSaveError) {
-        setProgress(`⚠️ Address pool save failed: ${data.addrSaveError}`);
+        setProgress(`⚠️ Edge fn addr save error: ${data.addrSaveError} — retrying from client…`);
       } else {
-        setProgress('');
+        setProgress('Saving address pool…');
       }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
 
       // Update plan totals
       await supabase.from('route_plans').update({
@@ -318,27 +318,42 @@ export default function RoutePlanner({ portalSession } = {}) {
       }).eq('id', plan.id);
 
       // Populate route_addresses so the manager portal can see the full address pool
-      // Use delete+insert (no explicit id) to avoid UUID type errors from non-UUID unique_id values
-      try {
+      {
         const addressRows = [];
         for (const route of data.routes ?? []) {
           for (const stop of route.stop_sequence ?? []) {
-            addressRows.push({ plan_id: plan.id, branch_id: portalSession?.branchId ?? null, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat, lng: stop.lng, status: 'assigned', assignment_id: route.assignment_id });
+            addressRows.push({ id: crypto.randomUUID(), plan_id: plan.id, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat, lng: stop.lng, status: 'assigned' });
           }
         }
         for (const stop of data.unassigned ?? []) {
-          addressRows.push({ plan_id: plan.id, branch_id: portalSession?.branchId ?? null, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat, lng: stop.lng, status: 'unassigned', assignment_id: null });
+          addressRows.push({ id: crypto.randomUUID(), plan_id: plan.id, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat ?? 0, lng: stop.lng ?? 0, status: 'unassigned' });
         }
         for (const stop of data.excluded ?? []) {
-          addressRows.push({ plan_id: plan.id, branch_id: portalSession?.branchId ?? null, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat, lng: stop.lng, status: 'excluded', assignment_id: null });
+          addressRows.push({ id: crypto.randomUUID(), plan_id: plan.id, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat ?? 0, lng: stop.lng ?? 0, status: 'excluded' });
         }
-        await supabase.from('route_addresses').delete().eq('plan_id', plan.id);
-        for (let i = 0; i < addressRows.length; i += 500) {
-          await supabase.from('route_addresses').insert(addressRows.slice(i, i + 500));
+        const { error: delErr } = await supabase.from('route_addresses').delete().eq('plan_id', plan.id);
+        if (delErr) {
+          setProgress(`⚠️ Address pool delete failed — ${delErr.message}`);
+          setAddrPoolMsg(`⚠️ Address pool delete failed — ${delErr.message}`);
+        } else {
+          let insertErr = null;
+          for (let i = 0; i < addressRows.length; i += 500) {
+            const { error: e } = await supabase.from('route_addresses').insert(addressRows.slice(i, i + 500));
+            if (e) { insertErr = e; break; }
+          }
+          if (insertErr) {
+            setProgress(`⚠️ Address pool insert failed — ${insertErr.message}`);
+            setAddrPoolMsg(`⚠️ Address pool insert failed — ${insertErr.message}`);
+          } else {
+            setAddrPoolMsg(`✓ ${addressRows.length} addresses saved to pool (${data.routes?.reduce((s,r)=>s+(r.total_stops??0),0)??0} assigned, ${data.unassigned?.length??0} unassigned)`);
+          }
         }
-      } catch {
-        // non-fatal — edge function handles this server-side when deployed
       }
+
+      setResult(data);
+      setStatus('done');
+      setProgress('');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
 
     } catch (e) {
       let msg = e.message ?? 'Unknown error';
@@ -790,7 +805,7 @@ export default function RoutePlanner({ portalSession } = {}) {
                   <button
                     type="button"
                     className="text-np-lite text-sm font-semibold hover:text-white border border-np-lite/30 px-4 py-1.5 rounded-xl transition-colors"
-                    onClick={() => { setStatus('idle'); setResult(null); setPendingChanges(0); setUndoStack([]); setShowUnassignedPanel(false); setSelectedUnassigned(null); }}
+                    onClick={() => { setStatus('idle'); setResult(null); setPendingChanges(0); setUndoStack([]); setShowUnassignedPanel(false); setSelectedUnassigned(null); setAddrPoolMsg(''); }}
                   >
                     ← Start Over
                   </button>
@@ -810,6 +825,13 @@ export default function RoutePlanner({ portalSession } = {}) {
 
           {/* Tab bar + content */}
           <div className="px-[5%] max-w-7xl mx-auto py-6">
+
+            {/* Address pool status — persistent after loading */}
+            {addrPoolMsg && (
+              <div className={`mb-4 px-4 py-2 rounded-xl text-sm font-medium ${addrPoolMsg.startsWith('⚠️') ? 'bg-amber-50 border border-amber-200 text-amber-700' : 'bg-green-50 border border-green-200 text-green-700'}`}>
+                {addrPoolMsg}
+              </div>
+            )}
 
             {/* Filter bar */}
             {filterAgentIds && filterTypes && (

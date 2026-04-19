@@ -19,8 +19,9 @@ export function filterPointsInCircle(points, center, radiusM) {
 }
 
 // Ray-casting point-in-polygon
-// ring: array of {lat, lng}
+// ring: array of {lat, lng} — must have at least 3 points
 export function filterPointsInPolygon(points, ring) {
+  if (!ring || ring.length < 3) return [];
   return points.filter(p => p.lat != null && p.lng != null && pointInPolygon(p.lat, p.lng, ring));
 }
 

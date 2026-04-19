@@ -1,18 +1,23 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
+import StatusBadge from '../../../components/rp/StatusBadge';
 
 const EMPTY = { name: '', email: '', phone: '', start_address: '', branch_id: '00000000-0000-0000-0000-000000000001' };
 
 export default function AgentRosterTab({ session }) {
   const [agents, setAgents]     = useState([]);
   const [branches, setBranches] = useState([]);
-  const [form, setForm]         = useState(null); // null = closed, {} = new, {id,...} = edit
+  const [form, setForm]         = useState(null);
   const [saving, setSaving]     = useState(false);
   const [error, setError]       = useState('');
 
   useEffect(() => {
-    supabase.from('agents').select('*').order('name').then(({ data }) => setAgents(data ?? []));
-    supabase.from('branches').select('id,name').eq('active', true).then(({ data }) => setBranches(data ?? []));
+    supabase.from('agents').select('*').order('name')
+      .then(({ data }) => setAgents(data ?? []))
+      .catch(err => console.error('Failed to load agents:', err));
+    supabase.from('branches').select('id,name').eq('active', true)
+      .then(({ data }) => setBranches(data ?? []))
+      .catch(err => console.error('Failed to load branches:', err));
   }, []);
 
   const save = async (e) => {
@@ -30,7 +35,9 @@ export default function AgentRosterTab({ session }) {
   };
 
   const toggle = async (agent) => {
-    await supabase.from('agents').update({ active: !agent.active }).eq('id', agent.id);
+    const { error } = await supabase
+      .from('agents').update({ active: !agent.active }).eq('id', agent.id);
+    if (error) { console.error('Toggle failed:', error.message); return; }
     setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, active: !a.active } : a));
   };
 
@@ -46,7 +53,6 @@ export default function AgentRosterTab({ session }) {
         </button>
       </div>
 
-      {/* Agent table */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-200">
@@ -67,11 +73,7 @@ export default function AgentRosterTab({ session }) {
                 <td className="px-4 py-3 font-medium text-gray-900">{agent.name}</td>
                 <td className="px-4 py-3 text-gray-500 hidden md:table-cell">{agent.email ?? '—'}</td>
                 <td className="px-4 py-3 text-gray-500 hidden lg:table-cell truncate max-w-xs">{agent.start_address ?? '—'}</td>
-                <td className="px-4 py-3">
-                  <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${agent.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                    {agent.active ? 'Active' : 'Inactive'}
-                  </span>
-                </td>
+                <td className="px-4 py-3"><StatusBadge active={agent.active} /></td>
                 <td className="px-4 py-3 text-right whitespace-nowrap">
                   <button onClick={() => setForm({ ...agent })} className="text-xs text-blue-600 hover:underline mr-3">Edit</button>
                   <button onClick={() => toggle(agent)} className="text-xs text-gray-500 hover:underline">
@@ -84,7 +86,6 @@ export default function AgentRosterTab({ session }) {
         </table>
       </div>
 
-      {/* Add / edit form modal */}
       {form && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
@@ -101,15 +102,13 @@ export default function AgentRosterTab({ session }) {
                 <div key={key}>
                   <label className="block text-xs font-semibold text-gray-600 mb-1">{label}{required && ' *'}</label>
                   <input
-                    type="text"
-                    required={required}
+                    type="text" required={required}
                     value={form[key] ?? ''}
                     onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                   />
                 </div>
               ))}
-
               <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1">Branch</label>
                 <select
@@ -120,9 +119,7 @@ export default function AgentRosterTab({ session }) {
                   {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                 </select>
               </div>
-
               {error && <p className="text-sm text-red-600">{error}</p>}
-
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setForm(null)} className="flex-1 border border-gray-300 text-gray-700 text-sm font-medium py-2 rounded-lg hover:bg-gray-50">Cancel</button>
                 <button type="submit" disabled={saving} className="flex-1 bg-green-700 text-white text-sm font-semibold py-2 rounded-lg hover:bg-green-800 disabled:opacity-60">

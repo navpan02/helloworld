@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
+import StatusBadge from '../../../components/rp/StatusBadge';
 
 const EMPTY = { username: '', display_name: '', branch_id: '00000000-0000-0000-0000-000000000001' };
 
@@ -12,9 +13,11 @@ export default function ManagerAccounts({ session }) {
 
   useEffect(() => {
     supabase.from('portal_users').select('*').eq('role', 'branch_manager').order('display_name')
-      .then(({ data }) => setManagers(data ?? []));
+      .then(({ data }) => setManagers(data ?? []))
+      .catch(err => console.error('Failed to load managers:', err));
     supabase.from('branches').select('id,name').eq('active', true)
-      .then(({ data }) => setBranches(data ?? []));
+      .then(({ data }) => setBranches(data ?? []))
+      .catch(err => console.error('Failed to load branches:', err));
   }, []);
 
   const save = async (e) => {
@@ -33,7 +36,9 @@ export default function ManagerAccounts({ session }) {
   };
 
   const toggle = async (mgr) => {
-    await supabase.from('portal_users').update({ active: !mgr.active }).eq('id', mgr.id);
+    const { error } = await supabase
+      .from('portal_users').update({ active: !mgr.active }).eq('id', mgr.id);
+    if (error) { console.error('Toggle failed:', error.message); return; }
     setManagers(prev => prev.map(m => m.id === mgr.id ? { ...m, active: !m.active } : m));
   };
 
@@ -44,7 +49,7 @@ export default function ManagerAccounts({ session }) {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-lg font-bold text-gray-900">Manager Accounts</h2>
-          <p className="text-xs text-gray-500 mt-0.5">All managers share the same portal password as admin2.</p>
+          <p className="text-xs text-gray-500 mt-0.5">Managers log in at <code className="font-mono">/rp-manager/login</code> using their username and the shared portal password.</p>
         </div>
         <button
           onClick={() => setForm({ ...EMPTY })}
@@ -75,9 +80,7 @@ export default function ManagerAccounts({ session }) {
                 <td className="px-4 py-3 font-medium text-gray-900">{mgr.display_name}</td>
                 <td className="px-4 py-3 text-gray-500 hidden md:table-cell">{branchName(mgr.branch_id)}</td>
                 <td className="px-4 py-3">
-                  <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${mgr.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                    {mgr.active ? 'Active' : 'Disabled'}
-                  </span>
+                  <StatusBadge active={mgr.active} inactiveLabel="Disabled" />
                 </td>
                 <td className="px-4 py-3 text-right whitespace-nowrap">
                   <button onClick={() => setForm({ ...mgr })} className="text-xs text-blue-600 hover:underline mr-3">Edit</button>

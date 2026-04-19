@@ -47,6 +47,3 @@ export function getPortalSession(portal) {
   }
 }
 
-export function usePortalSession(portal) {
-  return getPortalSession(portal);
-}

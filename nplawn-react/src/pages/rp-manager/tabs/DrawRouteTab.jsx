@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { filterPointsInCircle, filterPointsInPolygon } from '../../../utils/geoFilter';
 import ConstraintPanel, { DEFAULT_CONSTRAINTS } from '../../../components/ConstraintPanel';
@@ -7,6 +7,13 @@ import { exportAgentCSV, buildGoogleMapsUrls } from '../../../utils/routeExport'
 const RouteMap = lazy(() => import('../../../components/RouteMap'));
 
 const DNK_TYPE = 'do_not_knock';
+
+function loadAgentConstraints(agentId) {
+  try {
+    const raw = localStorage.getItem(`agent_constraints_${agentId}`);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
 
 // Rejects if the promise doesn't settle within ms milliseconds
 function withTimeout(promise, ms = 15000) {
@@ -48,26 +55,49 @@ export default function DrawRouteTab({ session }) {
     setError('');
   }, [historyIdx]);
 
-  const undo = () => setHistoryIdx(i => Math.max(0, i - 1));
-  const redo = () => setHistoryIdx(i => Math.min(history.length - 1, i + 1));
   const canUndo = historyIdx > 0;
   const canRedo = historyIdx < history.length - 1;
+  const undo = () => setHistoryIdx(i => Math.max(0, i - 1));
+  const redo = () => setHistoryIdx(i => Math.min(history.length - 1, i + 1));
+
+  // Keep a ref so the keyboard handler always sees fresh history without re-registering
+  const historyRef = useRef({ history, historyIdx });
+  historyRef.current = { history, historyIdx };
 
   useEffect(() => {
     const handler = (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
-      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        setHistoryIdx(i => Math.max(0, i - 1));
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        setHistoryIdx(i => Math.min(historyRef.current.history.length - 1, i + 1));
+      }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  });
+  }, []); // register once — ref keeps values fresh
 
-  const loadAddresses = useCallback(() => {
+  // Load agent-specific constraints from localStorage when agent changes
+  useEffect(() => {
+    if (!selectedAgent) return;
+    const saved = loadAgentConstraints(selectedAgent);
+    setConstraints(saved ? { ...DEFAULT_CONSTRAINTS, ...saved } : DEFAULT_CONSTRAINTS);
+  }, [selectedAgent]);
+
+  const [reloadKey, setReloadKey] = useState(0);
+
+  useEffect(() => {
     setAddrLoading(true);
     setAddresses([]);
 
-    supabase.from('agents').select('*').eq('branch_id', session.branchId).eq('active', true)
-      .then(({ data }) => { setAgents(data ?? []); if (data?.length) setAgent(prev => prev || data[0].id); });
+    supabase.from('agents').select('*').eq('active', true).order('name')
+      .then(({ data, error: err }) => {
+        const list = (!err && data?.length) ? data : [];
+        setAgents(list);
+        if (list.length) setAgent(a => a || list[0].id);
+      });
 
     supabase.from('route_plans')
       .select('id')
@@ -78,11 +108,13 @@ export default function DrawRouteTab({ session }) {
         if (!plans?.length) { setAddrLoading(false); return; }
         const planId = plans[0].id;
 
-        const { data: addrs } = await supabase
+        const { data: addrs, error: addrErr } = await supabase
           .from('route_addresses')
           .select('id,address,city,state,zip,address_type,lat,lng,status,assignment_id')
           .eq('plan_id', planId)
           .neq('address_type', DNK_TYPE);
+
+        if (addrErr) { console.error('Failed to load route_addresses:', addrErr.message); }
 
         if (addrs?.length) {
           setAddresses(addrs);
@@ -90,12 +122,13 @@ export default function DrawRouteTab({ session }) {
           return;
         }
 
-        // Fallback for plans generated before route_addresses was populated:
-        // derive assigned stops from route_assignments stop_sequences
-        const { data: assignments } = await supabase
+        // Fallback: derive from route_assignments stop_sequences
+        const { data: assignments, error: asgErr } = await supabase
           .from('route_assignments')
           .select('id,stop_sequence')
           .eq('plan_id', planId);
+
+        if (asgErr) { console.error('Failed to load route_assignments:', asgErr.message); }
 
         if (assignments?.length) {
           const derived = [];
@@ -105,26 +138,19 @@ export default function DrawRouteTab({ session }) {
               if (!stop.unique_id || seen.has(stop.unique_id)) continue;
               seen.add(stop.unique_id);
               derived.push({
-                id: stop.unique_id,
-                address: stop.address,
-                city: stop.city ?? '',
-                state: stop.state ?? '',
-                zip: stop.zip ?? '',
+                id: stop.unique_id, address: stop.address,
+                city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '',
                 address_type: stop.address_type ?? 'homeowner',
-                lat: stop.lat,
-                lng: stop.lng,
-                status: 'assigned',
-                assignment_id: asgn.id,
+                lat: stop.lat, lng: stop.lng, status: 'assigned', assignment_id: asgn.id,
               });
             }
           }
           setAddresses(derived);
         }
         setAddrLoading(false);
-      });
-  }, [session.branchId]);
-
-  useEffect(() => { loadAddresses(); }, [loadAddresses]);
+      }).catch(() => setAddrLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reloadKey]);
 
   // Shape drawing — bulk-select addresses inside polygon/circle
   const handleShapeComplete = useCallback((shapeData) => {
@@ -183,9 +209,10 @@ export default function DrawRouteTab({ session }) {
 
       // Get or create today's plan for this branch
       let planId;
+      let planQuery = supabase.from('route_plans').select('id').eq('plan_date', today);
+      if (session.branchId) planQuery = planQuery.eq('branch_id', session.branchId);
       const { data: existingPlan, error: planErr } = await withTimeout(
-        supabase.from('route_plans').select('id')
-          .eq('plan_date', today).order('created_at', { ascending: false }).limit(1)
+        planQuery.order('created_at', { ascending: false }).limit(1)
       );
       if (planErr) throw new Error(`Could not load plan: ${planErr.message}`);
 
@@ -241,11 +268,12 @@ export default function DrawRouteTab({ session }) {
       }
 
       if (filtered.length) {
-        await withTimeout(
+        const { error: addrErr } = await withTimeout(
           supabase.from('route_addresses')
             .update({ status: 'assigned', assignment_id: assignId })
             .in('id', filtered.map(a => a.id))
         );
+        if (addrErr) throw new Error(`Could not mark addresses as assigned: ${addrErr.message}`);
       }
 
       setSaveStatus('saved');
@@ -256,9 +284,11 @@ export default function DrawRouteTab({ session }) {
   };
 
   const agentName      = agents.find(a => a.id === selectedAgent)?.name ?? '';
-  const byType         = filtered.reduce((acc, a) => { acc[a.address_type] = (acc[a.address_type] ?? 0) + 1; return acc; }, {});
-  const assignedCount  = addresses.filter(a => a.status === 'assigned').length;
-  const unassignedCount = addresses.filter(a => a.status !== 'assigned' && a.address_type !== DNK_TYPE).length;
+  const byType              = filtered.reduce((acc, a) => { acc[a.address_type] = (acc[a.address_type] ?? 0) + 1; return acc; }, {});
+  const assignedCount       = addresses.filter(a => a.status === 'assigned').length;
+  const unassignedMappable  = addresses.filter(a => a.status !== 'assigned' && a.address_type !== DNK_TYPE && a.lat && a.lng);
+  const unassignedNoCoords  = addresses.filter(a => a.status !== 'assigned' && a.address_type !== DNK_TYPE && (!a.lat || !a.lng));
+  const unassignedCount     = unassignedMappable.length;
 
   return (
     <div className="flex h-full">
@@ -296,10 +326,13 @@ export default function DrawRouteTab({ session }) {
         {/* Header + undo/redo */}
         <div className="p-4 border-b border-gray-100">
           <div className="flex items-center justify-between mb-1">
-            <h3 className="font-bold text-gray-900 text-sm">Add / Edit Route</h3>
+            <h3 className="font-bold text-gray-900 text-sm">
+              Add / Edit Route
+              {!addrLoading && <span className="font-normal text-xs text-gray-400 ml-1">({addresses.length})</span>}
+            </h3>
             <div className="flex gap-1">
               <button
-                onClick={() => { setHistory([[]]); setHistoryIdx(0); setResult(null); loadAddresses(); }}
+                onClick={() => { setHistory([[]]); setHistoryIdx(0); setResult(null); setReloadKey(k => k + 1); }}
                 title="Reload address pool"
                 className="w-7 h-7 rounded flex items-center justify-center text-gray-400 hover:text-green-700 hover:bg-gray-100 text-sm"
               >↺</button>
@@ -328,10 +361,20 @@ export default function DrawRouteTab({ session }) {
                   {assignedCount} assigned
                 </span>
               )}
+              {unassignedNoCoords.length > 0 && (
+                <span className="flex items-center gap-1 text-xs text-gray-400" title="These addresses could not be geocoded and have no map coordinates">
+                  ⚠ {unassignedNoCoords.length} no location
+                </span>
+              )}
             </div>
           )}
-          {!addrLoading && addresses.length > 0 && unassignedCount === 0 && (
+          {!addrLoading && addresses.length > 0 && unassignedCount === 0 && unassignedNoCoords.length === 0 && (
             <p className="mt-1.5 text-xs text-amber-600">All stops are assigned. You can still select any pin (cyan) to add it to a new route.</p>
+          )}
+          {!addrLoading && unassignedNoCoords.length > 0 && (
+            <p className="mt-1.5 text-xs text-amber-600">
+              {unassignedNoCoords.length} stop{unassignedNoCoords.length > 1 ? 's' : ''} couldn't be geocoded (no coordinates) — they can't be shown on the map. Use a CSV with lat/lng columns to include them.
+            </p>
           )}
         </div>
 
@@ -382,7 +425,12 @@ export default function DrawRouteTab({ session }) {
             onClick={() => setShowCon(v => !v)}
             className="w-full px-4 py-3 flex items-center justify-between text-xs font-semibold text-gray-600 hover:bg-gray-50"
           >
-            <span>Constraint overrides</span>
+            <span className="flex items-center gap-1.5">
+              Constraint overrides
+              {selectedAgent && loadAgentConstraints(selectedAgent) && (
+                <span className="text-[10px] text-blue-600 font-semibold bg-blue-50 px-1.5 py-0.5 rounded">custom</span>
+              )}
+            </span>
             <span>{showConstraints ? '▲' : '▼'}</span>
           </button>
           {showConstraints && (

@@ -15,30 +15,6 @@ export async function sha256(message) {
 export const RESERVED_EMAILS = ['admin@admin.com', 'navpan@gmail.com'];
 
 // ---------------------------------------------------------------------------
-// Legacy / local-auth helpers (kept for backward-compat and test coverage)
-// ---------------------------------------------------------------------------
-
-export function getRegisteredUsers() {
-  try { return JSON.parse(localStorage.getItem('nplawn_users') || '[]'); }
-  catch { return []; }
-}
-
-export function saveRegisteredUsers(users) {
-  localStorage.setItem('nplawn_users', JSON.stringify(users));
-}
-
-/** Look up a user by email + password in localStorage (legacy). */
-export async function findUser(email, password) {
-  const users = getRegisteredUsers();
-  const found = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-  if (!found) return null;
-  if (!found.verified) return { error: 'unverified' };
-  const hash = await sha256(password);
-  if (hash !== found.hash) return null;
-  return { email: found.email, name: found.name || '', role: found.role || 'user' };
-}
-
-// ---------------------------------------------------------------------------
 // Session helpers (sessionStorage)
 // ---------------------------------------------------------------------------
 
@@ -148,10 +124,3 @@ export function authErrorMessage(error) {
   return error.message || 'Something went wrong. Please try again.';
 }
 
-// ---------------------------------------------------------------------------
-// Retained for backward-compatibility while orders still read localStorage
-// ---------------------------------------------------------------------------
-export function getOrders() {
-  try { return JSON.parse(localStorage.getItem('nplawn_orders') || '[]'); }
-  catch { return []; }
-}

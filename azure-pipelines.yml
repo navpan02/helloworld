@@ -3,7 +3,6 @@ trigger:
   - release/*
   - claude/*
   - feature*
-  - gh-pages
 
 pool:
   name: 'Default'
@@ -15,11 +14,16 @@ steps:
 
   - script: |
       git remote add github https://github.com/navpan02/NP02.git || git remote set-url github https://github.com/navpan02/NP02.git
-      
+
       # Fetch all branches from ADO
       git fetch origin '+refs/heads/*:refs/remotes/origin/*'
-      
-      # Push all branches and tags to GitHub
-      git push github '+refs/remotes/origin/*:refs/heads/*' --force
+
+      # Push all source branches to GitHub, excluding gh-pages (managed by GitHub Actions)
+      git push github '+refs/remotes/origin/main:refs/heads/main' --force
+      git for-each-ref --format='%(refname:short)' refs/remotes/origin/ \
+        | grep -v '^origin/gh-pages$' \
+        | grep -v '^origin/HEAD$' \
+        | sed 's|^origin/||' \
+        | xargs -I{} git push github "refs/remotes/origin/{}:refs/heads/{}" --force
       git push github --tags --force
-    displayName: 'Mirror to GitHub'
+    displayName: 'Mirror to GitHub (excluding gh-pages)'

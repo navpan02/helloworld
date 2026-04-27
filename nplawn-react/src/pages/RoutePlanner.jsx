@@ -106,8 +106,9 @@ function StatCard({ label, value, accent }) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function RoutePlanner({ portalSession } = {}) {
+export default function RoutePlanner({ portalSession, portalClient } = {}) {
   const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD in local time
+  const client = portalClient ?? supabase;
 
   const [planDate, setPlanDate] = useState(today);
   const [csvData, setCsvData] = useState([]);
@@ -297,7 +298,7 @@ export default function RoutePlanner({ portalSession } = {}) {
         plan_id: plan.id,
       };
 
-      const { data, error: fnError } = await supabase.functions.invoke('route-optimize', {
+      const { data, error: fnError } = await client.functions.invoke('route-optimize', {
         body: payload,
       });
 
@@ -311,7 +312,7 @@ export default function RoutePlanner({ portalSession } = {}) {
       }
 
       // Update plan totals
-      await supabase.from('route_plans').update({
+      await client.from('route_plans').update({
         total_stops: data.stats.assigned,
         unassigned_ct: data.stats.unassigned,
         status: 'active',
@@ -331,14 +332,14 @@ export default function RoutePlanner({ portalSession } = {}) {
         for (const stop of data.excluded ?? []) {
           addressRows.push({ id: crypto.randomUUID(), plan_id: plan.id, address: stop.address, city: stop.city ?? '', state: stop.state ?? '', zip: stop.zip ?? '', address_type: stop.address_type ?? 'homeowner', lat: stop.lat ?? 0, lng: stop.lng ?? 0, status: 'excluded' });
         }
-        const { error: delErr } = await supabase.from('route_addresses').delete().eq('plan_id', plan.id);
+        const { error: delErr } = await client.from('route_addresses').delete().eq('plan_id', plan.id);
         if (delErr) {
           setProgress(`⚠️ Address pool delete failed — ${delErr.message}`);
           setAddrPoolMsg(`⚠️ Address pool delete failed — ${delErr.message}`);
         } else {
           let insertErr = null;
           for (let i = 0; i < addressRows.length; i += 500) {
-            const { error: e } = await supabase.from('route_addresses').insert(addressRows.slice(i, i + 500));
+            const { error: e } = await client.from('route_addresses').insert(addressRows.slice(i, i + 500));
             if (e) { insertErr = e; break; }
           }
           if (insertErr) {

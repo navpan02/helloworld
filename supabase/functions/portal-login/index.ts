@@ -1,6 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
-// Constant-time string comparison — prevents timing attacks on password checks
 function timingSafeEqual(a: string, b: string): boolean {
   const enc = new TextEncoder();
   const aBytes = enc.encode(a);
@@ -10,7 +9,6 @@ function timingSafeEqual(a: string, b: string): boolean {
   const paddedB = new Uint8Array(maxLen);
   paddedA.set(aBytes);
   paddedB.set(bBytes);
-  // length mismatch seeds a non-zero result so we still scan all bytes
   let result = aBytes.length === bBytes.length ? 0 : 1;
   for (let i = 0; i < maxLen; i++) result |= paddedA[i] ^ paddedB[i];
   return result === 0;
@@ -21,7 +19,7 @@ const ALLOWED_ORIGIN = Deno.env.get('PORTAL_ALLOWED_ORIGIN') ?? '';
 function corsHeaders(origin: string) {
   const allowed = ALLOWED_ORIGIN
     ? (origin === ALLOWED_ORIGIN ? origin : '')
-    : origin; // dev fallback: echo origin when env var not set
+    : origin;
   return {
     'Access-Control-Allow-Origin': allowed || 'null',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -60,10 +58,9 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     );
 
-    // Look up the user
     const { data: user, error: userErr } = await supabase
       .from('portal_users')
-      .select('id, username, display_name, role, branch_id, active')
+      .select('id, username, display_name, role, branch_id, org_id, active')
       .eq('username', username.trim().toLowerCase())
       .single();
 
@@ -79,7 +76,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create session (12-hour expiry)
     const expiresAt = new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString();
     const { data: session, error: sessionErr } = await supabase
       .from('portal_sessions')
@@ -104,6 +100,17 @@ Deno.serve(async (req) => {
       branchName = branch?.name ?? null;
     }
 
+    // Fetch org name
+    let orgName = null;
+    if (user.org_id) {
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('name, slug')
+        .eq('id', user.org_id)
+        .single();
+      orgName = org?.name ?? null;
+    }
+
     return new Response(JSON.stringify({
       token: session.token,
       user: {
@@ -113,6 +120,8 @@ Deno.serve(async (req) => {
         role: user.role,
         branchId: user.branch_id,
         branchName,
+        orgId: user.org_id,
+        orgName,
       },
       expiresAt,
     }), {

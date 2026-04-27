@@ -1,12 +1,11 @@
 import { lazy, Suspense } from 'react';
 
-// Reuse the existing RoutePlanner page wholesale inside the admin portal tab
 const RoutePlanner = lazy(() => import('../../RoutePlanner'));
 
-export default function RoutePlannerTab({ session }) {
+export default function RoutePlannerTab({ portalClient, ...session }) {
   return (
     <Suspense fallback={<div className="p-8 text-center text-gray-400">Loading route planner…</div>}>
-      <RoutePlanner portalSession={session} />
+      <RoutePlanner portalSession={session} portalClient={portalClient} />
     </Suspense>
   );
 }

@@ -7,7 +7,6 @@ function storageKey(portal) {
   return portal === 'admin' ? ADMIN_KEY : MANAGER_KEY;
 }
 
-// Calls portal-login edge function, stores session in localStorage
 export async function portalLogin(username, password, portal) {
   const { data, error } = await supabase.functions.invoke('portal-login', {
     body: { username, password },
@@ -16,8 +15,8 @@ export async function portalLogin(username, password, portal) {
   if (error) throw new Error(error.message ?? 'Login failed');
   if (data.error) throw new Error(data.error);
 
-  // Validate role matches the portal being accessed
-  const expectedRole = portal === 'admin' ? 'admin' : 'branch_manager';
+  // org_admin for admin portal; branch_manager for manager portal
+  const expectedRole = portal === 'admin' ? 'org_admin' : 'branch_manager';
   if (data.user.role !== expectedRole) {
     throw new Error('Invalid username or password');
   }
@@ -46,4 +45,3 @@ export function getPortalSession(portal) {
     return null;
   }
 }
-

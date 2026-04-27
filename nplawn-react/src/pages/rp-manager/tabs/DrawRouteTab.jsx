@@ -282,6 +282,9 @@ export default function DrawRouteTab({ session }) {
     } catch (e) {
       setError(e.message ?? 'Save failed');
       setSaveStatus('idle');
+    } finally {
+      // Guard against saveStatus getting stuck as 'saving' (e.g. network hang)
+      setSaveStatus(s => s === 'saving' ? 'idle' : s);
     }
   };
 
@@ -481,7 +484,7 @@ export default function DrawRouteTab({ session }) {
                   <button
                     onClick={() => saveRoute()}
                     disabled={saveStatus === 'saving'}
-                    className="w-full bg-gray-900 text-white text-sm font-semibold py-2.5 rounded-lg hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                    className="w-full bg-gray-900 text-white text-sm font-semibold py-2.5 rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
                   >
                     {saveStatus === 'saving' ? 'Saving…' : "Save to Today's Plan"}
                   </button>

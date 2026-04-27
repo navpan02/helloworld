@@ -335,7 +335,7 @@ export default function TodaysRoutes({ session }) {
                   className={`inline-flex items-center gap-1.5 text-xs font-bold px-4 py-1.5 rounded-lg transition-all ${
                     isSaving
                       ? 'bg-white/30 text-white/60 cursor-not-allowed'
-                      : 'bg-white text-green-700 hover:bg-green-50 shadow'
+                      : 'bg-white text-green-700 hover:bg-green-50 shadow cursor-pointer'
                   }`}
                 >
                   {isSaving ? (

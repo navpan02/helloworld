@@ -205,11 +205,16 @@ export default function TodaysRoutes({ session }) {
     setSaveMsg('');
 
     try {
-      // 1. Update each modified route_assignment (stop_sequence, total_stops, google_maps_urls)
-      const routeUpdates = Array.from(modifiedRoutesRef.current.values());
+      // 1. Update each route_assignment with current stop_sequence from React state
+      const routeUpdates = (result?.routes ?? []).filter(r => r.assignment_id);
+      if (!routeUpdates.length) {
+        setSaveMsg('⚠️ No routes found to save');
+        return;
+      }
+      const urlMap = new Map();
       await Promise.all(routeUpdates.map(async route => {
-        if (!route.assignment_id) return;
         const newUrls = buildGoogleMapsUrls(route.stop_sequence ?? []);
+        urlMap.set(route.assignment_id, newUrls);
         const { data: upRows, error } = await client
           .from('route_assignments')
           .update({
@@ -221,14 +226,14 @@ export default function TodaysRoutes({ session }) {
           .select('id');
         if (error) throw new Error(`Failed to save ${route.agent_name}: ${error.message}`);
         if (!upRows?.length) throw new Error(`Save blocked for ${route.agent_name} — RLS policy rejected the update. Re-login and try again.`);
-        // Update local state with new URLs too
-        setResult(prev => prev ? {
-          ...prev,
-          routes: prev.routes.map(r =>
-            r.assignment_id === route.assignment_id ? { ...r, google_maps_urls: newUrls } : r
-          ),
-        } : prev);
       }));
+      // Update google_maps_urls in local state
+      setResult(prev => prev ? {
+        ...prev,
+        routes: prev.routes.map(r =>
+          urlMap.has(r.assignment_id) ? { ...r, google_maps_urls: urlMap.get(r.assignment_id) } : r
+        ),
+      } : prev);
 
       // 2. Mark each newly assigned address as 'assigned' in route_addresses
       const stopEntries = Array.from(assignedStopsRef.current.entries());
@@ -243,13 +248,11 @@ export default function TodaysRoutes({ session }) {
       }
 
       // 3. Sync plan totals
-      if (result) {
-        const totalStops = result.routes.reduce((s, r) => s + (r.total_stops ?? 0), 0);
-        await client
-          .from('route_plans')
-          .update({ total_stops: totalStops, unassigned_ct: result.unassigned?.length ?? 0 })
-          .eq('id', plan.id);
-      }
+      const totalStops = routeUpdates.reduce((s, r) => s + (r.total_stops ?? 0), 0);
+      await client
+        .from('route_plans')
+        .update({ total_stops: totalStops, unassigned_ct: result?.unassigned?.length ?? 0 })
+        .eq('id', plan.id);
 
       modifiedRoutesRef.current.clear();
       assignedStopsRef.current.clear();

@@ -210,15 +210,17 @@ export default function TodaysRoutes({ session }) {
       await Promise.all(routeUpdates.map(async route => {
         if (!route.assignment_id) return;
         const newUrls = buildGoogleMapsUrls(route.stop_sequence ?? []);
-        const { error } = await client
+        const { data: upRows, error } = await client
           .from('route_assignments')
           .update({
             stop_sequence: route.stop_sequence,
             total_stops: route.total_stops,
             google_maps_urls: newUrls,
           })
-          .eq('id', route.assignment_id);
+          .eq('id', route.assignment_id)
+          .select('id');
         if (error) throw new Error(`Failed to save ${route.agent_name}: ${error.message}`);
+        if (!upRows?.length) throw new Error(`Save blocked for ${route.agent_name} — RLS policy rejected the update. Re-login and try again.`);
         // Update local state with new URLs too
         setResult(prev => prev ? {
           ...prev,

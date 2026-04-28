@@ -1,0 +1,2 @@
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index-CqjGrlFp.js","assets/index-C1EroiNK.css"])))=>i.map(i=>d[i]);
+import{j as t,a,_ as n}from"./index-CqjGrlFp.js";const s=a.lazy(()=>n(()=>import("./index-CqjGrlFp.js").then(e=>e.h),__vite__mapDeps([0,1])));function l({portalClient:e,...r}){return t.jsx(a.Suspense,{fallback:t.jsx("div",{className:"p-8 text-center text-gray-400",children:"Loading route planner…"}),children:t.jsx(s,{portalSession:r,portalClient:e})})}export{l as default};

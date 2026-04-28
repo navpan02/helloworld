@@ -191,7 +191,7 @@ export default function DrawRouteTab({ session, onRouteSaved }) {
           lat: a.lat, lng: a.lng,
         })),
         agents: [{ id: agent.id, name: agent.name, start_address: agent.start_address ?? '', start_lat: agent.start_lat, start_lng: agent.start_lng }],
-        constraints,
+        constraints: { ...constraints, min_cluster_size: 1 },
         plan_id: 'draw-route-preview',
       },
     });

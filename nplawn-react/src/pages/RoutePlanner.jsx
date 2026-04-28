@@ -196,8 +196,8 @@ export default function RoutePlanner({ portalSession, portalClient } = {}) {
         .filter(r => filterAgentIds.has(r.agent_id))
         .map(r => ({
           ...r,
-          clusters: r.clusters
-            .map(c => ({ ...c, stops: c.stops.filter(s => filterTypes.has(s.address_type)) }))
+          clusters: (r.clusters ?? [])
+            .map(c => ({ ...c, stops: (c.stops ?? []).filter(s => filterTypes.has(s.address_type)) }))
             .filter(c => c.stops.length > 0),
           stop_sequence: r.stop_sequence?.filter(s => filterTypes.has(s.address_type)) ?? [],
         })),

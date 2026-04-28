@@ -213,7 +213,8 @@ export default function DrawRouteTab({ session, onRouteSaved }) {
 
       // Get or create today's plan for this branch
       let planId;
-      let planQuery = client.from('route_plans').select('id').eq('plan_date', today);
+      // Must match TodaysRoutes' query: status='active' so both tabs use the same plan row
+      let planQuery = client.from('route_plans').select('id').eq('plan_date', today).eq('status', 'active');
       if (session.branchId) planQuery = planQuery.eq('branch_id', session.branchId);
       const { data: existingPlan, error: planErr } = await withTimeout(
         planQuery.order('created_at', { ascending: false }).limit(1)
@@ -225,7 +226,7 @@ export default function DrawRouteTab({ session, onRouteSaved }) {
       } else {
         const { data: newPlan, error: newPlanErr } = await withTimeout(
           client.from('route_plans')
-            .insert({ plan_date: today, constraints, branch_id: session.branchId, org_id: session.orgId, created_by: session.username })
+            .insert({ plan_date: today, constraints, branch_id: session.branchId, org_id: session.orgId, created_by: session.username, status: 'active' })
             .select('id').single()
         );
         if (newPlanErr) throw new Error(`Could not create plan: ${newPlanErr.message}`);

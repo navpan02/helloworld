@@ -76,7 +76,8 @@ export default function TodaysRoutes({ session }) {
       .order('created_at', { ascending: false })
       .limit(1);
 
-    if (session?.branchId) query = query.eq('branch_id', session.branchId);
+    // Accept org-wide plans (branch_id IS NULL, created by admin) as well as branch-specific ones
+    if (session?.branchId) query = query.or(`branch_id.eq.${session.branchId},branch_id.is.null`);
     if (date) query = query.eq('plan_date', date);
 
     const { data: plans, error: planErr } = await query;

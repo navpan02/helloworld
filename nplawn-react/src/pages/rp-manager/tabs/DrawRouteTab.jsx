@@ -215,7 +215,8 @@ export default function DrawRouteTab({ session, onRouteSaved }) {
       let planId;
       // Must match TodaysRoutes' query: status='active' so both tabs use the same plan row
       let planQuery = client.from('route_plans').select('id').eq('plan_date', today).eq('status', 'active');
-      if (session.branchId) planQuery = planQuery.eq('branch_id', session.branchId);
+      // Accept org-wide plans (branch_id IS NULL, created by admin) as well as branch-specific ones
+      if (session.branchId) planQuery = planQuery.or(`branch_id.eq.${session.branchId},branch_id.is.null`);
       const { data: existingPlan, error: planErr } = await withTimeout(
         planQuery.order('created_at', { ascending: false }).limit(1)
       );

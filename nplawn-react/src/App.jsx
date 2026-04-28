@@ -1,10 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { DebugProvider } from './context/DebugContext';
 
 import Layout      from './components/Layout';
 import AdminRoute  from './components/AdminRoute';
 import RequireAuth from './components/RequireAuth';
 import ScrollToTop from './components/ScrollToTop';
+import DebugPanel  from './components/DebugPanel';
 
 // Pages
 import Landing          from './pages/Landing';
@@ -211,9 +213,12 @@ function AppRoutes() {
 export default function App() {
   return (
     <BrowserRouter basename="/NP02">
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
+      <DebugProvider>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+        <DebugPanel />
+      </DebugProvider>
     </BrowserRouter>
   );
 }

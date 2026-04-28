@@ -253,7 +253,7 @@ export default function DrawRouteTab({ session }) {
         stop_sequence: stopSeq, cluster_sequence: route.clusters?.map(c => c.id) ?? [],
         total_stops: stopSeq.length, total_miles: route.total_miles,
         est_hours: route.est_hours, google_maps_urls: buildGoogleMapsUrls(stopSeq),
-        org_id: session.orgId, branch_id: session.branchId,
+        org_id: session.orgId,
       };
 
       if (existingAssign) {

@@ -1,18 +1,16 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>NPLawn LLC</title>
-    <script>
-      // GitHub Pages SPA redirect: encode the path as ?p=... and send to index
-      var l = window.location;
-      var path = l.pathname.replace('/NP02', '') || '/';
-      l.replace(
-        l.protocol + '//' + l.host +
-        '/NP02/?p=' + encodeURIComponent(path + l.search) +
-        l.hash
-      );
-    </script>
-  </head>
-  <body></body>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Redirecting…</title>
+  <script>
+    window.location.replace(
+      'https://navpan02.github.io/np-route-planner' +
+      window.location.pathname.replace(/^\/NP02/, '') +
+      window.location.search +
+      window.location.hash
+    );
+  </script>
+</head>
+<body></body>
 </html>
